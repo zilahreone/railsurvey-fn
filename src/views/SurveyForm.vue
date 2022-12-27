@@ -1,0 +1,244 @@
+<script setup>
+import { ref } from 'vue'
+import BorderRadioBtn from '@/components/BorderRadioBtn.vue'
+import Border from '@/components/Border.vue'
+import RadioBtnRow from '@/components/RadioBtnRow.vue'
+import RadioBtn from '@/components/RadioBtn.vue'
+const damagesLevel = [
+  'ระดับที่ 1 ไม่รุนแรงและรอซ่อมบำรุงในวาระ',
+  'ระดับที่ 2 ควรเร่งซ่อม',
+  'ระดับที่ 3 รุนแรงและควรซ่อมอย่างเร่งด่วน',
+  'ระดับที่ 4 รุนแรงและเกิดความเสียหายต่อทรัพย์สิน/เกิดผลกระทบต่อสิ่งแวดล้อม',
+  'ระดับที่ 5 รุนแรงและเกิดความเสียหายต่อทรัพย์สิน/เกิดผลกระทบต่อสิ่งแวดล้อมเป็นวงกว้าง'
+]
+const damageProperties = [ 'แตกหัก', 'แตกร้าว', 'สึกหรอ', 'รางคดงอ', 'เกิดสนิม/กัดกร่อน', 'เป็นแผล/เสียรูป เสียเนื้อโลหะ/เพียงบางส่วน' ]
+const damageAraePrperties = [
+  'พื้นที่ลาดชัน',
+  'พื้นที่รัสมีโค้ง',
+  'ใกล้สถานีรถไฟ',
+  'บริเวณอุโมงค์',
+  'สะพาน',
+  'มีน้ำท่วมขัง'
+]
+const integrity = ['สมบูรณ์', 'ไม่สมบูรณ์']
+const ballast = ['สมบูรณ์', 'ไม่สมบูรณ์', 'พร่อง', 'มีลักษณะกลม']
+const sleeper = ['สมบูรณ์', 'ไม่สมบูรณ์', 'ทรุดตัว', 'แตกหัก', 'ให้ตัวได้', 'ประกับยึดรางหลวม']
+const analyse = ['เห็นควรดำเนินการ', 'ไม่จำเป็นต้องส่งวิเคราะห์']
+const positionDamage = [
+  {
+    title: 'รอยต่อราง (Fish Plate)',
+    img: 'positionDamage/Picture2.png'
+  },
+  {
+    title: 'แนวเชื่อมต่อราง',
+    img: 'positionDamage/Picture3.png'
+  },
+  {
+    title: 'รางปกติ',
+    img: 'positionDamage/Picture4.png'
+  },
+  {
+    title: 'รอยเชื่อมซ่อม',
+    img: 'positionDamage/Picture5.png'
+  },
+  {
+    title: 'ประแจ',
+    img: 'positionDamage/Picture6.png'
+  },
+  {
+    title: 'จุดตัดราง',
+    img: 'positionDamage/Picture7.png'
+  }
+]
+const scar = [
+  {
+    title: 'Crushed Head',
+    img: 'scar/Picture1.png'
+  },
+  {
+    title: 'Head Checking',
+    img: 'scar/Picture2.png'
+  },
+  {
+    title: 'Spalling',
+    img: 'scar/Picture3.png'
+  },
+  {
+    title: 'Side Wear',
+    img: 'scar/Picture4.png'
+  },
+  {
+    title: 'Shelling',
+    img: 'scar/Picture5.png'
+  },
+  {
+    title: 'Burned Rail',
+    img: 'scar/Picture6.png'
+  },
+]
+const signaturePad = ref(null)
+const undo = () => {
+  signaturePad.value.undoSignature()
+}
+const save = () => {
+  const { isEmpty, data } = signaturePad.value.saveSignature()
+  console.log(isEmpty)
+  console.log(data)
+}
+const clear = () => {
+  signaturePad.value.clearSignature()
+}
+</script>
+<template>
+  <div class="container">
+    <div class="flex flex-col gap-4">
+      <!-- วันที่สำรวจ -->
+      <Border>
+        <div class="flex md:flex-row flex-col gap-4">
+          <div class="flex-1">
+            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">วันที่สำรวจ</label>
+            <input type="date" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required>
+          </div>
+          <div class="flex-1">
+            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">เขตการเดินรถ</label>
+            <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              <option>United States</option>
+              <option>Canada</option>
+              <option>France</option>
+              <option>Germany</option>
+            </select>
+          </div>
+        </div>
+      </Border>
+      <!-- พื้นที่เกิดความเสียหาย -->
+      <Border>
+        <label class="block mb-2 text-lg font-semibold text-gray-900 dark:text-white">พื้นที่เกิดความเสียหาย</label>
+        <div class="flex flex-col gap-4">
+          <div class="flex md:flex-row flex-col gap-4">
+            <div class="flex-1">
+              <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">พิกัด GPS</label>
+              <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required>
+            </div>
+            <div class="flex-1">
+              <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">หลักกิโลเมตร/เสาโทรเลข</label>
+              <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">สถานีรถไฟใกล้เคียง</label>
+            <div class="flex md:flex-row flex-col gap-4">
+              <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option>United States</option>
+                <option>Canada</option>
+                <option>France</option>
+                <option>Germany</option>
+              </select>
+              <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option>United States</option>
+                <option>Canada</option>
+                <option>France</option>
+                <option>Germany</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <label class="block mb-2 text-lg font-semibold text-gray-900 dark:text-white">ชนิดของราง</label>
+            <label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">มาตรฐานและเกรด</label>
+            <div>
+              <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option>United States</option>
+                <option>Canada</option>
+                <option>France</option>
+                <option>Germany</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </Border>
+      <Border>
+        <label class="block mb-2 text-lg font-semibold text-gray-900 dark:text-white">ความรุนแรงของความเสียหาย</label>
+        <div class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
+          <RadioBtn name="positionDamage" :items="damagesLevel"></RadioBtn>
+        </div>
+      </Border>
+      <Border>
+        <p class="text-lg font-semibold mb-4">ตำแหน่งที่เกิดความเสียหายของราง</p>
+        <div class="flex flex-wrap gap-8">
+          <div class="flex items-center">
+            <img src="@/assets/positionDamage/Picture1.png" alt="positionDamage" class="h-40">
+          </div>
+          <div class="ml-12">
+            <div>
+              <input id="rail" type="radio" value="" name="rail" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+              <label for="rail" class="ml-4 text-sm font-medium text-gray-900 dark:text-gray-300">หัวราง</label>
+            </div>
+            <div>
+              <input id="rail" type="radio" value="" name="rail" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+              <label for="rail" class="ml-4 text-sm font-medium text-gray-900 dark:text-gray-300">หัวราง</label>
+            </div>
+            <div>
+              <input id="rail" type="radio" value="" name="rail" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+              <label for="rail" class="ml-4 text-sm font-medium text-gray-900 dark:text-gray-300">หัวราง</label>
+            </div>
+          </div>
+          <RadioBtnRow labelTitle="title" labelImage="img" :items="positionDamage"></RadioBtnRow>
+        </div>
+      </Border>
+      <Border>
+        <label class="block mb-2 text-lg font-semibold text-gray-900 dark:text-white">ลักษณะความเสียหาย</label>
+        <div class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
+          <RadioBtn name="positionDamage" :items="damageProperties"></RadioBtn>
+        </div>
+      </Border>
+      <Border>
+        <label class="block mb-2 text-lg font-semibold text-gray-900 dark:text-white">ให้ระบุลักษณะแผล โดยดูรูปต่อไปนี้ประกอบ</label>
+        <RadioBtnRow labelTitle="title" labelImage="img" :items="scar"></RadioBtnRow>
+      </Border>
+      <BorderRadioBtn title="ลักษณะพื้นที่ที่เกิดความเสียหาย" :items="damageAraePrperties"></BorderRadioBtn>
+      <BorderRadioBtn title="ความสมบูรณ์ของทาง" :items="integrity"></BorderRadioBtn>
+      <BorderRadioBtn title="Track Geometry" :items="integrity"></BorderRadioBtn>
+      <BorderRadioBtn title="หินโรยทาง (Ballast)" :items="ballast"></BorderRadioBtn>
+      <BorderRadioBtn title="หมอนรองทาง (Sleeper)" :items="sleeper"></BorderRadioBtn>
+      <BorderRadioBtn title="คันทาง" :items="integrity"></BorderRadioBtn>
+      <!-- <BorderRadioBtn title="ประวัติการซ่อมบำรุง" :items="['เคย', 'ไม่เคย']"></BorderRadioBtn> -->
+      <Border>
+        <div>
+          <label class="block mb-2 text-lg font-semibold text-gray-900 dark:text-white">ประวัติการซ่อมบำรุง</label>
+          <div class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
+            <RadioBtn name="his" :items="['เคย', 'ไม่เคย']"></RadioBtn>
+          </div>
+        </div>
+        <div class="grid md:grid-cols-2 md:gap-6">
+          <div class="mb-6">
+            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">การซ่อมบำรุงครั้งล่าสุด</label>
+            <input type="date" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required>
+          </div>
+          <div class="mb-6">
+            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">ความถี่ในการซ่อมบำรุงในรอบปี</label>
+            <input type="number" :min="0" :max="365" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+          </div>
+        </div>
+        <div>
+          <label class="block mb-2 text-lg font-semibold text-gray-900 dark:text-white">วิธีซ่อมบำรุง</label>
+          <div class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-4">
+            <RadioBtn name="ma" :items="['เชื่อมซ่อม', 'ตัดเปลี่ยนราง']"></RadioBtn>
+          </div>
+        </div>
+      </Border>
+      <BorderRadioBtn title="ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุของความเสียหาย" :items="analyse"></BorderRadioBtn>
+      <Border>
+        <!-- <p class="text-lg font-semibold mb-4">ความคิดเห็นของผู้สำรวจความเสียหาย</p> -->
+        <label for="message" class="block mb-2 text-lg font-semibold text-gray-900 dark:text-white">ความคิดเห็นของผู้สำรวจความเสียหาย</label>
+        <textarea id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your thoughts here..."></textarea>
+      </Border>
+      <Border>
+        <VueSignaturePad ref="signaturePad" />
+      </Border>
+      <div>
+        <button @click="save">Save</button>
+        <button @click="undo">Undo</button>
+        <button @click="clear">Clear</button>
+      </div>
+    </div>
+  </div>
+</template>
