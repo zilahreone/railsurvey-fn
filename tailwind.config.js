@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 const defaultTheme = require('tailwindcss/defaultTheme')
 module.exports = {
+  darkMode: 'class',
   content: [
     './public/**/*.html', './src/**/*.{vue,js,ts,jsx,tsx}',
     'node_modules/flowbite-vue/**/*.{js,jsx,ts,tsx}',
