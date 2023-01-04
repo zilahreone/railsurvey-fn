@@ -18,13 +18,13 @@ onMounted(() => {
             เว็บไซต์นี้จัดทำขึ้นเพื่อ ใช้ในการตรวจสอบความสมบูรณ์ หรือความผิดปกติของรางรถไฟ เพื่อวิเคราห์ความรุนแรงของความเสียหาย และพิจารณาในการซ่อมแซมต่อไป
           </p>
           <div class="flex justify-center lg:justify-start mt-6">
-              <a class="px-4 py-3 bg-gray-900 text-gray-200 text-xs font-semibold rounded hover:bg-gray-800" href="#" @click="router.push('/about')">เริ่ม สำรวจความเสียหาย</a>
+              <router-link to="/form" class="px-4 py-3 bg-gray-900 text-gray-200 text-xs font-semibold rounded hover:bg-gray-800">เริ่ม สำรวจความเสียหาย</router-link>
               <a class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400" href="#">Learn More</a>
           </div>
         </div>
       </div>
       <div class="hidden lg:block lg:w-1/2" style="clip-path:polygon(15% 0, 100% 0%, 100% 100%, 0 100%)">
-        <img class="h-full object-cover" src="https://images.unsplash.com/photo-1580940583249-77175ce5f75a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80">
+        <img class="h-full object-cover" src="@/assets/photo-1580940583249-77175ce5f75a.webp">
       </div>
     </div>
   </Transition>

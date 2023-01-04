@@ -10,8 +10,7 @@ const d = new Date().getFullYear()
   </div> -->
   <footer>
     <div class="flex justify-center border-t">
-      <span class="mt-4 mb-8 block text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ d }} <a href="https://flowbite.com/" class="hover:underline">
-        Flowbite™</a>. All Rights Reserved.
+      <span class="mt-4 mb-8 block text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ d }} __. All Rights Reserved.
       </span>
     </div>
   </footer>
