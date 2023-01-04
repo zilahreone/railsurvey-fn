@@ -20,7 +20,7 @@ const router = useRouter()
                 </button>
             </div>
         </div>
-        <div class="flex-col md:flex-row hidden md:block -mx-2">
+        <!-- <div class="flex-col md:flex-row hidden md:block -mx-2">
           <a href="#"  @click="router.push('/')" class="text-gray-800 rounded hover:bg-gray-900 hover:text-gray-100 hover:font-medium py-2 px-2 md:mx-2">Home</a>
           <a href="#" @click="router.push('/about')" class="text-gray-800 rounded hover:bg-gray-900 hover:text-gray-100 hover:font-medium py-2 px-2 md:mx-2">About</a>
           <a href="#" class="text-gray-800 py-2 px-2 md:mx-2">
@@ -31,7 +31,7 @@ const router = useRouter()
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
             <span class="sr-only">Icon description</span>
             </button>
-        </div>
+        </div> -->
       </div>
     </nav>
   </div>
