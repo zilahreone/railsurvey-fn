@@ -11,6 +11,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, minValue, maxValue } from '@vuelidate/validators'
 import { Loader } from '@googlemaps/js-api-loader'
 import variable from '@/assets/variable.json'
+import api from '@/services'
 
 const loader = new Loader({
   apiKey: 'AIzaSyBksdb-qLu2FZavr1UPnrUpXhvO-VUeSLA',
@@ -19,12 +20,14 @@ const loader = new Loader({
 })
 
 const maps = ref([])
+const ta = ref(null)
 
 onMounted(() => {
   navigator.geolocation.getCurrentPosition((position)=> {
     const p = position.coords;
     console.log(p.latitude, p.longitude);
   })
+  getAPI()
 })
 
 const store = useStore()
@@ -64,6 +67,7 @@ const railSurvey = reactive({
   damageSeverity: null,
   railDamagePoint: null,
   natureDamage: null,
+  railScar: null,
   natureAreaDamage: null,
   integrityRail: null,
   trackGeometry: null,
@@ -91,6 +95,7 @@ const rules = {
   damageSeverity: { required  },
   railDamagePoint: { required  },
   natureDamage: { required  },
+  railScar: { required  },
   natureAreaDamage: { required  },
   integrityRail: { required  },
   trackGeometry: { required  },
@@ -118,6 +123,13 @@ const handleGetLocation = () => {
       railSurvey.damagedArea.GPSCoordinates = `${p.latitude}, ${p.longitude}`
   })
 }
+const getAPI = () => {
+  api.get(`/`, null).then((resp) => {
+    resp.json().then((json) => {
+      ta.value = json
+    })
+  })
+}
 
 // COMPUTED //
 const compMARec = computed(() => {
@@ -142,10 +154,9 @@ const compDate = computed({
   }
 })
 
-
-
 </script>
 <template>
+  {{ ta }}
   <!-- 2023-01-07 -->
   <!-- {{ new Date().toISOString().substring(0, 10) }} -->
   <div class="container">
@@ -179,11 +190,12 @@ const compDate = computed({
             <div class="flex-1">
               <label class="_label-sm">พิกัด GPS</label>
               <input v-model="railSurvey.damagedArea.GPSCoordinates" @click="handleGetLocation()" type="text" id="GPSCoordinates" :class="v$.damagedArea.GPSCoordinates.$error ? '_input_error' : '_input' " required>
-              <p v-if="v$.damagedArea.GPSCoordinates.$error" class="text-sm text-red-600">{{ v$.trafficArea.$errors[0].$message }}</p>
+              <p v-if="v$.damagedArea.GPSCoordinates.$error" class="text-sm text-red-600">{{ v$.damagedArea.GPSCoordinates.$errors[0].$message }}</p>
             </div>
             <div class="flex-1">
               <label class="_label-sm">หลักกิโลเมตร/เสาโทรเลข</label>
               <input v-model="railSurvey.damagedArea.kmTelegraphPoles" type="text" id="kmTelegraphPoles" :class="v$.damagedArea.kmTelegraphPoles.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.damagedArea.kmTelegraphPoles.$error" class="text-sm text-red-600">{{ v$.damagedArea.kmTelegraphPoles.$errors[0].$message }}</p>
             </div>
           </div>
           <div class="flex flex-col">
@@ -191,18 +203,18 @@ const compDate = computed({
             <div class="flex md:flex-row flex-col gap-4">
               <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option disabled :value="null">กรุณาเลือกสถานี</option>
-                <option v-for="station in stations" :key="station">{{ station }}</option>
+                <option v-for="(trafAr, index) in trafficArae" :key="index">{{ trafAr }}</option>
               </select>
               <select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option disabled :value="null">กรุณาเลือกสถานี</option>
-                <option v-for="station in stations" :key="station">{{ station }}</option>
+                <option v-for="(trafAr, index) in trafficArae" :key="index">{{ trafAr }}</option>
               </select>
             </div>
           </div>
           <div class="flex flex-col">
             <label class="_label-lg">ชนิดของราง</label>
             <label class="_label-sm">มาตรฐานและเกรด</label>
-            <div class="max-w-md">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <select v-model="railSurvey.railType" id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option disabled :value="null">กรุณาเลือกประเภทของเกจ</option>
                 <option v-for="(g ,index) in guageType" :key="index" :value="g.value">{{ g.name }}</option>
@@ -218,8 +230,19 @@ const compDate = computed({
         </div>
       </Border>
       <Border>
-        <p class="text-lg font-semibold mb-4">ตำแหน่งที่เกิดความเสียหายของราง</p>
-        <div class="flex flex-wrap gap-8">
+        <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง</label>
+        <RadioImageBtn v-model="railSurvey.railDamagePoint" name="positionDamage" :items="positionDamage" imageLabel="title" imagePath="img">
+          <!-- <template #label="{ item }">
+            <div v-if="Array.isArray(item)" class="flex flex-row md:flex-col">
+              <div v-for="(label, index) in item" :key="index">
+                <input type="radio" value="" name="rail" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                <label class="ml-4 text-sm font-medium text-gray-900 dark:text-gray-300">{{ label }}</label>
+              </div>
+            </div>
+            <div v-else>{{ item }}</div>
+          </template> -->
+        </RadioImageBtn>
+        <!-- <div class="flex flex-wrap gap-8">
           <div class="flex items-center">
             <img src="@/assets/positionDamage/Picture1.png" alt="positionDamage" class="h-40">
           </div>
@@ -237,8 +260,7 @@ const compDate = computed({
               <label class="ml-4 text-sm font-medium text-gray-900 dark:text-gray-300">หัวราง</label>
             </div>
           </div>
-          <RadioImageBtn name="positionDamage" :items="positionDamage" imageLabel="title" imagePath="img"></RadioImageBtn>
-        </div>
+        </div> -->
       </Border>
       <Border :error="v$.natureDamage.$error">
         <label class="_label-lg">ลักษณะความเสียหาย</label>
@@ -246,9 +268,10 @@ const compDate = computed({
           <RadioBtn v-model="railSurvey.natureDamage" name="positionDamage" :items="damageProperties"></RadioBtn>
         </div>
       </Border>
-      <Border :error="v$.railDamagePoint.$error">
+      <Border :error="v$.railScar.$error">
         <label class="_label-lg">ให้ระบุลักษณะแผล โดยดูรูปต่อไปนี้ประกอบ</label>
-        <RadioImageBtn v-model="railSurvey.railDamagePoint" name="scar" :items="scar" imageLabel="title" imagePath="img"></RadioImageBtn>
+        <RadioImageBtn v-model="railSurvey.railScar" name="scar" :items="scar" imageLabel="title" imagePath="img">
+        </RadioImageBtn>
       </Border>
       <Border :error="v$.natureAreaDamage.$error">
         <label class="_label-lg">ลักษณะพื้นที่ที่เกิดความเสียหาย</label>
