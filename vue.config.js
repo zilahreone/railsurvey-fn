@@ -2,11 +2,13 @@ const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true,
   pwa: {
+    name: 'Rail Survey',
+    // workboxPluginMode: 'GenerateSW',
     workboxPluginMode: 'InjectManifest',
     workboxOptions: {
-      // swSrc is required in InjectManifest mode.
-      swSrc: 'src/service-worker.js'
-      // ...other Workbox options...
+      // navigateFallback: 'index.html',
+      // skipWaiting: true,
+      swSrc: './src/service-worker.js'
     }
-}
+  }
 })
