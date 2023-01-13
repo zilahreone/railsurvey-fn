@@ -9,7 +9,8 @@ const router = useRouter()
       <div class="md:flex items-center justify-between">
         <div class="flex justify-between items-center">
             <div class="text-2xl font-bold text-gray-800 md:text-3xl">
-                <a href="#">Railway</a>
+              <router-link to="/" >Railway</router-link>
+                <!-- <a>Railway</a> -->
             </div>
             <div class="md:hidden">
                 <button type="button" class="block text-gray-800 hover:text-gray-700 focus:text-gray-700 focus:outline-none">

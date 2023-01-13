@@ -12,6 +12,11 @@ import { required, minValue, maxValue } from '@vuelidate/validators'
 import { Loader } from '@googlemaps/js-api-loader'
 import variable from '@/assets/variable.json'
 import api from '@/services'
+import { nullableTypeAnnotation } from '@babel/types'
+import { useRouter } from 'vue-router'
+import IndexDB from '@/IndexedDB'
+
+const router = useRouter()
 
 const loader = new Loader({
   apiKey: 'AIzaSyBksdb-qLu2FZavr1UPnrUpXhvO-VUeSLA',
@@ -89,9 +94,10 @@ const rules = {
   trafficArea: { required  },
   damagedArea: {
     GPSCoordinates: { required },
-    kmTelegraphPoles: { required },
-    nearby: { required }
+    kmTelegraphPoles: { required }
+    // nearby: { required }
   },
+  railType: { required  },
   damageSeverity: { required  },
   railDamagePoint: { required  },
   natureDamage: { required  },
@@ -114,7 +120,22 @@ const v$ = useVuelidate(rules, railSurvey, { $autoDirty: true })
 
 // METHOD //
 const handleSubmit = async () => {
-  await v$.value.$validate()
+  const isValid = await v$.value.$validate()
+  console.log(isValid);
+  if (isValid) {
+  }
+  api.post(`/`, { name: 'testPOST' }, null).then((resp) => {
+    if (resp.status === 201) {
+      console.log('create success ;)')
+    }
+  }).catch(() => {
+    navigator.serviceWorker.ready.then(registration => {
+      // console.log(registration)
+      registration.sync.register('some-unique-tag')
+    }).catch(console.log())
+  })
+  IndexDB('test-db', 1, 'book', { id: 'js', name: 'Harry Porter' })
+  // router.push('/survey-list')
 }
 const handleGetLocation = () => {
   navigator.geolocation.getCurrentPosition((position) => {
@@ -157,6 +178,9 @@ const compDate = computed({
 </script>
 <template>
   <!-- {{ ta }} -->
+  <!-- <pre>
+    {{ v$.$errors }}
+  </pre> -->
   <!-- 2023-01-07 -->
   <!-- {{ new Date().toISOString().substring(0, 10) }} -->
   <div class="container">
@@ -215,7 +239,7 @@ const compDate = computed({
             <label class="_label-lg">ชนิดของราง</label>
             <label class="_label-sm">มาตรฐานและเกรด</label>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <select v-model="railSurvey.railType" id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              <select v-model="railSurvey.railType" id="countries" :class="v$.railType.$error ? '_input_error' : '_input'">
                 <option disabled :value="null">กรุณาเลือกประเภทของเกจ</option>
                 <option v-for="(g ,index) in guageType" :key="index" :value="g.value">{{ g.name }}</option>
               </select>
