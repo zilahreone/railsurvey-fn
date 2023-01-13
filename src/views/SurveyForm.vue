@@ -127,6 +127,7 @@ const handleSubmit = async () => {
   api.post(`/`, { name: 'testPOST' }, null).then((resp) => {
     if (resp.status === 201) {
       console.log('create success ;)')
+    } else {
     }
   }).catch(() => {
     navigator.serviceWorker.ready.then(registration => {
