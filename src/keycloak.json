@@ -1,0 +1,9 @@
+{
+  "realm": "social",
+  "url": "https://id.meca.in.th/auth/",
+  "ssl-required": "external",
+  "resource": "rail-survey-frontend",
+  "public-client": true,
+  "confidential-port": 0,
+  "clientId": "rail-survey-frontend"
+}

@@ -21,19 +21,19 @@ if (process.env.NODE_ENV === 'production') {
       // .catch(err => {
       //   console.log(`ServiceWorker registration failed: ${err}`);
       // })
-      navigator.serviceWorker.ready.then(async registration => {
-        if (registration.periodicSync) {
-          console.log('Periodic Background Sync is supported.')
-          const status = await navigator.permissions.query({name: 'periodic-background-sync'});
-          if (status.state === 'granted') {
-            console.log('Periodic background sync can be used.')
-          } else {
-            console.log('Periodic background sync cannot be used.')
-          }
-        } else {
-          console.log('Periodic Background Sync isn\'t supported.')
-        }
-      })
+      // navigator.serviceWorker.ready.then(async registration => {
+      //   if (registration.periodicSync) {
+      //     console.log('Periodic Background Sync is supported.')
+      //     const status = await navigator.permissions.query({name: 'periodic-background-sync'});
+      //     if (status.state === 'granted') {
+      //       console.log('Periodic background sync can be used.')
+      //     } else {
+      //       console.log('Periodic background sync cannot be used.')
+      //     }
+      //   } else {
+      //     console.log('Periodic Background Sync isn\'t supported.')
+      //   }
+      // })
     },
     registered () {
       console.log('Service worker has been registered.')

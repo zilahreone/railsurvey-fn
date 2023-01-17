@@ -55,35 +55,34 @@ self.addEventListener('message', (event) => {
   // }
 })
 
-self.addEventListener('fetch', (event) => {
-  if (event.request.headers.get('Accept').includes('application/json')) {
-    console.log(event.request.url);
-    if (event.request.method === 'GET') {
-      event.respondWith(
-        caches.match(event.request).then((response) => {
-          if (navigator.onLine) {
-            return fetch(event.request).then((response) => {
-              return caches.open(cacheName).then((cache) => {
-                cache.put(event.request.url, response.clone());
-                return response;
-              })
-            })
-          } else {
-            if (response) {
-              console.log('USE CACHE')
-              return response
-            }
-          }
-        })
-      );
-    }
-  }
-})
+// self.addEventListener('fetch', (event) => {
+//   if (event.request.headers.get('Accept').includes('application/json')) {
+//     console.log(event.request.url);
+//     if (event.request.method === 'GET') {
+//       event.respondWith(
+//         caches.match(event.request).then((response) => {
+//           if (navigator.onLine) {
+//             return fetch(event.request).then((response) => {
+//               return caches.open(cacheName).then((cache) => {
+//                 cache.put(event.request.url, response.clone());
+//                 return response;
+//               })
+//             })
+//           } else {
+//             if (response) {
+//               console.log('USE CACHE')
+//               return response
+//             }
+//           }
+//         })
+//       );
+//     }
+//   }
+// })
 
 self.addEventListener('sync', (event) => {
   if (event.tag === 'some-unique-tag') {
     console.log('sync event')
-    console.log(event)
     event.waitUntil(getDailyNewsInCache())
     // retrieve data from indexedDB
     // make the api call with the data

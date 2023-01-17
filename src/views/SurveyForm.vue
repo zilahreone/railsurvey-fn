@@ -135,8 +135,8 @@ const handleSubmit = async () => {
       registration.sync.register('some-unique-tag')
     }).catch(console.log())
   })
-  IndexDB('test-db', 1, 'book', { id: 'js', name: 'Harry Porter' })
-  // router.push('/survey-list')
+  // IndexDB.createDB('test-db', 1, 'book', { id: 'js', name: 'Harry Porter' })
+  router.push('/survey-list')
 }
 const handleGetLocation = () => {
   navigator.geolocation.getCurrentPosition((position) => {
