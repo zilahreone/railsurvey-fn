@@ -8,7 +8,7 @@ export default {
       'Content-Type': 'application/json'
     }
     if (token) {
-      headers['Authorization'] = 'UMA ' + token
+      headers['Authorization'] = `Bearer ${token}`
     }
     return fetch(baseURL + endpoint, { method: 'GET', headers })
   },
@@ -18,7 +18,7 @@ export default {
       'Content-Type': 'application/json'
     }
     if (token) {
-      headers['Authorization'] = 'UMA ' + token
+      headers['Authorization'] = 'Bearer ' + token
     }
     return fetch(baseURL + endpoint, { method: 'POST', headers, body: JSON.stringify(body) })
   },
@@ -28,7 +28,7 @@ export default {
       'Content-Type': 'application/json'
     }
     if (token) {
-      headers['Authorization'] = 'UMA ' + token
+      headers['Authorization'] = 'Bearer ' + token
     }
     return fetch(baseURL + endpoint, { method: 'PUT', headers, body: JSON.stringify(body) })
   },
@@ -38,7 +38,7 @@ export default {
       'Content-Type': 'application/json'
     }
     if (token) {
-      headers['Authorization'] = 'UMA ' + token
+      headers['Authorization'] = 'Bearer ' + token
     }
     return fetch(baseURL + endpoint, { method: 'DELETE', headers })
   }
