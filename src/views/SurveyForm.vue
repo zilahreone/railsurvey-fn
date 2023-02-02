@@ -74,6 +74,7 @@ const railSurvey = reactive({
   typeOfRail: null,
   locationOfFailure: null,
   typeOfFailure: null,
+  trackGeometryFaults: null,
   typeOfFailureArea: null,
   railCondition: null,
   trackGeometry: null,
@@ -141,7 +142,7 @@ const handleGetLocation = () => {
   navigator.geolocation.getCurrentPosition((position) => {
       const p = position.coords;
       // console.log(p.latitude, p.longitude);
-      railSurvey.damagedArea.GPSCoordinates = `${p.latitude}, ${p.longitude}`
+      railSurvey.coordinates = `${p.latitude}, ${p.longitude}`
   })
 }
 const getAPI = () => {
@@ -310,13 +311,11 @@ const compDate = computed({
               <RadioBtn v-model="railSurvey.trackGeometry" name="tg" :items="integrity"></RadioBtn>
             </div>
           </div> -->
-          <div v-if="railSurvey.railCondition?.includes('ไม่')">
-            <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
-            <RadioImageBtn v-model="railSurvey.irregularTrackGeometryPattern" name="abtg" :items="trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
-          </div>
         </div>
       </Border>
-      <Border :error="v$.irregularTrackGeometryPattern.$error">
+      <Border v-if="railSurvey.railCondition?.includes('ไม่')">
+        <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
+        <RadioImageBtn v-model="railSurvey.trackGeometryFaults" name="abtg" :items="trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
       </Border>
       <Border :error="v$.ballast.$error">
         <label class="_label-lg">หินโรยทาง (Ballast)</label>

@@ -45,21 +45,23 @@ keycloak.onAuthSuccess = function () {
   app.component('VueSignaturePad', VueSignaturePad)
   app.mount('#app')
 
+  store.commit('setToken', keycloak.token)
+  store.commit('setTokenParsed', keycloak.tokenParsed)
   store.commit('setProfile', {
     fname: keycloak.tokenParsed.given_name,
     lname: keycloak.tokenParsed.family_name,
     email: keycloak.tokenParsed.email,
-    username: keycloak.tokenParsed.preferred_username
-    // id: keycloak.tokenParsed.id
+    username: keycloak.tokenParsed.preferred_username,
+    id: keycloak.tokenParsed.sub
   })
 
-  api.post('/api/rail-survey', { email: 'asd@sdf.com', age: 10 }, keycloak.token).then((resp) => {
-    if (resp.status === 201) {
-      console.log(resp).then((re) => {
-        console.log(re);
-      });
-    }
-  })
+  // api.post('/api/rail-survey', { email: 'asd@sdf.com', age: 10 }, keycloak.token).then((resp) => {
+  //   if (resp.status === 201) {
+  //     console.log(resp).then((re) => {
+  //       console.log(re);
+  //     });
+  //   }
+  // })
 }
 
 
