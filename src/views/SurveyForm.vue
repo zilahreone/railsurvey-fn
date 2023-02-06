@@ -8,7 +8,7 @@ import RadioBtn from '@/components/RadioBtn.vue'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import RadioImageBtn from '@/components/RadioImageBtn.vue'
 import { useVuelidate } from '@vuelidate/core'
-import { required, minValue, maxValue } from '@vuelidate/validators'
+import { required, helpers, requiredIf, minValue, maxValue } from '@vuelidate/validators'
 import { Loader } from '@googlemaps/js-api-loader'
 import variable from '@/assets/variable.json'
 import api from '@/services'
@@ -54,6 +54,7 @@ const trackGeometry = variable.trackGeometry
 const guageType = variable.guageType
 const trafficArae = variable.trafficArae
 const signaturePad = ref(null)
+
 const undo = () => {
   signaturePad.value.undoSignature()
 }
@@ -65,6 +66,13 @@ const save = () => {
 const clear = () => {
   signaturePad.value.clearSignature()
 }
+
+const validateSignature = () => {
+  const { isEmpty, data } = signaturePad.value.saveSignature()
+  console.log(isEmpty)
+  return !isEmpty
+}
+
 const railSurvey = reactive({
   date: new Date().toISOString().substring(0, 10),
   zone: null,
@@ -109,34 +117,52 @@ const rules = {
   sleeper: { required  },
   trackFoundation: { required  },
   severityOfDamage: { required  },
-  maintenanceRecord: { required  },
-  maintenanceLastDate: { required  },
-  maintenancePreiod: { required, minValue: minValue(0), maxValue: maxValue(365)  },
-  maintenanceMethod: { required  },
-  isAnalyzeDamage: { required }
+  maintenanceRecord: { required },
+  maintenanceLastDate: {
+    requiredIfRec: requiredIf(() => {
+      return railSurvey.maintenanceRecord === 'เคย'
+    })
+  },
+  maintenancePreiod: {
+    requiredIfRec: requiredIf(() => {
+      return railSurvey.maintenanceRecord === 'เคย'
+    }),
+    minValue: minValue(0), maxValue: maxValue(365)
+  },
+  maintenanceMethod: {
+    requiredIfRec: requiredIf(() => {
+      return railSurvey.maintenanceRecord === 'เคย'
+    })
+  },
+  isAnalyzeDamage: { required },
+  signature: { required }
 }
 
 const v$ = useVuelidate(rules, railSurvey, { $autoDirty: true })
 
 // METHOD //
 const handleSubmit = async () => {
+  const { isEmpty, data } = signaturePad.value.saveSignature()
+  railSurvey.signature = data
   const isValid = await v$.value.$validate()
-  console.log(isValid);
   if (isValid) {
   }
-  api.post(`/`, railSurvey, store.state.token).then((resp) => {
-    if (resp.status === 201) {
-      console.log('create success ;)')
-    } else {
-    }
-  }).catch(() => {
-    navigator.serviceWorker.ready.then(registration => {
-      // console.log(registration)
-      registration.sync.register('some-unique-tag')
-    }).catch(console.log())
-  })
-  // IndexDB.createDB('test-db', 1, 'book', { id: 'js', name: 'Harry Porter' })
-  router.push('/survey-list')
+  // IndexDB.insertData('railway-survey', 1, { fname: 'wissarut', lname: 'sangjong' })
+  // router.push('/survey-list')
+  // console.log(isValid);
+  // api.post(`/`, railSurvey, store.state.token).then((resp) => {
+  //   if (resp.status === 201) {
+  //     console.log('create success ;)')
+  //   } else {
+  //   }
+  // }).catch(() => {
+  //   navigator.serviceWorker.ready.then(registration => {
+  //     // console.log(registration)
+  //     registration.sync.register('some-unique-tag')
+  //   }).catch(console.log())
+  // })
+  // // IndexDB.createDB('test-db', 1, 'book', { id: 'js', name: 'Harry Porter' })
+  // router.push('/survey-list')
 }
 const handleGetLocation = () => {
   navigator.geolocation.getCurrentPosition((position) => {
@@ -169,9 +195,9 @@ const handleSelectZone = (value) => {
 // COMPUTED //
 const compMARec = computed(() => {
   return v$.value.maintenanceRecord.$error
-    // || v$.value.lastMaintenance.$error
-    // || v$.value.manyTimeMaintenance.$error
-    || v$.value.maintenanceMethod.$error
+    || v$.value.lastMaintenance?.$error
+    || v$.value.manyTimeMaintenance?.$error
+    || v$.value.maintenanceMethod?.$error
 })
 
 const compAraeDamage = computed(() => {
@@ -192,7 +218,7 @@ const compDate = computed({
 </script>
 <template>
 <!-- <button @click="store.state.logout">log out</button> -->
-{{ store.state.profile }}
+<!-- {{ store.state.profile }} -->
   <!-- {{ ta }} -->
   <!-- <pre>
     {{ v$.$errors }}
@@ -241,8 +267,8 @@ const compDate = computed({
           <div class="flex flex-col">
             <label class="_label-sm">สถานีรถไฟใกล้เคียง</label>
             <div class="flex md:flex-row flex-col gap-4">
-              <input v-if="railSurvey.zone" v-for="(nb, index) in railSurvey.nearby" :key="index" :value="nb" disabled type="text" id="kmTelegraphPoles" :class="'_input'">
-              <input v-else v-for="(nb, index_) in 2" :key="index_" :value="null" disabled type="text" id="kmTelegraphPoles" :class="'_input'">
+              <input v-if="railSurvey.zone" v-for="(nb, index) in railSurvey.nearby" :key="index" :value="nb" disabled type="text" id="kmTelegraphPoles" class="_input">
+              <input v-else v-for="(nb, index_) in 2" :key="index_" :value="null" disabled type="text" id="kmTelegraphPoles" :class="v$.zone.$error ? '_input_error' : '_input'">
               <!-- <select :value="railSurvey.nearby[0]" disabled id="nearby-1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option disabled :value="null">กรุณาเลือกสถานี</option>
                 <option v-for="(trafAr, index) in trafficArae" :key="index">{{ trafAr }}</option>
@@ -252,6 +278,7 @@ const compDate = computed({
                 <option v-for="(trafAr, index) in trafficArae" :key="index">{{ trafAr }}</option>
               </select> -->
             </div>
+            <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
           </div>
           <div class="flex flex-col">
             <label class="_label-lg">ชนิดของราง</label>
@@ -261,8 +288,8 @@ const compDate = computed({
                 <option disabled :value="null">กรุณาเลือกประเภทของเกจ</option>
                 <option v-for="(g ,index) in guageType" :key="index" :value="g.value">{{ g.name }}</option>
               </select>
-              <p v-if="v$.typeOfRail.$error" class="text-sm text-red-600">{{ v$.typeOfRail.$errors[0].$message }}</p>
             </div>
+            <p v-if="v$.typeOfRail.$error" class="text-sm text-red-600">{{ v$.typeOfRail.$errors[0].$message }}</p>
           </div>
         </div>
       </Border>
@@ -341,22 +368,24 @@ const compDate = computed({
           <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
             <RadioBtn v-model="railSurvey.maintenanceRecord" name="his" :items="['เคย', 'ไม่เคย']"></RadioBtn>
           </div>
-          <div class="flex md:flex-row flex-col gap-4">
-            <div class="flex-1">
-              <label class="_label-sm">การซ่อมบำรุงครั้งล่าสุด</label>
-              <input v-model="railSurvey.maintenanceLastDate" type="date" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required>
-              <p v-if="v$.maintenanceLastDate.$error" class="text-sm text-red-600">{{ v$.maintenanceLastDate.$errors[0].$message }}</p>
+          <div v-if="railSurvey.maintenanceRecord && !railSurvey.maintenanceRecord?.includes('ไม่')" class="flex flex-col gap-4">
+            <div class="flex md:flex-row flex-col gap-4">
+              <div class="flex-1">
+                <label class="_label-sm">การซ่อมบำรุงครั้งล่าสุด</label>
+                <input v-model="railSurvey.maintenanceLastDate" type="date" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required>
+                <p v-if="v$.maintenanceLastDate.$error" class="text-sm text-red-600">{{ v$.maintenanceLastDate.$errors[0].$message }}</p>
+              </div>
+              <div class="flex-1">
+                <label class="_label-sm">ความถี่ในการซ่อมบำรุงในรอบปี</label>
+                <input v-model="railSurvey.maintenancePreiod" type="number" :min="0" :max="365" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                <p v-if="v$.maintenancePreiod.$error" class="text-sm text-red-600">{{ v$.maintenancePreiod.$errors[0].$message }}</p>
+              </div>
             </div>
-            <div class="flex-1">
-              <label class="_label-sm">ความถี่ในการซ่อมบำรุงในรอบปี</label>
-              <input v-model="railSurvey.maintenancePreiod" type="number" :min="0" :max="365" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
-              <p v-if="v$.maintenancePreiod.$error" class="text-sm text-red-600">{{ v$.maintenancePreiod.$errors[0].$message }}</p>
-            </div>
-          </div>
-          <div>
-            <label class="_label-lg">วิธีซ่อมบำรุง</label>
-            <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-              <RadioBtn v-model="railSurvey.maintenanceMethod" name="ma" :items="['เชื่อมซ่อม', 'ตัดเปลี่ยนราง']"></RadioBtn>
+            <div>
+              <label class="_label-lg">วิธีซ่อมบำรุง</label>
+              <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
+                <RadioBtn v-model="railSurvey.maintenanceMethod" name="ma" :items="['เชื่อมซ่อม', 'ตัดเปลี่ยนราง']"></RadioBtn>
+              </div>
             </div>
           </div>
         </div>
@@ -378,21 +407,23 @@ const compDate = computed({
         <textarea v-model="railSurvey.comment" rows="4" class="_input" placeholder=""></textarea>
       </Border>
       <div class="flex justify-end">
-        <div class="w-1/2">
-          <Border>
-            <div class="h-20">
-              <VueSignaturePad ref="signaturePad" />
-            </div>
-            <label class="pt-2 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
-          </Border>
+        <div class="w-1/2 border border-solid p-0" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
+          <div class="flex justify-center">
+            <button @click="undo" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-x rounded-bl-md text-sm px-5 py-1">Undo</button>
+            <button @click="clear" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r rounded-br-md text-sm px-5 py-1">Clear</button>
+          </div>
+          <div class="h-28 p-1">
+            <VueSignaturePad ref="signaturePad" />
+          </div>
+          <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
         </div>
       </div>
-      <div class="flex mx-auto">
-        <button class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400" @click="save">Save</button>
-        <button class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400" @click="undo">Undo</button>
-        <button class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400" @click="clear">Clear</button>
-        <button class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400" @click="handleSubmit()">Submit</button>
-      </div>
+    </div>
+    <div class="flex justify-end mt-8">
+      <!-- <button class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400" @click="save">Save</button> -->
+      <!-- <button class="px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400" @click="handleSubmit()">Submit</button> -->
+      <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" @click="handleSubmit()">Submit</button>
     </div>
   </div>
+  <!-- <RadioBtnLayout v-model="railSurvey.severityOfDamage" name="testasd" :items="damagesLevel"></RadioBtnLayout> -->
 </template>
