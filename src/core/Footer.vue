@@ -1,5 +1,6 @@
 <script setup>
 const d = new Date().getFullYear()
+const title =  process.env.FOOTER_TITLE
 </script>
 <template>
   <!-- <div class="flex justify-center">
@@ -10,7 +11,7 @@ const d = new Date().getFullYear()
   </div> -->
   <footer>
     <div class="flex justify-center border-t mt-4">
-      <span class="mt-4 mb-8 block text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ d }} __. All Rights Reserved.
+      <span class="mt-4 mb-8 block text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ d }} {{ title }}. All Rights Reserved.
       </span>
     </div>
   </footer>

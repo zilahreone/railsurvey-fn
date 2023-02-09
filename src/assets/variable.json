@@ -1,46 +1,274 @@
 {
-  "damagesLevel": [
-    "ระดับที่ 1 ไม่รุนแรงและรอซ่อมบำรุงในวาระ",
-    "ระดับที่ 2 ควรเร่งซ่อม",
-    "ระดับที่ 3 รุนแรงและควรซ่อมอย่างเร่งด่วน",
-    "ระดับที่ 4 รุนแรงและเกิดความเสียหายต่อทรัพย์สิน/เกิดผลกระทบต่อสิ่งแวดล้อม",
-    "ระดับที่ 5 รุนแรงและเกิดความเสียหายต่อทรัพย์สิน/เกิดผลกระทบต่อสิ่งแวดล้อมเป็นวงกว้าง"
+  "zone": [
+    {
+        "key": "ศิลาอาสน์ (Sila At)",
+        "value": "silaAt"
+    },
+    {
+        "key": "ท่าเสา (Tha Sao)",
+        "value": "thaSao"
+    },
+    {
+        "key": "บ้านด่าน (Ban Dan)",
+        "value": "banDan"
+    },
+    {
+        "key": "ปางต้นผึ้ง (Pang Ton Phung)",
+        "value": "pangTonPhung"
+    },
+    {
+        "key": "เขาพลึง (Khao Phlung)",
+        "value": "khaoPhlung"
+    },
+    {
+        "key": "ห้วยไร่ (Huai Rai)",
+        "value": "huaiRai"
+    },
+    {
+        "key": "ไร่เกล็ดดาว (Rai Kred Dao)",
+        "value": "raiKredDao"
+    },
+    {
+        "key": "แม่พวก (Mae Phuak)",
+        "value": "maePhuak"
+    },
+    {
+        "key": "เด่นชัย (Den Chai)",
+        "value": "denChai"
+    },
+    {
+        "key": "ปากปาน (Pak Pan)",
+        "value": "pakPan"
+    },
+    {
+        "key": "แก่งหลวง (Kaeng Luang)",
+        "value": "kaengLuang"
+    },
+    {
+        "key": "ห้วยแม่ต้า (Huai Mae Ta)",
+        "value": "huaiMaeTa"
+    },
+    {
+        "key": "บ้านปิน (Ban Pin)",
+        "value": "banPin"
+    },
+    {
+        "key": "ผาคัน (Pha Khan)",
+        "value": "phaKhan"
+    },
+    {
+        "key": "ผาคอ (Pha Kho)",
+        "value": "phaKho"
+    },
+    {
+        "key": "ปางป๋วย (Pang Puai)",
+        "value": "pangPuai"
+    },
+    {
+        "key": "แม่จาง (Mae Chang)",
+        "value": "maeChang"
+    },
+    {
+        "key": "แม่เมาะ (Mae Mo)",
+        "value": "maeMo"
+    },
+    {
+        "key": "ห้วยรากไม้ (Huai Rak Mai)",
+        "value": "huaiRakMai"
+    },
+    {
+        "key": "ศาลาผาลาด (Sala Pha Lat)",
+        "value": "salaPhaLat"
+    },
+    {
+        "key": "แม่ทะ (Mae Tha)",
+        "value": "maeTha"
+    },
+    {
+        "key": "หนองวัวเฒ่า (Nong Wua Thao)",
+        "value": "nongWuaThao"
+    },
+    {
+        "key": "นครลำปาง (Nakhon Lampang)",
+        "value": "nakhonLampang"
+    },
+    {
+        "key": "ห้างฉัตร (Hang Chat)",
+        "value": "hangChat"
+    },
+    {
+        "key": "ปางม่วง (Pang Muang)",
+        "value": "pangMuang"
+    },
+    {
+        "key": "ห้วยเรียน (Huai Rian)",
+        "value": "huaiRian"
+    },
+    {
+        "key": "แม่ตานน้อย (Mae Tan Noi)",
+        "value": "maeTanNoi"
+    },
+    {
+        "key": "ขุนตาน (Khun Tan)",
+        "value": "khunTan"
+    },
+    {
+        "key": "ทาชมภู (Tha Chomphu)",
+        "value": "thaChomphu"
+    },
+    {
+        "key": "ศาลาแม่ทา (Sala Mae Tha)",
+        "value": "salaMaeTha"
+    },
+    {
+        "key": "หนองหล่ม (Nong Lom)",
+        "value": "nongLom"
+    },
+    {
+        "key": "ลำพูน (Lam Phun)",
+        "value": "lamPhun"
+    },
+    {
+        "key": "ป่าเส้า (Pa Sao)",
+        "value": "paSao"
+    },
+    {
+        "key": "สารภี (Saraphi)",
+        "value": "saraphi"
+    },
+    {
+        "key": "เชียงใหม่ (Chiang Mai)",
+        "value": "chiangMai"
+    }
   ],
-  "damageProperties": [ "แตกหัก (Fracture)", "แตกร้าว (Rupture)", "สึกหรอ (Wear)", "รางคดงอ (Bend)", "เกิดสนิม/กัดกร่อน (Corrosion)", "เป็นแผล/เสียรูป เสียเนื้อโลหะ/เพียงบางส่วน (Surface Defect)" ],
-  "damageAraePrperties": [ "พื้นที่ลาดชัน (Slope)", "พื้นที่รัสมีโค้ง (Curve)", "สถานีรถไฟ (Station)", "บริเวณอุโมงค์ (Tunnel)", "สะพาน (Bridge)", "มีน้ำท่วมขัง (Flood)" ],
-  "integrity": ["สมบูรณ์", "ไม่สมบูรณ์"],
-  "ballast": ["สมบูรณ์", "ไม่สมบูรณ์", "พร่อง (Lack)", "มีลักษณะกลม (Round)"],
-  "sleeper": ["สมบูรณ์", "ไม่สมบูรณ์", "ทรุดตัว", "แตกหัก", "ให้ตัวได้", "ประกับยึดรางหลวม"],
-  "analyse": ["เห็นควรดำเนินการ", "ไม่จำเป็นต้องส่งวิเคราะห์"],
-  "locationOfFailure": ["รางปกติ (Plain Rail)", "ปลายราง (Rail End)"],
-  "positionDamage": [
+  "guageType": [
     {
-      "title": ["หัวราง", "เอวราง", "ฐานราง"],
-      "img": "positionDamage/Picture1.png"
+      "key": "R200",
+      "value": "r200"
     },
     {
-      "title": "รอยต่อราง (Fish Plate)",
-      "img": "positionDamage/Picture2.png"
+      "key": "R260",
+      "value": "r260"
     },
     {
-      "title": "แนวเชื่อมต่อราง",
-      "img": "positionDamage/Picture3.png"
+      "key": "R260Mn",
+      "value": "r260mn"
     },
     {
-      "title": "รางปกติ",
-      "img": "positionDamage/Picture4.png"
+      "key": "R320Cr",
+      "value": "r320cr"
     },
     {
-      "title": "รอยเชื่อมซ่อม",
-      "img": "positionDamage/Picture5.png"
+      "key": "R350HT",
+      "value": "r350ht"
     },
     {
-      "title": "ประแจ",
-      "img": "positionDamage/Picture6.png"
+      "key": "R350LHT",
+      "value": "r350lht"
+    }
+  ],
+  "situation": [
+    {
+      "key": "รางปกติ (Plain Rail)",
+      "value": "plainRail"
     },
     {
-      "title": "จุดตัดราง",
-      "img": "positionDamage/Picture7.png"
+      "key": "ปลายราง (Rail End)",
+      "value": "railEnd"
+    }
+  ],
+  "damageAreaPrperties": [
+    {
+      "key": "พื้นที่ลาดชัน (Slope)",
+      "value": "slope"
+    },
+    {
+      "key": "พื้นที่รัสมีโค้ง (Curve)",
+      "value": "curve"
+    },
+    {
+      "key": "สถานีรถไฟ (Station)",
+      "value": "station"
+    },
+    {
+      "key": "บริเวณอุโมงค์ (Tunnel)",
+      "value": "tunnel"
+    },
+    {
+      "key": "สะพาน (Bridge)",
+      "value": "bridge"
+    },
+    {
+      "key": "มีน้ำท่วมขัง (Flood)",
+      "value": "flood"
+    }
+  ],
+  "positionDamage": {
+    "topRail": [
+      {
+        "key": "หัวราง (Rail head)",
+        "value": "railHead"
+      },
+      {
+        "key": "เอวราง (Rail web)",
+        "value": "railWeb"
+      },
+      {
+        "key": "ฐานราง (Rail foot)",
+        "value": "railFoot"
+      }
+    ],
+    "damageArea": [
+      {
+        "title": "ประกับราง (Fish Plate)",
+        "img": "positionDamage/Picture2.png"
+      },
+      {
+        "title": "รอยเชื่อมซ่อม (Welding Repair)",
+        "img": "positionDamage/Picture5.png"
+      },
+      {
+        "title": "แนวเชื่อมต่อราง (Welding Joint)",
+        "img": "positionDamage/Picture3.png"
+      },
+      {
+        "title": "จุดตัดราง (Crossing)",
+        "img": "positionDamage/Picture7.png"
+      },
+      {
+        "title": "ประแจ (Turn Out)",
+        "img": "positionDamage/Picture6.png"
+      },
+      {
+        "title": "ทางข้ามราง (Railroad Crossing)",
+        "img": "positionDamage/Picture4.png"
+      }
+    ]
+  },
+  "damageProperties": [
+    {
+      "key": "แตกหัก (Fracture)",
+      "value": "fracture"
+    },
+    {
+      "key": "แตกร้าว (Rupture)",
+      "value": "rupture"
+    },
+    {
+      "key": "สึกหรอ (Wear)",
+      "value": "wear"
+    },
+    {
+      "key": "รางคดงอ (Bend)",
+      "value": "bend"
+    },
+    {
+      "key": "เกิดสนิม/กัดกร่อน (Corrosion)",
+      "value": "corrosion"
+    },
+    {
+      "key": "เป็นแผล/เสียรูป เสียเนื้อโลหะ/เพียงบางส่วน (Surface Defect)",
+      "value": "surfaceDefect"
     }
   ],
   "scar": [
@@ -67,6 +295,21 @@
     {
       "title": "Burned Rail",
       "img": "scar/Picture6.png"
+    },
+    {
+      "title": "รูปแบบอื่นๆ",
+      "img": ""
+    }
+
+  ],
+  "integrity": [
+    {
+      "key": "สมบูรณ์",
+      "value": "complete"
+    },
+    {
+      "key": "ไม่สมบูรณ์",
+      "value": "inComplete"
     }
   ],
   "trackGeometry": [
@@ -91,11 +334,82 @@
       "img": "trackGeometry/Picture5.png"
     }
   ],
-  "guageType": [
-    { "name": "เกจแคบ (Narrow gauge)", "value": "narrowGauge" },
-    { "name": "เกจมาตรฐานยุโรป (European Standard gauge)", "value": "europeanStandardGauge" },
-    { "name": "เกจกว้าง (Broad gauge)", "value": "broadGauge" }
+  "ballast": [
+    {
+      "key": "พร่อง (Lack)",
+      "value": "lack"
+    },
+    {
+      "key": "มีลักษณะกลม (Round)",
+      "value": "round"
+    }
   ],
+  "sleeper": [
+    {
+      "key": "แตกหัก (Fracture)",
+      "value": "fracture"
+    },
+    {
+      "key": "ให้ตัวได้ (Untight)",
+      "value": "untight"
+    },
+    {
+      "key": "ประกับยึดรางหลวม (Clamp: Untight/lost)",
+      "value": "clampUntight/lost"
+    }
+  ],
+  "maintenanceRecord": [
+    {
+      "key": "เคย",
+      "value": "yes"
+    },
+    {
+      "key": "ไม่เคย",
+      "value": "no"
+    }
+  ],
+  "maintenanceMethod": [
+    {
+      "key": "เชื่อมซ่อม",
+      "value": "yes"
+    },
+    {
+      "key": "ตัดเปลี่ยนราง",
+      "value": "no"
+    }
+  ],
+  "damagesLevel": [
+    {
+      "key": "ไม่รุนแรงและรอซ่อมบำรุงในวาระ",
+      "value": "level1"
+    },
+    {
+      "key": "ควรเร่งซ่อม",
+      "value": "level2"
+    },
+    {
+      "key": "รุนแรงและควรซ่อมอย่างเร่งด่วน",
+      "value": "level3"
+    },
+    {
+      "key": "รุนแรงและเกิดความเสียหายต่อทรัพย์สิน",
+      "value": "level4"
+    },
+    {
+      "key": "รุนแรงและเกิดความเสียหายต่อชีวิตและทรัพย์สิน",
+      "value": "level5"
+    }
+  ],
+  "analyse": [
+    {
+      "key": "เห็นควรดำเนินการ",
+      "value": "yes"
+    },
+    {
+      "key": "ไม่จำเป็นต้องส่งวิเคราะห์",
+      "value": "no"
+    }
+  ],  
   "trafficArae": [
     "กรุงเทพอภิวัฒน์",
     "กรุงเทพ",

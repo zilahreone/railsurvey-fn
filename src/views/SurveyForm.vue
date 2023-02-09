@@ -36,23 +36,11 @@ onMounted(() => {
     const p = position.coords;
     console.log(p.latitude, p.longitude);
   })
+  console.log(process.env.VUE_APP_TITLE)
   // getAPI()
 })
 
 const store = useStore()
-const damagesLevel = variable.damagesLevel
-const damageProperties = variable.damageProperties
-const locationOfFailure = variable.locationOfFailure
-const damageAraePrperties = variable.damageAraePrperties
-const integrity = variable.integrity
-const ballast = variable.ballast
-const sleeper = variable.sleeper
-const analyse = variable.analyse
-const positionDamage = variable.positionDamage
-const scar = variable.scar
-const trackGeometry = variable.trackGeometry
-const guageType = variable.guageType
-const trafficArae = variable.trafficArae
 const signaturePad = ref(null)
 
 const undo = () => {
@@ -80,20 +68,23 @@ const railSurvey = reactive({
   kilometers: null,
   nearby: [],
   typeOfRail: null,
+  situation: null,
   locationOfFailure: null,
   typeOfFailure: null,
   trackGeometryFaults: null,
+  surfaceDefect: null,
   typeOfFailureArea: null,
   railCondition: null,
   trackGeometry: null,
   ballast: null,
   sleeper: null,
   trackFoundation: null,
-  severityOfDamage: null,
   maintenanceRecord: null,
   maintenanceLastDate: null,
   maintenancePreiod: null,
   maintenanceMethod: null,
+  uploadImage: null,
+  severityOfDamage: null,
   isAnalyzeDamage: null,
   comment: null,
   signature: null
@@ -105,14 +96,24 @@ const rules = {
   coordinates: { required },
   kilometers: { required },
   typeOfRail: { required  },
+  situation: { required  },
   locationOfFailure: { required  },
   typeOfFailure: { required  },
-  typeOfFailureArea: { required  },
+  surfaceDefect: {
+    requiredIfFailArea: requiredIf(() => {
+      return railSurvey.typeOfFailure.includes('Surface Defect')
+    })
+  },
+  typeOfFailureArea: { required },
   railScar: { required  },
   natureAreaDamage: { required  },
   railCondition: { required  },
   trackGeometry: { required  },
-  irregularTrackGeometryPattern: { required  },
+  trackGeometryFaults: {
+    requiredIfTrackFault: requiredIf(() => {
+      return railSurvey.railCondition.includes('ไม่')
+    })
+  },
   ballast: { required  },
   sleeper: { required  },
   trackFoundation: { required  },
@@ -180,15 +181,25 @@ const getAPI = () => {
 }
 
 const handleSelectZone = (value) => {
-  if (!!trafficArae[trafficArae.indexOf(value) - 1] && !!trafficArae[trafficArae.indexOf(value) + 1]) {
-    railSurvey.nearby = [trafficArae[trafficArae.indexOf(value) - 1], trafficArae[trafficArae.indexOf(value) + 1]]
+  if (!!zones[zones.indexOf(value) - 1] && !!zones[zones.indexOf(value) + 1]) {
+    railSurvey.nearby = [zones[zones.indexOf(value) - 1], zones[zones.indexOf(value) + 1]]
   } else {
-    if (!trafficArae[trafficArae.indexOf(value) - 1]) {
-      railSurvey.nearby = [value, trafficArae[trafficArae.indexOf(value) + 1]]
+    if (!zones[zones.indexOf(value) - 1]) {
+      railSurvey.nearby = [value, zones[zones.indexOf(value) + 1]]
     }
-    if (!trafficArae[trafficArae.indexOf(value) + 1]) {
-      railSurvey.nearby = [trafficArae[trafficArae.indexOf(value) - 1], value]
+    if (!zones[zones.indexOf(value) + 1]) {
+      railSurvey.nearby = [zones[zones.indexOf(value) - 1], value]
     }
+  }
+}
+
+const handleUploadImage = (event) => {
+  var file = event.target.files[0]
+  var reader = new FileReader()
+  reader.readAsDataURL(file)
+  reader.onloadend = function() {
+    railSurvey.uploadImage = reader.result
+    // console.log(reader.result)
   }
 }
 
@@ -243,7 +254,7 @@ const compDate = computed({
             <label class="_label-sm">เขตการเดินรถ</label>
             <select @change="handleSelectZone($event.target.value)" v-model="railSurvey.zone" id="zone" :class="v$.zone.$error ? '_input_error' : '_input'">
               <option :value="null">กรุณาเลือกเขตการเดินรถ</option>
-              <option v-for="(trafAr, index) in trafficArae" :key="index">{{ trafAr }}</option>
+              <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
             </select>
             <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
           </div>
@@ -267,7 +278,7 @@ const compDate = computed({
           <div class="flex flex-col">
             <label class="_label-sm">สถานีรถไฟใกล้เคียง</label>
             <div class="flex md:flex-row flex-col gap-4">
-              <input v-if="railSurvey.zone" v-for="(nb, index) in railSurvey.nearby" :key="index" :value="nb" disabled type="text" id="kmTelegraphPoles" class="_input">
+              <input v-if="railSurvey.zone" v-for="(nb, index) in railSurvey.nearby" :key="index" :value="nb.value" disabled type="text" id="kmTelegraphPoles" class="_input">
               <input v-else v-for="(nb, index_) in 2" :key="index_" :value="null" disabled type="text" id="kmTelegraphPoles" :class="v$.zone.$error ? '_input_error' : '_input'">
               <!-- <select :value="railSurvey.nearby[0]" disabled id="nearby-1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                 <option disabled :value="null">กรุณาเลือกสถานี</option>
@@ -286,16 +297,26 @@ const compDate = computed({
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <select v-model="railSurvey.typeOfRail" id="countries" :class="v$.typeOfRail.$error ? '_input_error' : '_input'">
                 <option disabled :value="null">กรุณาเลือกประเภทของเกจ</option>
-                <option v-for="(g ,index) in guageType" :key="index" :value="g.value">{{ g.name }}</option>
+                <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
               </select>
             </div>
             <p v-if="v$.typeOfRail.$error" class="text-sm text-red-600">{{ v$.typeOfRail.$errors[0].$message }}</p>
           </div>
         </div>
       </Border>
+      <Border :error="v$.situation.$error">
+        <label class="_label-lg">ความเสียหายของราง</label>
+        <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
+          <RadioBtn v-model="railSurvey.situation" name="positionDamage" :items="variable.situation"></RadioBtn>
+        </div>
+      </Border>
       <Border>
-        <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง</label>
-        <RadioImageBtn name="positionDamage" :items="positionDamage" imageLabel="title" imagePath="img">
+        <!-- <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง</label> -->
+        <label class="_label-lg">ตำแหน่งความเสียหายบนราง</label>
+        <RadioBtn v-model="railSurvey.typeOfFailure" name="topRailDamage" :items="variable.positionDamage.topRail"></RadioBtn>
+        <label class="_label-lg">บริเวณความเสียหาย</label>
+        <RadioImageBtn name="areaDamage" :items="variable.positionDamage.damageArea" imageLabel="title" imagePath="img"></RadioImageBtn>
+        <!-- <RadioImageBtn name="positionDamage" :items="variable.positionDamage" imageLabel="title" imagePath="img"> -->
           <!-- <template #label="{ item }">
             <div v-if="Array.isArray(item)" class="flex flex-row md:flex-col">
               <div v-for="(label, index) in item" :key="index">
@@ -304,71 +325,65 @@ const compDate = computed({
               </div>
             </div>
             <div v-else>{{ item }}</div>
-          </template> -->
-        </RadioImageBtn>
+          </template> 
+        </RadioImageBtn>-->
       </Border>
       <Border :error="v$.typeOfFailure.$error">
         <label class="_label-lg">ลักษณะความเสียหาย</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.typeOfFailure" name="positionDamage" :items="damageProperties"></RadioBtn>
+          <RadioBtn v-model="railSurvey.typeOfFailure" name="positionDamage" :items="variable.damageProperties"></RadioBtn>
         </div>
       </Border>
       <!-- {{  railSurvey.typeOfFailure && railSurvey.typeOfFailure.includes('Surface Defect') }} -->
-      <Border v-if="railSurvey.typeOfFailure?.includes('Surface Defect')" :error="v$.typeOfFailureArea.$error">
+      <Border v-if="railSurvey.typeOfFailure?.includes('surfaceDefect')" :error="v$.surfaceDefect.$error">
         <label class="_label-lg">ให้ระบุลักษณะแผล โดยดูรูปต่อไปนี้ประกอบ</label>
-        <RadioImageBtn v-model="railSurvey.typeOfFailureArea" name="scar" :items="scar" imageLabel="title" imagePath="img"></RadioImageBtn>
+        <RadioImageBtn v-model="railSurvey.surfaceDefect" name="scar" :items="variable.scar" imageLabel="title" imagePath="img"></RadioImageBtn>
       </Border>
       <Border :error="v$.typeOfFailureArea.$error">
         <label class="_label-lg">ลักษณะพื้นที่ที่เกิดความเสียหาย</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.typeOfFailureArea" name="damageAraePrperties" :items="damageAraePrperties"></RadioBtn>
+          <RadioBtn v-model="railSurvey.typeOfFailureArea" name="damageAraePrperties" :items="variable.damageAreaPrperties"></RadioBtn>
         </div>
       </Border>
-      <Border :error="v$.railCondition.$error || v$.trackGeometry.$error ">
+      <Border :error="v$.railCondition.$error">
         <div class="flex flex-col gap-4">
           <div>
             <label class="_label-lg">ความสมบูรณ์ของทาง</label>
             <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-              <RadioBtn v-model="railSurvey.railCondition" name="pt" :items="integrity"></RadioBtn>
+              <RadioBtn v-model="railSurvey.railCondition" name="pt" :items="variable.integrity"></RadioBtn>
             </div>
           </div>
-          <!-- <div>
-            <label class="_label-lg">Track Geometry</label>
-            <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-              <RadioBtn v-model="railSurvey.trackGeometry" name="tg" :items="integrity"></RadioBtn>
-            </div>
-          </div> -->
         </div>
       </Border>
-      <Border v-if="railSurvey.railCondition?.includes('ไม่')">
+      <Border v-if="railSurvey.railCondition?.includes('ไม่')" :error="v$.trackGeometryFaults.$error">
         <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
-        <RadioImageBtn v-model="railSurvey.trackGeometryFaults" name="abtg" :items="trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
+        <RadioImageBtn v-model="railSurvey.trackGeometryFaults" name="abtg" :items="variable.trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
       </Border>
       <Border :error="v$.ballast.$error">
         <label class="_label-lg">หินโรยทาง (Ballast)</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.ballast" name="ballast" :items="ballast"></RadioBtn>
+          <RadioBtn v-model="railSurvey.ballast" name="ballast" :items="variable.ballast"></RadioBtn>
         </div>
       </Border>
       <Border :error="v$.sleeper.$error">
         <label class="_label-lg">หมอนรองทาง (Sleeper)</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.sleeper" name="sleeper" :items="sleeper"></RadioBtn>
+          <RadioBtn v-model="railSurvey.sleeper" name="sleeper" :items="variable.sleeper"></RadioBtn>
         </div>
       </Border>
       <Border :error="v$.trackFoundation.$error">
         <label class="_label-lg">คันทาง</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.trackFoundation" name="track" :items="integrity"></RadioBtn>
+          <RadioBtn v-model="railSurvey.trackFoundation" name="track" :items="variable.integrity"></RadioBtn>
         </div>
       </Border>
       <Border :error="compMARec">
         <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
         <div class="flex flex-col gap-4">
           <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-            <RadioBtn v-model="railSurvey.maintenanceRecord" name="his" :items="['เคย', 'ไม่เคย']"></RadioBtn>
+            <RadioBtn v-model="railSurvey.maintenanceRecord" name="his" :items="variable.maintenanceRecord"></RadioBtn>
           </div>
-          <div v-if="railSurvey.maintenanceRecord && !railSurvey.maintenanceRecord?.includes('ไม่')" class="flex flex-col gap-4">
+          <div v-if="railSurvey.maintenanceRecord && railSurvey.maintenanceRecord?.includes('yes')" class="flex flex-col gap-4">
             <div class="flex md:flex-row flex-col gap-4">
               <div class="flex-1">
                 <label class="_label-sm">การซ่อมบำรุงครั้งล่าสุด</label>
@@ -384,22 +399,26 @@ const compDate = computed({
             <div>
               <label class="_label-lg">วิธีซ่อมบำรุง</label>
               <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-                <RadioBtn v-model="railSurvey.maintenanceMethod" name="ma" :items="['เชื่อมซ่อม', 'ตัดเปลี่ยนราง']"></RadioBtn>
+                <RadioBtn v-model="railSurvey.maintenanceMethod" name="ma" :items="variable.maintenanceMethod"></RadioBtn>
               </div>
             </div>
           </div>
         </div>
       </Border>
+      <Border>
+        <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
+        <input @change="handleUploadImage($event)" name="img" accept="image/x-png,image/gif,image/jpeg" class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="small_size" type="file">
+      </Border>
       <Border :error="v$.severityOfDamage.$error">
         <label class="_label-lg">ความรุนแรงของความเสียหาย</label>
         <div class="grid md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.severityOfDamage" name="positionDamage" :items="damagesLevel"></RadioBtn>
+          <RadioBtn v-model="railSurvey.severityOfDamage" name="positionDamage" :items="variable.damagesLevel"></RadioBtn>
         </div>
       </Border>
       <Border :error="v$.isAnalyzeDamage.$error">
         <label class="_label-lg">ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุของความเสียหาย</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.isAnalyzeDamage" name="positionDamage" :items="analyse"></RadioBtn>
+          <RadioBtn v-model="railSurvey.isAnalyzeDamage" name="positionDamage" :items="variable.analyse"></RadioBtn>
         </div>
       </Border>
       <Border>

@@ -1,4 +1,4 @@
-let baseURL = 'http://localhost:3000'
+let baseURL = process.env.BACK_END_URL
 
 export default {
 

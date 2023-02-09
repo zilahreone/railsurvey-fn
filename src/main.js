@@ -45,8 +45,8 @@ keycloak.onAuthSuccess = function () {
   app.component('VueSignaturePad', VueSignaturePad)
   app.mount('#app')
 
+  store.commit('setKeycloak', keycloak)
   store.commit('setToken', keycloak.token)
-  store.commit('setTokenParsed', keycloak.tokenParsed)
   store.commit('setProfile', {
     fname: keycloak.tokenParsed.given_name,
     lname: keycloak.tokenParsed.family_name,
@@ -71,7 +71,6 @@ keycloak.onTokenExpired = function () {
     if (refreshed) {
       console.log('Token refreshed ' + refreshed)
       store.commit('setToken', keycloak.token)
-      store.commit('setTokenParsed', keycloak.tokenParsed)
     } else {
       // store.commit('setToken', keycloak.token)
       // store.commit('setTokenParsed', keycloak.tokenParsed)

@@ -49,7 +49,7 @@ const isActiveProfile = ref(false)
                 <div class="font-medium truncate">{{ store.state.profile.username }}</div>
               </div>
               <div>
-                <a href="" @click="store.state.logout.logout()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
+                <a @click="store.dispatch('logout')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
               </div>
               <!-- <MenuItem v-slot="{ active }">
                 <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">Your Profile</a>

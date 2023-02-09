@@ -10,9 +10,8 @@ export default createStore({
     isDark: false,
     isSuportIndexedDB: true,
     token: null,
-    tokenParsed: null,
     profile: {},
-    logout: null
+    keycloak: null
   },
   getters: {
     getCount: (state) => state.count
@@ -28,21 +27,21 @@ export default createStore({
       }
     },
     setSupportIndexedDB: (state, payload) => state.isSuportIndexedDB = payload,
+    setKeycloak: (state, payload) => state.keycloak = payload,
     setToken: (state, payload) => state.token = payload,
-    setTokenParsed: (state, payload) => state.tokenParsed = payload,
     setProfile: (state, payload) => state.profile = payload,
+    logout: (state) => state.keycloak.logout(),
     clearState (state) {
       state = {
         token: null,
         tokenParsed: null,
         profile: {}
       }
-    },
-    logout: (state, payload) => state.logout = payload
+    }
   },
   actions: {
     logout (context) {
-      context.commit('clearState')
+      context.commit('logout')
     }
   },
   modules: {
