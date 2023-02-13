@@ -1,6 +1,6 @@
 <script setup>
 const d = new Date().getFullYear()
-const title =  process.env.FOOTER_TITLE
+const title =  process.env.VUE_APP_FOOTER_TITLE
 </script>
 <template>
   <!-- <div class="flex justify-center">

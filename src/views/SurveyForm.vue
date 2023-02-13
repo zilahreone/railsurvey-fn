@@ -36,7 +36,6 @@ onMounted(() => {
     const p = position.coords;
     console.log(p.latitude, p.longitude);
   })
-  console.log(process.env.VUE_APP_TITLE)
   // getAPI()
 })
 

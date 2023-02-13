@@ -36,7 +36,7 @@ keycloak.init({ onLoad: 'login-required', checkLoginIframe: false }).then((auth)
 })
 
 keycloak.onAuthSuccess = function () {
-  console.log(keycloak.tokenParsed )
+  // console.log(keycloak.tokenParsed )
   const app = createApp(App)
   // app.provide('myGlobalVariable', console.log('hello'))
   // app.config.globalProperties.$globalVar = 'globalVar'
@@ -48,22 +48,28 @@ keycloak.onAuthSuccess = function () {
   store.commit('setKeycloak', keycloak)
   store.commit('setToken', keycloak.token)
   store.commit('setProfile', {
+    id: keycloak.tokenParsed.sub,
     fname: keycloak.tokenParsed.given_name,
     lname: keycloak.tokenParsed.family_name,
     email: keycloak.tokenParsed.email,
-    username: keycloak.tokenParsed.preferred_username,
-    id: keycloak.tokenParsed.sub
+    username: keycloak.tokenParsed.preferred_username
   })
-
-  // api.post('/api/rail-survey', { email: 'asd@sdf.com', age: 10 }, keycloak.token).then((resp) => {
+  // console.log(store.state.profile)
+  // api.post('/users', store.state.profile, keycloak.token).then((resp) => {
   //   if (resp.status === 201) {
-  //     console.log(resp).then((re) => {
-  //       console.log(re);
-  //     });
+  //     console.log(resp)
+  //     // console.log(resp).then((re) => {
+  //     // });
+  //   }
+  // })
+  // api.get('/albums?offset=0', null).then((resp) => {
+  //   if (resp.status === 200) {
+  //     resp.json().then((json) => {
+  //       console.log(json)
+  //     })
   //   }
   // })
 }
-
 
 keycloak.onTokenExpired = function () {
   keycloak.updateToken(70).then((refreshed) => {

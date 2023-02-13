@@ -1,4 +1,4 @@
-let baseURL = process.env.BACK_END_URL
+let baseURL = process.env.VUE_APP_BACK_END_URL
 
 export default {
 
