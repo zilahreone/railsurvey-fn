@@ -9,7 +9,7 @@ import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import RadioImageBtn from '@/components/RadioImageBtn.vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, helpers, requiredIf, minValue, maxValue } from '@vuelidate/validators'
-import { Loader } from '@googlemaps/js-api-loader'
+// import { Loader } from '@googlemaps/js-api-loader'
 import variable from '@/assets/variable.json'
 import api from '@/services'
 import { nullableTypeAnnotation } from '@babel/types'
@@ -17,30 +17,79 @@ import { useRouter } from 'vue-router'
 import IndexDB from '@/IndexedDB'
 import Keycloak from 'keycloak-js'
 import kcJSON from '@/keycloak.json'
+import { Buffer } from 'buffer'
 
+const store = useStore()
 const router = useRouter()
 const keycloak = new Keycloak(kcJSON)
 
-const loader = new Loader({
-  apiKey: 'AIzaSyBksdb-qLu2FZavr1UPnrUpXhvO-VUeSLA',
-  version: 'weekly',
-  libraries: ['places']
-})
-
+// const loader = new Loader({
+//   apiKey: 'AIzaSyBksdb-qLu2FZavr1UPnrUpXhvO-VUeSLA',
+//   version: 'weekly',
+//   libraries: ['places']
+// })
+const signaturePad = ref(null)
 const maps = ref([])
 const ta = ref(null)
 const is = ref(false)
+const isShowBtnUpload = ref(false)
+
+const railForm = {
+  date: null,
+  zone: null,
+  coordinates: null,
+  kilometers: null,
+  nearby: {
+    stationBefore: null,
+    stationAfter: null
+  },
+  railType: null,
+  areaCondition: null,
+  defectSituation: {
+    railPositionDefect: null,
+    railAreaDefect: null,
+  },
+  defectPattern: null,
+  surfaceDefect: null,
+  railCondition: null,
+  trackGeometryCondition: null,
+  defectTrackGeometry: null,
+  ballastCondition: null,
+  sleeperCondition: null,
+  trackFoundationCondition: null,
+  uploadImage: null,
+  severity: null,
+  isAnalyzeDamage: null,
+  hasMaintenanceRecord: null,
+  lastMaintenanceDate: null,
+  yearlyMaintenanceTimes: null,
+  maintenanceMethod: null,
+  note: null,
+  signature: null,
+  createdAt: null,
+  createdBy: null
+}
+
+const railSurvey = reactive(Object.assign({}, railForm, { date: new Date().toISOString().substring(0, 10) }))
+
+const rules2 = computed(() => {
+  const rule = {}
+  Object.keys(railForm).forEach((key) => {
+    rule[key] = { required }
+  })
+  return rule
+})
+
+const v$ = useVuelidate(rules2, railSurvey, { $autoDirty: true })
 
 onMounted(() => {
   navigator.geolocation.getCurrentPosition((position)=> {
     const p = position.coords;
-    console.log(p.latitude, p.longitude);
+    railSurvey.coordinates = `${p.latitude}/${p.longitude}`
+    // console.log(p.latitude, p.longitude);
   })
   // getAPI()
 })
-
-const store = useStore()
-const signaturePad = ref(null)
 
 const undo = () => {
   signaturePad.value.undoSignature()
@@ -60,87 +109,91 @@ const validateSignature = () => {
   return !isEmpty
 }
 
-const railSurvey = reactive({
-  date: new Date().toISOString().substring(0, 10),
-  zone: null,
-  coordinates: null,
-  kilometers: null,
-  nearby: [],
-  typeOfRail: null,
-  situation: null,
-  locationOfFailure: null,
-  typeOfFailure: null,
-  trackGeometryFaults: null,
-  surfaceDefect: null,
-  typeOfFailureArea: null,
-  railCondition: null,
-  trackGeometry: null,
-  ballast: null,
-  sleeper: null,
-  trackFoundation: null,
-  maintenanceRecord: null,
-  maintenanceLastDate: null,
-  maintenancePreiod: null,
-  maintenanceMethod: null,
-  uploadImage: null,
-  severityOfDamage: null,
-  isAnalyzeDamage: null,
-  comment: null,
-  signature: null
-})
+// METHOD //
+const _base64ToArrayBuffer = (base64) => {
+    var binary_string = window.atob(base64);
+    console.log(binary_string);
+    var len = binary_string.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+const convertBlobToBase64 = (blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader;
+    reader.onerror = reject;
+    reader.onload = () => {
+        resolve(reader.result);
+    };
+    reader.readAsDataURL(blob);
+});
+const convertImage = async () => {
+  console.log('convert')
+  const { isEmpty, data } = signaturePad.value.saveSignature()
+  // const b4 = Buffer.from(data, 'base64')
+  // console.log(data);
+  // let blob = new Blob(["<html>…</html>"], {type: 'text/html'});
+  // const blob = await fetch(data).then(resp => resp.blob());
+  // const blob1 = await base64Response.blob();
+  if (!isEmpty) {
+    // const asd = Buffer.from(data)
+    // console.log(asd)
+    // const buff = Buffer.from(data).toString('base64')
+    api.post('/api/rail-survey', { id: '123', blob: data}, null).then((res) => {
+      // res.json().then((json) => {
+      //   console.log(json);
+      // })
+    })
+  }
 
-const rules = {
-  date: { required  },
-  zone: { required  },
-  coordinates: { required },
-  kilometers: { required },
-  typeOfRail: { required  },
-  situation: { required  },
-  locationOfFailure: { required  },
-  typeOfFailure: { required  },
-  surfaceDefect: {
-    requiredIfFailArea: requiredIf(() => {
-      return railSurvey.typeOfFailure.includes('Surface Defect')
-    })
-  },
-  typeOfFailureArea: { required },
-  railScar: { required  },
-  natureAreaDamage: { required  },
-  railCondition: { required  },
-  trackGeometry: { required  },
-  trackGeometryFaults: {
-    requiredIfTrackFault: requiredIf(() => {
-      return railSurvey.railCondition.includes('ไม่')
-    })
-  },
-  ballast: { required  },
-  sleeper: { required  },
-  trackFoundation: { required  },
-  severityOfDamage: { required  },
-  maintenanceRecord: { required },
-  maintenanceLastDate: {
-    requiredIfRec: requiredIf(() => {
-      return railSurvey.maintenanceRecord === 'เคย'
-    })
-  },
-  maintenancePreiod: {
-    requiredIfRec: requiredIf(() => {
-      return railSurvey.maintenanceRecord === 'เคย'
-    }),
-    minValue: minValue(0), maxValue: maxValue(365)
-  },
-  maintenanceMethod: {
-    requiredIfRec: requiredIf(() => {
-      return railSurvey.maintenanceRecord === 'เคย'
-    })
-  },
-  isAnalyzeDamage: { required },
-  signature: { required }
+  // const base64String = await convertBlobToBase64(blob);
+  // console.log(base64String);
+  // fetch(data)
+  //   .then(res => res.blob())
+  //   .then(blob => {
+
+  //     // console.log(blob);
+  //     // const a = URL.createObjectURL(blob)
+  //     // console.log(a);
+  //     // api.post('/api/rail-survey', { id: '123', blob: a }, null).then((res) => {
+  //     //   res.json().then((json) => {
+  //     //     console.log(json);
+  //     //   })
+  //     // })
+  //     // var a = document.createElement("a"), url = URL.createObjectURL(blob);
+  //     //   a.href = url;
+  //     //   a.download = 'asd.png';
+  //     // document.body.appendChild(a);
+  //     // a.click();
+  //   })
+  // api.get('/api/rail-survey/943b777b-7866-4aa7-aedf-13cf22204bab', null).then((res) => {
+  //   res.json().then((json) => {
+  //     console.log(json);
+  //     var uri = URL.createObjectURL(json.blob);
+  //     var img = new Image();
+  //     img.src = uri;
+  //     document.body.appendChild(img);
+  //     // const myFile = new File([json.blob], 'image.png', {
+  //     //     type: json.blob.type,
+  //     // });
+  //     // console.log(myFile);
+  //     // var blob = new Blob([json.blob.data], {type: json.blob.type});
+  //     // console.log(blob);
+  //     // console.log(readAsArrayBuffer(json.blob))
+  //     // const url = URL.createObjectURL(new Blob([data], {type: type}));
+  //     // console.log(JSON.stringify(json));
+  //     // var blob = new Blob([json.blob.data], {type: json.blob.type});
+  //     // console.log(blob);
+  //     // var link = document.createElement('a');
+  //     // link.href = window.URL.createObjectURL(blob);
+  //     // var fileName = 'asd.png';
+  //     // link.download = fileName;
+  //     // link.click()
+  //   })
+  // })
 }
 
-const v$ = useVuelidate(rules, railSurvey, { $autoDirty: true })
-
-// METHOD //
 const handleSubmit = async () => {
   const { isEmpty, data } = signaturePad.value.saveSignature()
   railSurvey.signature = data
@@ -180,26 +233,43 @@ const getAPI = () => {
 }
 
 const handleSelectZone = (value) => {
+  // Object.assign(railSurvey, { zone: value })
+  // console.log(value)
+  const zones = variable.zone.map((z) => z.value)
+  let be = null
+  let af = null
   if (!!zones[zones.indexOf(value) - 1] && !!zones[zones.indexOf(value) + 1]) {
-    railSurvey.nearby = [zones[zones.indexOf(value) - 1], zones[zones.indexOf(value) + 1]]
+    // railSurvey.nearby = [zones[zones.indexOf(value) - 1], zones[zones.indexOf(value) + 1]]
+    be = zones[zones.indexOf(value) - 1]
+    af = zones[zones.indexOf(value) + 1]
   } else {
     if (!zones[zones.indexOf(value) - 1]) {
-      railSurvey.nearby = [value, zones[zones.indexOf(value) + 1]]
+      // railSurvey.nearby = [value, zones[zones.indexOf(value) + 1]]
+      be = value
+      af = zones[zones.indexOf(value) + 1]
     }
     if (!zones[zones.indexOf(value) + 1]) {
-      railSurvey.nearby = [zones[zones.indexOf(value) - 1], value]
+      // railSurvey.nearby = [zones[zones.indexOf(value) - 1], value]
+      be = zones[zones.indexOf(value) - 1]
+      af = value
     }
+    railSurvey.nearby.stationBefore = be
+    railSurvey.nearby.stationAfter = af
   }
 }
 
 const handleUploadImage = (event) => {
-  var file = event.target.files[0]
-  var reader = new FileReader()
-  reader.readAsDataURL(file)
-  reader.onloadend = function() {
-    railSurvey.uploadImage = reader.result
-    // console.log(reader.result)
-  }
+  const files = uploadImg.files
+  Array.from(files).forEach((file, index) => {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file)
+    img.alt = file.name
+    document.querySelector('#preview').append(img);
+  })
+  isShowBtnUpload.value = true
+}
+
+const handleUploadImages = () => {
 }
 
 // COMPUTED //
@@ -236,12 +306,12 @@ const compDate = computed({
   <!-- 2023-01-07 -->
   <!-- {{ new Date().toISOString().substring(0, 10) }} -->
   <div class="container">
+    <button @click="convertImage">convertImage</button>
     <!-- {{ store.state }} -->
     <!-- <button @click="store.commit('increment')">+</button>
     <button @click="store.commit('toggleDarkMode')">Toggle</button>
     <DarkModeToggle></DarkModeToggle> -->
     <div class="flex flex-col gap-4">
-      <!-- วันที่สำรวจ -->
       <Border>
         <div class="flex md:flex-row flex-col gap-4">
           <div class="flex-1">
@@ -251,8 +321,8 @@ const compDate = computed({
           </div>
           <div class="flex-1">
             <label class="_label-sm">เขตการเดินรถ</label>
-            <select @change="handleSelectZone($event.target.value)" v-model="railSurvey.zone" id="zone" :class="v$.zone.$error ? '_input_error' : '_input'">
-              <option :value="null">กรุณาเลือกเขตการเดินรถ</option>
+            <select v-model="railSurvey.zone" @change="handleSelectZone($event.target.value)" id="zone" :class="v$.zone.$error ? '_input_error' : '_input'">
+              <option value="">กรุณาเลือกเขตการเดินรถ</option>
               <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
             </select>
             <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
@@ -277,16 +347,8 @@ const compDate = computed({
           <div class="flex flex-col">
             <label class="_label-sm">สถานีรถไฟใกล้เคียง</label>
             <div class="flex md:flex-row flex-col gap-4">
-              <input v-if="railSurvey.zone" v-for="(nb, index) in railSurvey.nearby" :key="index" :value="nb.value" disabled type="text" id="kmTelegraphPoles" class="_input">
-              <input v-else v-for="(nb, index_) in 2" :key="index_" :value="null" disabled type="text" id="kmTelegraphPoles" :class="v$.zone.$error ? '_input_error' : '_input'">
-              <!-- <select :value="railSurvey.nearby[0]" disabled id="nearby-1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option disabled :value="null">กรุณาเลือกสถานี</option>
-                <option v-for="(trafAr, index) in trafficArae" :key="index">{{ trafAr }}</option>
-              </select>
-              <select :value="railSurvey.nearby[1]" disabled id="nearby-2" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option disabled :value="null">กรุณาเลือกสถานี</option>
-                <option v-for="(trafAr, index) in trafficArae" :key="index">{{ trafAr }}</option>
-              </select> -->
+              <input v-if="railSurvey.zone" v-for="(value, key) in railSurvey.nearby" :key="key" :value="value" disabled type="text" id="nearBy" class="_input">
+              <input v-else v-for="(nb, index_) in 2" :key="index_" :value="null" disabled type="text" id="nearBy" :class="v$.zone.$error ? '_input_error' : '_input'">
             </div>
             <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
           </div>
@@ -294,105 +356,127 @@ const compDate = computed({
             <label class="_label-lg">ชนิดของราง</label>
             <label class="_label-sm">มาตรฐานและเกรด</label>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <select v-model="railSurvey.typeOfRail" id="countries" :class="v$.typeOfRail.$error ? '_input_error' : '_input'">
+              <select v-model="railSurvey.railType" id="countries" :class="v$.railType.$error ? '_input_error' : '_input'">
                 <option disabled :value="null">กรุณาเลือกประเภทของเกจ</option>
                 <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
               </select>
             </div>
-            <p v-if="v$.typeOfRail.$error" class="text-sm text-red-600">{{ v$.typeOfRail.$errors[0].$message }}</p>
+            <p v-if="v$.railType.$error" class="text-sm text-red-600">{{ v$.railType.$errors[0].$message }}</p>
           </div>
         </div>
       </Border>
-      <Border :error="v$.situation.$error">
-        <label class="_label-lg">ความเสียหายของราง</label>
+      <Border :error="v$.areaCondition.$error">
+        <label class="_label-lg">ลักษณะพื้นที่ที่เกิดความเสียหาย</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.situation" name="positionDamage" :items="variable.situation"></RadioBtn>
+          <RadioBtn v-model="railSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties"></RadioBtn>
         </div>
       </Border>
       <Border>
-        <!-- <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง</label> -->
-        <label class="_label-lg">ตำแหน่งความเสียหายบนราง</label>
-        <RadioBtn v-model="railSurvey.typeOfFailure" name="topRailDamage" :items="variable.positionDamage.topRail"></RadioBtn>
-        <label class="_label-lg">บริเวณความเสียหาย</label>
-        <RadioImageBtn name="areaDamage" :items="variable.positionDamage.damageArea" imageLabel="title" imagePath="img"></RadioImageBtn>
-        <!-- <RadioImageBtn name="positionDamage" :items="variable.positionDamage" imageLabel="title" imagePath="img"> -->
-          <!-- <template #label="{ item }">
-            <div v-if="Array.isArray(item)" class="flex flex-row md:flex-col">
-              <div v-for="(label, index) in item" :key="index">
-                <input type="radio" value="" name="rail" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                <label class="ml-4 text-sm font-medium text-gray-900 dark:text-gray-300">{{ label }}</label>
-              </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="_label-lg">ตำแหน่งความเสียหายบนราง</label>
+            <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
+              <RadioBtn v-model="railSurvey.defectSituation.railPositionDefect" name="areaCondition" :items="variable.positionDamage.topRail"></RadioBtn>
             </div>
-            <div v-else>{{ item }}</div>
-          </template> 
-        </RadioImageBtn>-->
-      </Border>
-      <Border :error="v$.typeOfFailure.$error">
-        <label class="_label-lg">ลักษณะความเสียหาย</label>
-        <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.typeOfFailure" name="positionDamage" :items="variable.damageProperties"></RadioBtn>
+          </div>
+          <div>
+            <label class="_label-lg">บริเวณความเสียหาย</label>
+            <RadioImageBtn v-model="railSurvey.defectSituation.railAreaDefect" name="areaDamage" :items="variable.positionDamage.damageArea" imageLabel="title" imagePath="img"></RadioImageBtn>
+          </div>
         </div>
       </Border>
-      <!-- {{  railSurvey.typeOfFailure && railSurvey.typeOfFailure.includes('Surface Defect') }} -->
-      <Border v-if="railSurvey.typeOfFailure?.includes('surfaceDefect')" :error="v$.surfaceDefect.$error">
+      <Border>
+        <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น</label>
+        <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
+          <RadioBtn v-model="railSurvey.defectPattern" name="positionDamage" :items="variable.damageProperties"></RadioBtn>
+        </div>
+      </Border>
+      <Border v-if="railSurvey.defectPattern?.includes('surfaceDefect')" :error="v$.surfaceDefect.$error">
         <label class="_label-lg">ให้ระบุลักษณะแผล โดยดูรูปต่อไปนี้ประกอบ</label>
         <RadioImageBtn v-model="railSurvey.surfaceDefect" name="scar" :items="variable.scar" imageLabel="title" imagePath="img"></RadioImageBtn>
       </Border>
-      <Border :error="v$.typeOfFailureArea.$error">
-        <label class="_label-lg">ลักษณะพื้นที่ที่เกิดความเสียหาย</label>
+      <label class="_label-lg">สำรวจความเสียหายของทาง</label>
+      <Border>
+        <label class="_label-lg">ความสมบูรณ์ของทาง</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.typeOfFailureArea" name="damageAraePrperties" :items="variable.damageAreaPrperties"></RadioBtn>
+          <RadioBtn v-model="railSurvey.railCondition" name="railCondition" :items="variable.integrity"></RadioBtn>
         </div>
       </Border>
-      <Border :error="v$.railCondition.$error">
+      <Border>
         <div class="flex flex-col gap-4">
           <div>
-            <label class="_label-lg">ความสมบูรณ์ของทาง</label>
+            <label class="_label-lg">Track Geometry</label>
             <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-              <RadioBtn v-model="railSurvey.railCondition" name="pt" :items="variable.integrity"></RadioBtn>
+              <RadioBtn v-model="railSurvey.trackGeometryCondition" name="trackGeometryCondition" :items="variable.integrity"></RadioBtn>
             </div>
+          </div>
+          <div v-if="railSurvey.trackGeometryCondition === 'imperfect'">
+            <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
+            <RadioImageBtn v-model="railSurvey.defectTrackGeometry" name="defectTrackGeometry" :items="variable.trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
           </div>
         </div>
       </Border>
-      <Border v-if="railSurvey.railCondition?.includes('ไม่')" :error="v$.trackGeometryFaults.$error">
-        <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
-        <RadioImageBtn v-model="railSurvey.trackGeometryFaults" name="abtg" :items="variable.trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
-      </Border>
-      <Border :error="v$.ballast.$error">
+      <Border :error="v$.ballastCondition.$error">
         <label class="_label-lg">หินโรยทาง (Ballast)</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.ballast" name="ballast" :items="variable.ballast"></RadioBtn>
+          <RadioBtn v-model="railSurvey.ballastCondition" name="ballastCondition" :items="variable.ballast"></RadioBtn>
         </div>
       </Border>
-      <Border :error="v$.sleeper.$error">
+      <Border :error="v$.sleeperCondition.$error">
         <label class="_label-lg">หมอนรองทาง (Sleeper)</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.sleeper" name="sleeper" :items="variable.sleeper"></RadioBtn>
+          <RadioBtn v-model="railSurvey.sleeperCondition" name="sleeperCondition" :items="variable.sleeper"></RadioBtn>
         </div>
       </Border>
-      <Border :error="v$.trackFoundation.$error">
+      <Border :error="v$.trackFoundationCondition.$error">
         <label class="_label-lg">คันทาง</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.trackFoundation" name="track" :items="variable.integrity"></RadioBtn>
+          <RadioBtn v-model="railSurvey.trackFoundationCondition" name="trackFoundationCondition" :items="variable.integrity"></RadioBtn>
         </div>
       </Border>
-      <Border :error="compMARec">
+      <label class="_label-lg">การประเมินความเสียหาย</label>
+      <Border>
+        <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
+        <div class="flex flex-col gap-2">
+          <input @change="handleUploadImage($event)" name="img" accept="image/x-png,image/gif,image/jpeg" id="uploadImg" type="file" multiple=""
+            class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+          >
+          <div id="preview" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center"></div>
+          <div v-if="isShowBtnUpload">
+            <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" @click="handleUploadImages()">Upload</button>
+          </div>
+        </div>
+      </Border>
+      <Border :error="v$.severity.$error">
+        <label class="_label-lg">ความรุนแรงของความเสียหาย</label>
+        <div class="grid md:grid-cols-2 sm:grid-cols-1 gap-4">
+          <RadioBtn v-model="railSurvey.severity" name="severity" :items="variable.damagesLevel"></RadioBtn>
+        </div>
+      </Border>
+      <Border :error="v$.isAnalyzeDamage.$error">
+        <label class="_label-lg">ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุของความเสียหาย</label>
+        <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
+          <RadioBtn v-model="railSurvey.isAnalyzeDamage" name="positionDamage" :items="variable.analyse"></RadioBtn>
+        </div>
+      </Border>
+      <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
+      <Border>
         <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
         <div class="flex flex-col gap-4">
           <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-            <RadioBtn v-model="railSurvey.maintenanceRecord" name="his" :items="variable.maintenanceRecord"></RadioBtn>
+            <RadioBtn v-model="railSurvey.hasMaintenanceRecord" name="hasMaintenanceRecord" :items="variable.maintenanceRecord"></RadioBtn>
           </div>
-          <div v-if="railSurvey.maintenanceRecord && railSurvey.maintenanceRecord?.includes('yes')" class="flex flex-col gap-4">
+          <div v-if="railSurvey.hasMaintenanceRecord" class="flex flex-col gap-4">
             <div class="flex md:flex-row flex-col gap-4">
               <div class="flex-1">
                 <label class="_label-sm">การซ่อมบำรุงครั้งล่าสุด</label>
-                <input v-model="railSurvey.maintenanceLastDate" type="date" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required>
-                <p v-if="v$.maintenanceLastDate.$error" class="text-sm text-red-600">{{ v$.maintenanceLastDate.$errors[0].$message }}</p>
+                <input v-model="railSurvey.lastMaintenanceDate" type="date" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required>
+                <p v-if="v$.lastMaintenanceDate.$error" class="text-sm text-red-600">{{ v$.lastMaintenanceDate.$errors[0].$message }}</p>
               </div>
               <div class="flex-1">
                 <label class="_label-sm">ความถี่ในการซ่อมบำรุงในรอบปี</label>
-                <input v-model="railSurvey.maintenancePreiod" type="number" :min="0" :max="365" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
-                <p v-if="v$.maintenancePreiod.$error" class="text-sm text-red-600">{{ v$.maintenancePreiod.$errors[0].$message }}</p>
+                <input v-model="railSurvey.yearlyMaintenanceTimes" type="number" :min="0" :max="365" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                <p v-if="v$.yearlyMaintenanceTimes.$error" class="text-sm text-red-600">{{ v$.yearlyMaintenanceTimes.$errors[0].$message }}</p>
               </div>
             </div>
             <div>
@@ -405,24 +489,8 @@ const compDate = computed({
         </div>
       </Border>
       <Border>
-        <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
-        <input @change="handleUploadImage($event)" name="img" accept="image/x-png,image/gif,image/jpeg" class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="small_size" type="file">
-      </Border>
-      <Border :error="v$.severityOfDamage.$error">
-        <label class="_label-lg">ความรุนแรงของความเสียหาย</label>
-        <div class="grid md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.severityOfDamage" name="positionDamage" :items="variable.damagesLevel"></RadioBtn>
-        </div>
-      </Border>
-      <Border :error="v$.isAnalyzeDamage.$error">
-        <label class="_label-lg">ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุของความเสียหาย</label>
-        <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.isAnalyzeDamage" name="positionDamage" :items="variable.analyse"></RadioBtn>
-        </div>
-      </Border>
-      <Border>
         <label class="_label-lg">ความคิดเห็นของผู้สำรวจความเสียหาย</label>
-        <textarea v-model="railSurvey.comment" rows="4" class="_input" placeholder=""></textarea>
+        <textarea v-model="railSurvey.note" rows="4" class="_input" placeholder=""></textarea>
       </Border>
       <div class="flex justify-end">
         <div class="w-1/2 border border-solid p-0" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
@@ -436,12 +504,17 @@ const compDate = computed({
           <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
         </div>
       </div>
-    </div>
-    <div class="flex justify-end mt-8">
-      <!-- <button class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400" @click="save">Save</button> -->
-      <!-- <button class="px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400" @click="handleSubmit()">Submit</button> -->
-      <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" @click="handleSubmit()">Submit</button>
+      <div class="flex justify-end mt-8">
+        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" @click="handleSubmit()">Submit</button>
+      </div>
     </div>
   </div>
-  <!-- <RadioBtnLayout v-model="railSurvey.severityOfDamage" name="testasd" :items="damagesLevel"></RadioBtnLayout> -->
+
 </template>
+<style>
+.image-column {
+  display: block;
+  height: 100%;
+  background-size: cover;
+}
+</style>

@@ -54,18 +54,16 @@ keycloak.onAuthSuccess = function () {
     email: keycloak.tokenParsed.email,
     username: keycloak.tokenParsed.preferred_username
   })
-  // console.log(store.state.profile)
-  // api.post('/users', store.state.profile, keycloak.token).then((resp) => {
-  //   if (resp.status === 201) {
-  //     console.log(resp)
-  //     // console.log(resp).then((re) => {
-  //     // });
-  //   }
-  // })
-  // api.get('/albums?offset=0', null).then((resp) => {
+  // api.get(`/users/${keycloak.tokenParsed.sub}`, null).then((resp) => {
   //   if (resp.status === 200) {
-  //     resp.json().then((json) => {
-  //       console.log(json)
+  //     resp.blob().then((data) => {
+  //       if (data['size'] === 0) {
+  //         api.post('/users', store.state.profile, keycloak.token).then((resp) => {
+  //           if (resp.status === 201) {
+  //             console.log(resp)
+  //           }
+  //         })
+  //       }
   //     })
   //   }
   // })
@@ -78,14 +76,8 @@ keycloak.onTokenExpired = function () {
       console.log('Token refreshed ' + refreshed)
       store.commit('setToken', keycloak.token)
     } else {
-      // store.commit('setToken', keycloak.token)
-      // store.commit('setTokenParsed', keycloak.tokenParsed)
-      // console.log(keycloak)
-      // console.log(keycloak.idToken )
-      // console.log(keycloak.idTokenParsed)
-      // console.log(keycloak.token)
-      // console.log(keycloak.tokenParsed )
       console.warn('Token not refreshed, valid for ' + Math.round(keycloak.tokenParsed.exp + keycloak.timeSkew - new Date().getTime() / 1000) + ' seconds')
+      window.location.reload()
     }
   }).catch(() => {
     console.error('Failed to refresh token')

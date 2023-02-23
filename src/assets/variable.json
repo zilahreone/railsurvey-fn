@@ -305,11 +305,21 @@
   "integrity": [
     {
       "key": "สมบูรณ์",
-      "value": "complete"
+      "value": true
     },
     {
       "key": "ไม่สมบูรณ์",
-      "value": "inComplete"
+      "value": false
+    }
+  ],
+  "trackGeometryCondition": [
+    {
+      "key": "สมบูรณ์",
+      "value": "perfect"
+    },
+    {
+      "key": "ไม่สมบูรณ์",
+      "value": "imperfect"
     }
   ],
   "trackGeometry": [
@@ -361,11 +371,11 @@
   "maintenanceRecord": [
     {
       "key": "เคย",
-      "value": "yes"
+      "value": true
     },
     {
       "key": "ไม่เคย",
-      "value": "no"
+      "value": false
     }
   ],
   "maintenanceMethod": [
