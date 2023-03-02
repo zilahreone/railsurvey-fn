@@ -221,27 +221,33 @@
     "damageArea": [
       {
         "title": "ประกับราง (Fish Plate)",
-        "img": "positionDamage/Picture2.png"
+        "img": "positionDamage/Picture2.png",
+        "value": "fishPlate"
       },
       {
         "title": "รอยเชื่อมซ่อม (Welding Repair)",
-        "img": "positionDamage/Picture5.png"
+        "img": "positionDamage/Picture5.png",
+        "value": "weldingRepair"
       },
       {
         "title": "แนวเชื่อมต่อราง (Welding Joint)",
-        "img": "positionDamage/Picture3.png"
+        "img": "positionDamage/Picture3.png",
+        "value": "weldingJoint"
       },
       {
         "title": "จุดตัดราง (Crossing)",
-        "img": "positionDamage/Picture7.png"
+        "img": "positionDamage/Picture7.png",
+        "value": "crossing"
       },
       {
         "title": "ประแจ (Turn Out)",
-        "img": "positionDamage/Picture6.png"
+        "img": "positionDamage/Picture6.png",
+        "value": "turnOut"
       },
       {
         "title": "ทางข้ามราง (Railroad Crossing)",
-        "img": "positionDamage/Picture4.png"
+        "img": "positionDamage/Picture4.png",
+        "value": "railroadCrossing"
       }
     ]
   },
@@ -274,33 +280,50 @@
   "scar": [
     {
       "title": "Crushed Head",
-      "img": "scar/Picture1.png"
+      "img": "scar/Picture1.jpg",
+      "value": "crushedHead"
     },
     {
       "title": "Head Checking",
-      "img": "scar/Picture2.png"
+      "img": "scar/Picture2.jpg",
+      "value": "headChecking"
     },
     {
       "title": "Spalling",
-      "img": "scar/Picture3.png"
+      "img": "scar/Picture3.jpg",
+      "value": "spalling"
     },
     {
       "title": "Side Wear",
-      "img": "scar/Picture4.png"
+      "img": "scar/Picture4.jpg",
+      "value": "sideWear"
     },
     {
       "title": "Shelling",
-      "img": "scar/Picture5.png"
+      "img": "scar/Picture5.jpg",
+      "value": "shelling"
+      
     },
     {
       "title": "Burned Rail",
-      "img": "scar/Picture6.png"
+      "img": "scar/Picture6.jpg",
+      "value": "burnedRail"
     },
     {
       "title": "รูปแบบอื่นๆ",
       "img": ""
     }
 
+  ],
+  "railCondition": [
+    {
+      "key": "สมบูรณ์",
+      "value": true
+    },
+    {
+      "key": "ไม่สมบูรณ์",
+      "value": false
+    }
   ],
   "integrity": [
     {

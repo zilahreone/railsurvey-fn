@@ -37,6 +37,15 @@
 ._label-sm {
   @apply block mb-2 text-gray-900 text-sm font-medium dark:text-white
 }
+._button {
+  @apply text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800
+}
+._button-success {
+  @apply text-white bg-lime-500 hover:bg-lime-600 focus:ring-4 focus:ring-lime-300 font-medium rounded-full text-sm px-5 py-2 dark:bg-lime-500 dark:hover:bg-lime-600 focus:outline-none dark:focus:ring-lime-700
+}
+._button-error {
+  @apply text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800
+}
 
 
 

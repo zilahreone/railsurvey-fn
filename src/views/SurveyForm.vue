@@ -33,11 +33,15 @@ const maps = ref([])
 const ta = ref(null)
 const is = ref(false)
 const isShowBtnUpload = ref(false)
+const uploadStatus = ref(null)
 
 const railForm = {
   date: null,
   zone: null,
-  coordinates: null,
+  coordinates: {
+    lattitude: null,
+    longitude: null
+  },
   kilometers: null,
   nearby: {
     stationBefore: null,
@@ -85,7 +89,8 @@ const v$ = useVuelidate(rules2, railSurvey, { $autoDirty: true })
 onMounted(() => {
   navigator.geolocation.getCurrentPosition((position)=> {
     const p = position.coords;
-    railSurvey.coordinates = `${p.latitude}/${p.longitude}`
+    railSurvey.coordinates.lattitude = p.latitude
+    railSurvey.coordinates.longitude = p.longitude
     // console.log(p.latitude, p.longitude);
   })
   // getAPI()
@@ -233,32 +238,14 @@ const getAPI = () => {
 }
 
 const handleSelectZone = (value) => {
-  // Object.assign(railSurvey, { zone: value })
-  // console.log(value)
   const zones = variable.zone.map((z) => z.value)
-  let be = null
-  let af = null
-  if (!!zones[zones.indexOf(value) - 1] && !!zones[zones.indexOf(value) + 1]) {
-    // railSurvey.nearby = [zones[zones.indexOf(value) - 1], zones[zones.indexOf(value) + 1]]
-    be = zones[zones.indexOf(value) - 1]
-    af = zones[zones.indexOf(value) + 1]
-  } else {
-    if (!zones[zones.indexOf(value) - 1]) {
-      // railSurvey.nearby = [value, zones[zones.indexOf(value) + 1]]
-      be = value
-      af = zones[zones.indexOf(value) + 1]
-    }
-    if (!zones[zones.indexOf(value) + 1]) {
-      // railSurvey.nearby = [zones[zones.indexOf(value) - 1], value]
-      be = zones[zones.indexOf(value) - 1]
-      af = value
-    }
-    railSurvey.nearby.stationBefore = be
-    railSurvey.nearby.stationAfter = af
-  }
+  const index = zones.indexOf(value)
+  railSurvey.nearby.stationBefore = !zones[index - 1] ? value : zones[index - 1]
+  railSurvey.nearby.stationAfter = !zones[index + 1] ? value : zones[index + 1]
 }
 
 const handleUploadImage = (event) => {
+  uploadStatus.value = null
   const files = uploadImg.files
   Array.from(files).forEach((file, index) => {
     const img = document.createElement("img");
@@ -270,6 +257,22 @@ const handleUploadImage = (event) => {
 }
 
 const handleUploadImages = () => {
+  const files = uploadImg.files
+  let formData = new FormData()
+  Array.from(files).forEach((file, index) => {
+    formData.append('file', file)
+  })
+  api.uploadFils('/api/uploads', formData, null).then((resp) => {
+    uploadStatus.value = 'pending'
+    if (resp.status === 201) {
+      resp.json().then((json) => {
+        console.log(json)
+      })
+      uploadStatus.value = 'success'
+    }
+  }).catch((err) => {
+    uploadStatus.value = 'error'
+  })
 }
 
 // COMPUTED //
@@ -284,6 +287,17 @@ const compAraeDamage = computed(() => {
   return v$.value.damagedArea.GPSCoordinates.$error
     || v$.value.damagedArea.kmTelegraphPoles.$error
     || v$.value.damagedArea.nearby.$error
+})
+
+const compNearby = computed(() => {
+  let nearby = []
+  for (const key in railSurvey.nearby) {
+    if (Object.hasOwnProperty.call(railSurvey.nearby, key)) {
+      const element = railSurvey.nearby[key]
+      nearby.push(variable.zone.filter(z => z.value === element).map(z => z.key))
+    }
+  }
+  return nearby
 })
 
 const compDate = computed({
@@ -316,7 +330,7 @@ const compDate = computed({
         <div class="flex md:flex-row flex-col gap-4">
           <div class="flex-1">
             <label class="_label-sm">วันที่สำรวจ</label>
-            <input v-model="railSurvey.date" type="date" id="date" :class="v$.date.$error ? '_input_error' : '_input'" required>
+            <input disabled v-model="railSurvey.date" type="date" id="date" :class="v$.date.$error ? '_input_error' : '_input'" required>
             <p v-if="v$.date.$error" class="text-sm text-red-600">{{ v$.date.$errors[0].$message }}</p>
           </div>
           <div class="flex-1">
@@ -335,7 +349,10 @@ const compDate = computed({
           <div class="flex md:flex-row flex-col gap-4">
             <div class="flex-1">
               <label class="_label-sm">พิกัด GPS</label>
-              <input v-model="railSurvey.coordinates" @click="handleGetLocation()" type="text" id="GPSCoordinates" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
+              <div class="flex sm:flex-row flex-col gap-1">
+                <input v-model="railSurvey.coordinates.lattitude" type="text" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
+                <input v-model="railSurvey.coordinates.longitude" type="text" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
+              </div>
               <p v-if="v$.coordinates.$error" class="text-sm text-red-600">{{ v$.coordinates.$errors[0].$message }}</p>
             </div>
             <div class="flex-1">
@@ -347,8 +364,8 @@ const compDate = computed({
           <div class="flex flex-col">
             <label class="_label-sm">สถานีรถไฟใกล้เคียง</label>
             <div class="flex md:flex-row flex-col gap-4">
-              <input v-if="railSurvey.zone" v-for="(value, key) in railSurvey.nearby" :key="key" :value="value" disabled type="text" id="nearBy" class="_input">
-              <input v-else v-for="(nb, index_) in 2" :key="index_" :value="null" disabled type="text" id="nearBy" :class="v$.zone.$error ? '_input_error' : '_input'">
+              <input v-if="railSurvey.zone" v-for="(value, index) in compNearby" :key="index" :value="value" disabled type="text" id="nearBy" class="_input">
+              <input v-else v-for="(nb, index_) in compNearby" :key="index_" :value="null" disabled type="text" id="nearBy" :class="v$.zone.$error ? '_input_error' : '_input'">
             </div>
             <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
           </div>
@@ -376,24 +393,24 @@ const compDate = computed({
           <div>
             <label class="_label-lg">ตำแหน่งความเสียหายบนราง</label>
             <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-              <RadioBtn v-model="railSurvey.defectSituation.railPositionDefect" name="areaCondition" :items="variable.positionDamage.topRail"></RadioBtn>
+              <RadioBtn v-model="railSurvey.defectSituation.railPositionDefect" name="railPositionDefect" :items="variable.positionDamage.topRail"></RadioBtn>
             </div>
           </div>
           <div>
             <label class="_label-lg">บริเวณความเสียหาย</label>
-            <RadioImageBtn v-model="railSurvey.defectSituation.railAreaDefect" name="areaDamage" :items="variable.positionDamage.damageArea" imageLabel="title" imagePath="img"></RadioImageBtn>
+            <RadioImageBtn v-model="railSurvey.defectSituation.railAreaDefect" name="railAreaDefect" :items="variable.positionDamage.damageArea" imageLabel="title" imagePath="img"></RadioImageBtn>
           </div>
         </div>
       </Border>
       <Border>
         <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.defectPattern" name="positionDamage" :items="variable.damageProperties"></RadioBtn>
+          <RadioBtn v-model="railSurvey.defectPattern" name="defectPattern" :items="variable.damageProperties"></RadioBtn>
         </div>
       </Border>
       <Border v-if="railSurvey.defectPattern?.includes('surfaceDefect')" :error="v$.surfaceDefect.$error">
         <label class="_label-lg">ให้ระบุลักษณะแผล โดยดูรูปต่อไปนี้ประกอบ</label>
-        <RadioImageBtn v-model="railSurvey.surfaceDefect" name="scar" :items="variable.scar" imageLabel="title" imagePath="img"></RadioImageBtn>
+        <RadioImageBtn v-model="railSurvey.surfaceDefect" name="surfaceDefect" :items="variable.scar" imageLabel="title" imagePath="img"></RadioImageBtn>
       </Border>
       <label class="_label-lg">สำรวจความเสียหายของทาง</label>
       <Border>
@@ -443,7 +460,21 @@ const compDate = computed({
           >
           <div id="preview" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center"></div>
           <div v-if="isShowBtnUpload">
-            <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" @click="handleUploadImages()">Upload</button>
+            <button :disabled="['pending', 'success'].includes(uploadStatus)" @click="handleUploadImages()" type="button"
+              :class="['text-center inline-flex items-center mr-2', uploadStatus === 'success' ? '_button-success' : uploadStatus === 'error' ? '_button-error' : '_button']"
+            >
+              <svg v-if="uploadStatus === 'pending'" aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+              </svg>
+              <svg v-if="uploadStatus === 'error'" class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <svg v-if="uploadStatus === 'success'"  class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              {{ uploadStatus === 'pending' ? 'Uploading' : uploadStatus === 'success' ? 'Done' : uploadStatus === 'error' ? 'Upload Fail' : 'Upload' }}
+            </button>
           </div>
         </div>
       </Border>
