@@ -328,11 +328,11 @@
   "integrity": [
     {
       "key": "สมบูรณ์",
-      "value": true
+      "value": "perfect"
     },
     {
       "key": "ไม่สมบูรณ์",
-      "value": false
+      "value": "imperfect"
     }
   ],
   "trackGeometryCondition": [
@@ -348,26 +348,35 @@
   "trackGeometry": [
     {
       "title": "Alignment",
-      "img": "trackGeometry/Picture1.png"
+      "img": "trackGeometry/Picture1.png",
+      "value": "alignment"
     },
     {
       "title": "Track Guage",
-      "img": "trackGeometry/Picture2.png"
+      "img": "trackGeometry/Picture2.png",
+      "value": "trackGuage"
     },
     {
       "title": "Longitudinal Level",
-      "img": "trackGeometry/Picture3.png"
+      "img": "trackGeometry/Picture3.png",
+      "value": "longitudinalLevel"
     },
     {
       "title": "Super Elevation",
-      "img": "trackGeometry/Picture4.png"
+      "img": "trackGeometry/Picture4.png",
+      "value": "superElevation"
     },
     {
       "title": "Twist",
-      "img": "trackGeometry/Picture5.png"
+      "img": "trackGeometry/Picture5.png",
+      "value": "twist"
     }
   ],
   "ballast": [
+    {
+      "key": "สมบูรณ์",
+      "value": "perfect"
+    },
     {
       "key": "พร่อง (Lack)",
       "value": "lack"
@@ -378,6 +387,10 @@
     }
   ],
   "sleeper": [
+    {
+      "key": "สมบูรณ์",
+      "value": "perfect"
+    },
     {
       "key": "แตกหัก (Fracture)",
       "value": "fracture"
@@ -404,11 +417,11 @@
   "maintenanceMethod": [
     {
       "key": "เชื่อมซ่อม",
-      "value": "yes"
+      "value": "weldingRepair"
     },
     {
       "key": "ตัดเปลี่ยนราง",
-      "value": "no"
+      "value": "cut/replace"
     }
   ],
   "damagesLevel": [
@@ -436,11 +449,11 @@
   "analyse": [
     {
       "key": "เห็นควรดำเนินการ",
-      "value": "yes"
+      "value": true
     },
     {
       "key": "ไม่จำเป็นต้องส่งวิเคราะห์",
-      "value": "no"
+      "value": false
     }
   ],  
   "trafficArae": [

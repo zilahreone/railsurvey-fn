@@ -54,19 +54,19 @@ keycloak.onAuthSuccess = function () {
     email: keycloak.tokenParsed.email,
     username: keycloak.tokenParsed.preferred_username
   })
-  // api.get(`/users/${keycloak.tokenParsed.sub}`, null).then((resp) => {
-  //   if (resp.status === 200) {
-  //     resp.blob().then((data) => {
-  //       if (data['size'] === 0) {
-  //         api.post('/users', store.state.profile, keycloak.token).then((resp) => {
-  //           if (resp.status === 201) {
-  //             console.log(resp)
-  //           }
-  //         })
-  //       }
-  //     })
-  //   }
-  // })
+  api.get(`/users/${keycloak.tokenParsed.sub}`, null).then((resp) => {
+    if (resp.status === 200) {
+      resp.blob().then((data) => {
+        if (data['size'] === 0) {
+          api.post('/users', store.state.profile, keycloak.token).then((resp) => {
+            if (resp.status === 201) {
+              console.log(resp)
+            }
+          })
+        }
+      })
+    }
+  })
 }
 
 keycloak.onTokenExpired = function () {

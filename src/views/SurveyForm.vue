@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import BorderRadioBtn from '@/components/BorderRadioBtn.vue'
 import Border from '@/components/Border.vue'
@@ -8,7 +8,7 @@ import RadioBtn from '@/components/RadioBtn.vue'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import RadioImageBtn from '@/components/RadioImageBtn.vue'
 import { useVuelidate } from '@vuelidate/core'
-import { required, helpers, requiredIf, minValue, maxValue } from '@vuelidate/validators'
+import { required, helpers, requiredIf, minValue, maxValue, requiredUnless } from '@vuelidate/validators'
 // import { Loader } from '@googlemaps/js-api-loader'
 import variable from '@/assets/variable.json'
 import api from '@/services'
@@ -57,7 +57,7 @@ const railForm = {
   surfaceDefect: null,
   railCondition: null,
   trackGeometryCondition: null,
-  defectTrackGeometry: null,
+  // defectTrackGeometry: null,
   ballastCondition: null,
   sleeperCondition: null,
   trackFoundationCondition: null,
@@ -69,9 +69,9 @@ const railForm = {
   yearlyMaintenanceTimes: null,
   maintenanceMethod: null,
   note: null,
-  signature: null,
-  createdAt: null,
-  createdBy: null
+  signature: null
+  // createdAt: null,
+  // createdBy: null
 }
 
 const railSurvey = reactive(Object.assign({}, railForm, { date: new Date().toISOString().substring(0, 10) }))
@@ -79,7 +79,50 @@ const railSurvey = reactive(Object.assign({}, railForm, { date: new Date().toISO
 const rules2 = computed(() => {
   const rule = {}
   Object.keys(railForm).forEach((key) => {
-    rule[key] = { required }
+    if (!['uploadImage', 'note'].includes(key)) {
+      switch (key) {
+        case 'coordinates':
+          rule[key] = {
+            lattitude: { required },
+            longitude: { required }
+          }
+          break
+        case 'defectSituation':
+          rule[key] = {
+            railPositionDefect: { required },
+            railAreaDefect: { required }
+          }
+          break
+        case 'surfaceDefect':
+          rule[key] = {
+            defectPattern: requiredIf(() => railSurvey.defectPattern === 'surfaceDefect')
+          }
+          break
+        case 'trackGeometryCondition':
+          rule[key] = {
+            track: (value) => value && value !== 'imperfect'
+          }
+          break
+        case 'lastMaintenanceDate':
+          rule[key] = {
+            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord)
+          }
+          break
+        case 'yearlyMaintenanceTimes':
+          rule[key] = {
+            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord)
+          }
+          break
+        case 'maintenanceMethod':
+          rule[key] = {
+            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord)
+          }
+          break
+        default:
+          rule[key] = { required }
+          break
+      }
+    }
   })
   return rule
 })
@@ -115,24 +158,6 @@ const validateSignature = () => {
 }
 
 // METHOD //
-const _base64ToArrayBuffer = (base64) => {
-    var binary_string = window.atob(base64);
-    console.log(binary_string);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
-        bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes.buffer;
-}
-const convertBlobToBase64 = (blob) => new Promise((resolve, reject) => {
-    const reader = new FileReader;
-    reader.onerror = reject;
-    reader.onload = () => {
-        resolve(reader.result);
-    };
-    reader.readAsDataURL(blob);
-});
 const convertImage = async () => {
   console.log('convert')
   const { isEmpty, data } = signaturePad.value.saveSignature()
@@ -142,68 +167,36 @@ const convertImage = async () => {
   // const blob = await fetch(data).then(resp => resp.blob());
   // const blob1 = await base64Response.blob();
   if (!isEmpty) {
+    const asd = Buffer.from(data)
+    const asd2 = await fetch(data).then(res => res.blob())
     // const asd = Buffer.from(data)
-    // console.log(asd)
+    // console.log(asd2)
     // const buff = Buffer.from(data).toString('base64')
-    api.post('/api/rail-survey', { id: '123', blob: data}, null).then((res) => {
-      // res.json().then((json) => {
-      //   console.log(json);
-      // })
+    api.post('/api/rail-survey', { blob: data}, null).then((res) => {
+      res.json().then((json) => {
+        console.log(json);
+      })
     })
   }
-
-  // const base64String = await convertBlobToBase64(blob);
-  // console.log(base64String);
-  // fetch(data)
-  //   .then(res => res.blob())
-  //   .then(blob => {
-
-  //     // console.log(blob);
-  //     // const a = URL.createObjectURL(blob)
-  //     // console.log(a);
-  //     // api.post('/api/rail-survey', { id: '123', blob: a }, null).then((res) => {
-  //     //   res.json().then((json) => {
-  //     //     console.log(json);
-  //     //   })
-  //     // })
-  //     // var a = document.createElement("a"), url = URL.createObjectURL(blob);
-  //     //   a.href = url;
-  //     //   a.download = 'asd.png';
-  //     // document.body.appendChild(a);
-  //     // a.click();
-  //   })
-  // api.get('/api/rail-survey/943b777b-7866-4aa7-aedf-13cf22204bab', null).then((res) => {
-  //   res.json().then((json) => {
-  //     console.log(json);
-  //     var uri = URL.createObjectURL(json.blob);
-  //     var img = new Image();
-  //     img.src = uri;
-  //     document.body.appendChild(img);
-  //     // const myFile = new File([json.blob], 'image.png', {
-  //     //     type: json.blob.type,
-  //     // });
-  //     // console.log(myFile);
-  //     // var blob = new Blob([json.blob.data], {type: json.blob.type});
-  //     // console.log(blob);
-  //     // console.log(readAsArrayBuffer(json.blob))
-  //     // const url = URL.createObjectURL(new Blob([data], {type: type}));
-  //     // console.log(JSON.stringify(json));
-  //     // var blob = new Blob([json.blob.data], {type: json.blob.type});
-  //     // console.log(blob);
-  //     // var link = document.createElement('a');
-  //     // link.href = window.URL.createObjectURL(blob);
-  //     // var fileName = 'asd.png';
-  //     // link.download = fileName;
-  //     // link.click()
-  //   })
-  // })
 }
 
 const handleSubmit = async () => {
-  const { isEmpty, data } = signaturePad.value.saveSignature()
-  railSurvey.signature = data
+  // const { isEmpty, data } = signaturePad.value.saveSignature()
+  // railSurvey.signature = data
   const isValid = await v$.value.$validate()
+  console.log(isValid);
   if (isValid) {
+    api.post(`/api/rail-survey`, railSurvey, store.state.token).then((resp) => {
+      if (resp.status === 201) {
+        console.log('create success ;)')
+      } else {
+      }
+    }).catch(() => {
+      navigator.serviceWorker.ready.then(registration => {
+        // console.log(registration)
+        registration.sync.register('some-unique-tag')
+      }).catch(console.log())
+    })
   }
   // IndexDB.insertData('railway-survey', 1, { fname: 'wissarut', lname: 'sangjong' })
   // router.push('/survey-list')
@@ -275,6 +268,19 @@ const handleUploadImages = () => {
   })
 }
 
+const onBegin = () => {
+  // console.log('=== Begin ===');
+}
+
+const onEnd = () => {
+  // console.log('=== End ===');
+  const { isEmpty, data } = signaturePad.value.saveSignature()
+  if (!isEmpty) {
+    railSurvey.signature = data
+  }
+
+}
+
 // COMPUTED //
 const compMARec = computed(() => {
   return v$.value.maintenanceRecord.$error
@@ -308,6 +314,12 @@ const compDate = computed({
     return railSurvey.date = newValue
   }
 })
+
+// watch(railSurvey.signature, (newUsername) => {
+//    // Do something with the updated value.
+//    console.log(newUsername)
+//   //  const { isEmpty, data } = signaturePad.value.saveSignature()
+// })
 
 </script>
 <template>
@@ -388,7 +400,7 @@ const compDate = computed({
           <RadioBtn v-model="railSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties"></RadioBtn>
         </div>
       </Border>
-      <Border>
+      <Border :error="v$.defectSituation.railPositionDefect.$error || v$.defectSituation.railAreaDefect.$error">
         <div class="flex flex-col gap-4">
           <div>
             <label class="_label-lg">ตำแหน่งความเสียหายบนราง</label>
@@ -402,7 +414,7 @@ const compDate = computed({
           </div>
         </div>
       </Border>
-      <Border>
+      <Border :error="v$.defectPattern.$error">
         <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
           <RadioBtn v-model="railSurvey.defectPattern" name="defectPattern" :items="variable.damageProperties"></RadioBtn>
@@ -413,13 +425,13 @@ const compDate = computed({
         <RadioImageBtn v-model="railSurvey.surfaceDefect" name="surfaceDefect" :items="variable.scar" imageLabel="title" imagePath="img"></RadioImageBtn>
       </Border>
       <label class="_label-lg">สำรวจความเสียหายของทาง</label>
-      <Border>
+      <Border :error="v$.railCondition.$error">
         <label class="_label-lg">ความสมบูรณ์ของทาง</label>
         <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-          <RadioBtn v-model="railSurvey.railCondition" name="railCondition" :items="variable.integrity"></RadioBtn>
+          <RadioBtn v-model="railSurvey.railCondition" name="railCondition" :items="variable.railCondition"></RadioBtn>
         </div>
       </Border>
-      <Border>
+      <Border :error="v$.trackGeometryCondition.$error">
         <div class="flex flex-col gap-4">
           <div>
             <label class="_label-lg">Track Geometry</label>
@@ -427,9 +439,9 @@ const compDate = computed({
               <RadioBtn v-model="railSurvey.trackGeometryCondition" name="trackGeometryCondition" :items="variable.integrity"></RadioBtn>
             </div>
           </div>
-          <div v-if="railSurvey.trackGeometryCondition === 'imperfect'">
+          <div v-if="railSurvey.trackGeometryCondition && railSurvey.trackGeometryCondition !== 'perfect'">
             <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
-            <RadioImageBtn v-model="railSurvey.defectTrackGeometry" name="defectTrackGeometry" :items="variable.trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
+            <RadioImageBtn v-model="railSurvey.trackGeometryCondition" name="defectTrackGeometry" :items="variable.trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
           </div>
         </div>
       </Border>
@@ -491,7 +503,11 @@ const compDate = computed({
         </div>
       </Border>
       <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
-      <Border>
+      <Border :error="v$.hasMaintenanceRecord.$error
+        || v$.lastMaintenanceDate.$error
+        || v$.yearlyMaintenanceTimes.$error
+        || v$.maintenanceMethod.$error"
+      >
         <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
         <div class="flex flex-col gap-4">
           <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
@@ -501,12 +517,12 @@ const compDate = computed({
             <div class="flex md:flex-row flex-col gap-4">
               <div class="flex-1">
                 <label class="_label-sm">การซ่อมบำรุงครั้งล่าสุด</label>
-                <input v-model="railSurvey.lastMaintenanceDate" type="date" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="name@flowbite.com" required>
+                <input v-model="railSurvey.lastMaintenanceDate" type="date" id="email" :class="v$.lastMaintenanceDate.$error ? '_input_error' : '_input' " required>
                 <p v-if="v$.lastMaintenanceDate.$error" class="text-sm text-red-600">{{ v$.lastMaintenanceDate.$errors[0].$message }}</p>
               </div>
               <div class="flex-1">
                 <label class="_label-sm">ความถี่ในการซ่อมบำรุงในรอบปี</label>
-                <input v-model="railSurvey.yearlyMaintenanceTimes" type="number" :min="0" :max="365" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
+                <input v-model="railSurvey.yearlyMaintenanceTimes" type="number" :min="0" :max="365" id="password" :class="v$.yearlyMaintenanceTimes.$error ? '_input_error' : '_input' " required>
                 <p v-if="v$.yearlyMaintenanceTimes.$error" class="text-sm text-red-600">{{ v$.yearlyMaintenanceTimes.$errors[0].$message }}</p>
               </div>
             </div>
@@ -523,14 +539,14 @@ const compDate = computed({
         <label class="_label-lg">ความคิดเห็นของผู้สำรวจความเสียหาย</label>
         <textarea v-model="railSurvey.note" rows="4" class="_input" placeholder=""></textarea>
       </Border>
-      <div class="flex justify-end">
+      <div class="flex justify-center">
         <div class="w-1/2 border border-solid p-0" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
           <div class="flex justify-center">
             <button @click="undo" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-x rounded-bl-md text-sm px-5 py-1">Undo</button>
             <button @click="clear" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r rounded-br-md text-sm px-5 py-1">Clear</button>
           </div>
           <div class="h-28 p-1">
-            <VueSignaturePad ref="signaturePad" />
+            <VueSignaturePad :options="{ onBegin, onEnd }" ref="signaturePad" />
           </div>
           <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
         </div>
