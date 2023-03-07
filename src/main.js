@@ -36,7 +36,7 @@ keycloak.init({ onLoad: 'login-required', checkLoginIframe: false }).then((auth)
 })
 
 keycloak.onAuthSuccess = function () {
-  // console.log(keycloak.tokenParsed )
+  // console.log(keycloak.token )
   const app = createApp(App)
   // app.provide('myGlobalVariable', console.log('hello'))
   // app.config.globalProperties.$globalVar = 'globalVar'
@@ -71,7 +71,7 @@ keycloak.onAuthSuccess = function () {
 
 keycloak.onTokenExpired = function () {
   keycloak.updateToken(70).then((refreshed) => {
-    console.log(keycloak.tokenParsed )
+    // console.log(keycloak.tokenParsed )
     if (refreshed) {
       console.log('Token refreshed ' + refreshed)
       store.commit('setToken', keycloak.token)

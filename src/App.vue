@@ -6,8 +6,6 @@ import Footer from '@/core/Footer.vue'
   <div class="flex flex-col h-screen justify-between">
     <Header></Header>
     <router-view></router-view>
-    <!-- <div class="h-full">
-    </div> -->
     <Footer></Footer>
   </div>
   <!-- <div class="flex flex-col min-h-screen">

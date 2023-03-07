@@ -1,142 +1,86 @@
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import BorderRadioBtn from '@/components/BorderRadioBtn.vue'
 import Border from '@/components/Border.vue'
 import RadioBtnRow from '@/components/RadioBtnRow.vue'
 import RadioBtn from '@/components/RadioBtn.vue'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import RadioImageBtn from '@/components/RadioImageBtn.vue'
-import { useVuelidate } from '@vuelidate/core'
-import { required, helpers, requiredIf, minValue, maxValue, requiredUnless } from '@vuelidate/validators'
 // import { Loader } from '@googlemaps/js-api-loader'
 import variable from '@/assets/variable.json'
 import api from '@/services'
 import { nullableTypeAnnotation } from '@babel/types'
-import { useRouter } from 'vue-router'
 import IndexDB from '@/IndexedDB'
-import Keycloak from 'keycloak-js'
-import kcJSON from '@/keycloak.json'
 import { Buffer } from 'buffer'
 
 const store = useStore()
 const router = useRouter()
-const keycloak = new Keycloak(kcJSON)
 
-// const loader = new Loader({
-//   apiKey: 'AIzaSyBksdb-qLu2FZavr1UPnrUpXhvO-VUeSLA',
-//   version: 'weekly',
-//   libraries: ['places']
-// })
+const props = defineProps({
+  isNew: {
+    type: Boolean,
+    default: false
+  },
+  modelValue: {
+    type: [Object, null],
+    default: {
+      date: new Date().toISOString().substring(0, 10),
+      zone: null,
+      coordinates: {
+        latitude: null,
+        longitude: null
+      },
+      kilometers: null,
+      nearby: {
+        stationBefore: null,
+        stationAfter: null
+      },
+      railType: null,
+      areaCondition: null,
+      defectSituation: {
+        railPositionDefect: null,
+        railAreaDefect: null,
+      },
+      defectPattern: null,
+      surfaceDefect: null,
+      railCondition: null,
+      trackGeometryCondition: null,
+      // defectTrackGeometry: null,
+      ballastCondition: null,
+      sleeperCondition: null,
+      trackFoundationCondition: null,
+      uploadImage: null,
+      severity: null,
+      isAnalyzeDamage: null,
+      hasMaintenanceRecord: null,
+      lastMaintenanceDate: null,
+      yearlyMaintenanceTimes: null,
+      maintenanceMethod: null,
+      note: null,
+      signature: null
+      // createdAt: null,
+      // createdBy: null
+    }
+  },
+  validate: {
+    type: Object,
+    default: {}
+  }
+})
+const railSurvey = props.modelValue
+const emit = defineEmits(['update:modelValue'])
+
+const v$ = props.validate
+
 const signaturePad = ref(null)
-const maps = ref([])
 const ta = ref(null)
-const is = ref(false)
 const isShowBtnUpload = ref(false)
 const uploadStatus = ref(null)
 
-const railForm = {
-  date: null,
-  zone: null,
-  coordinates: {
-    lattitude: null,
-    longitude: null
-  },
-  kilometers: null,
-  nearby: {
-    stationBefore: null,
-    stationAfter: null
-  },
-  railType: null,
-  areaCondition: null,
-  defectSituation: {
-    railPositionDefect: null,
-    railAreaDefect: null,
-  },
-  defectPattern: null,
-  surfaceDefect: null,
-  railCondition: null,
-  trackGeometryCondition: null,
-  // defectTrackGeometry: null,
-  ballastCondition: null,
-  sleeperCondition: null,
-  trackFoundationCondition: null,
-  uploadImage: null,
-  severity: null,
-  isAnalyzeDamage: null,
-  hasMaintenanceRecord: null,
-  lastMaintenanceDate: null,
-  yearlyMaintenanceTimes: null,
-  maintenanceMethod: null,
-  note: null,
-  signature: null
-  // createdAt: null,
-  // createdBy: null
-}
-
-const railSurvey = reactive(Object.assign({}, railForm, { date: new Date().toISOString().substring(0, 10) }))
-
-const rules2 = computed(() => {
-  const rule = {}
-  Object.keys(railForm).forEach((key) => {
-    if (!['uploadImage', 'note'].includes(key)) {
-      switch (key) {
-        case 'coordinates':
-          rule[key] = {
-            lattitude: { required },
-            longitude: { required }
-          }
-          break
-        case 'defectSituation':
-          rule[key] = {
-            railPositionDefect: { required },
-            railAreaDefect: { required }
-          }
-          break
-        case 'surfaceDefect':
-          rule[key] = {
-            defectPattern: requiredIf(() => railSurvey.defectPattern === 'surfaceDefect')
-          }
-          break
-        case 'trackGeometryCondition':
-          rule[key] = {
-            track: (value) => value && value !== 'imperfect'
-          }
-          break
-        case 'lastMaintenanceDate':
-          rule[key] = {
-            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord)
-          }
-          break
-        case 'yearlyMaintenanceTimes':
-          rule[key] = {
-            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord)
-          }
-          break
-        case 'maintenanceMethod':
-          rule[key] = {
-            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord)
-          }
-          break
-        default:
-          rule[key] = { required }
-          break
-      }
-    }
-  })
-  return rule
-})
-
-const v$ = useVuelidate(rules2, railSurvey, { $autoDirty: true })
-
 onMounted(() => {
-  navigator.geolocation.getCurrentPosition((position)=> {
-    const p = position.coords;
-    railSurvey.coordinates.lattitude = p.latitude
-    railSurvey.coordinates.longitude = p.longitude
-    // console.log(p.latitude, p.longitude);
-  })
-  // getAPI()
+  signaturePad.value.signatureData = railSurvey.signature
 })
 
 const undo = () => {
@@ -181,23 +125,36 @@ const convertImage = async () => {
 }
 
 const handleSubmit = async () => {
+  // const isValid = await v$.value.$validate()
+  // if (isValid) {
+  //   if (props.isNew) {
+  //     api.post(`/api/rail-survey`, railSurvey, store.state.token).then((resp) => {
+  //       if (resp.status === 201) {
+  //         console.log('create success ;)')
+  //       } else {
+  //       }
+  //     }).catch(() => {
+  //       navigator.serviceWorker.ready.then(registration => {
+  //         // console.log(registration)
+  //         registration.sync.register('some-unique-tag')
+  //       }).catch(console.log())
+  //     })
+  //   } else {
+  //     api.put(`/api/rail-survey`, railSurvey, store.state.token).then((resp) => {
+  //       if (resp.status === 201) {
+  //         console.log('update success ;)')
+  //       } else {
+  //       }
+  //     }).catch(() => {
+  //       navigator.serviceWorker.ready.then(registration => {
+  //         // console.log(registration)
+  //         registration.sync.register('some-unique-tag')
+  //       }).catch(console.log())
+  //     })
+  //   }
+  // }
   // const { isEmpty, data } = signaturePad.value.saveSignature()
   // railSurvey.signature = data
-  const isValid = await v$.value.$validate()
-  console.log(isValid);
-  if (isValid) {
-    api.post(`/api/rail-survey`, railSurvey, store.state.token).then((resp) => {
-      if (resp.status === 201) {
-        console.log('create success ;)')
-      } else {
-      }
-    }).catch(() => {
-      navigator.serviceWorker.ready.then(registration => {
-        // console.log(registration)
-        registration.sync.register('some-unique-tag')
-      }).catch(console.log())
-    })
-  }
   // IndexDB.insertData('railway-survey', 1, { fname: 'wissarut', lname: 'sangjong' })
   // router.push('/survey-list')
   // console.log(isValid);
@@ -215,13 +172,13 @@ const handleSubmit = async () => {
   // // IndexDB.createDB('test-db', 1, 'book', { id: 'js', name: 'Harry Porter' })
   // router.push('/survey-list')
 }
-const handleGetLocation = () => {
-  navigator.geolocation.getCurrentPosition((position) => {
-      const p = position.coords;
-      // console.log(p.latitude, p.longitude);
-      railSurvey.coordinates = `${p.latitude}, ${p.longitude}`
-  })
-}
+// const handleGetLocation = () => {
+//   navigator.geolocation.getCurrentPosition((position) => {
+//       const p = position.coords;
+//       // console.log(p.latitude, p.longitude);
+//       railSurvey.coordinates = `${p.latitude}, ${p.longitude}`
+//   })
+// }
 const getAPI = () => {
   api.get(`/`, null).then((resp) => {
     resp.json().then((json) => {
@@ -233,8 +190,10 @@ const getAPI = () => {
 const handleSelectZone = (value) => {
   const zones = variable.zone.map((z) => z.value)
   const index = zones.indexOf(value)
-  railSurvey.nearby.stationBefore = !zones[index - 1] ? value : zones[index - 1]
-  railSurvey.nearby.stationAfter = !zones[index + 1] ? value : zones[index + 1]
+  return {
+    stationBefore: !zones[index - 1] ? value : zones[index - 1],
+    stationAfter: !zones[index + 1] ? value : zones[index + 1]
+  }
 }
 
 const handleUploadImage = (event) => {
@@ -276,66 +235,52 @@ const onEnd = () => {
   // console.log('=== End ===');
   const { isEmpty, data } = signaturePad.value.saveSignature()
   if (!isEmpty) {
-    railSurvey.signature = data
+    // railSurvey.signature = data
+    handleEmit({ name: 'signature', value: data })
   }
+}
 
+const handleEmit = (target) => {
+  const arr = target.name.split('\.')
+  if (arr[0] === 'coordinates') {
+    let coord = JSON.parse(JSON.stringify(railSurvey[arr[0]]))
+    coord[arr[1]] = parseFloat(target.value)
+    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: coord }))
+  } else if (arr[0] === 'zone') {
+    emit('update:modelValue', Object.assign(railSurvey, { [target.name]: target.value, nearby: handleSelectZone(target.value) }))
+  } else if (arr[0] === 'yearlyMaintenanceTimes') {
+    emit('update:modelValue', Object.assign(railSurvey, { [target.name]: parseInt(target.value) }))
+  } else {
+    emit('update:modelValue', Object.assign(railSurvey, { [target.name]: target.value }))
+  }
 }
 
 // COMPUTED //
-const compMARec = computed(() => {
-  return v$.value.maintenanceRecord.$error
-    || v$.value.lastMaintenance?.$error
-    || v$.value.manyTimeMaintenance?.$error
-    || v$.value.maintenanceMethod?.$error
-})
-
-const compAraeDamage = computed(() => {
-  return v$.value.damagedArea.GPSCoordinates.$error
-    || v$.value.damagedArea.kmTelegraphPoles.$error
-    || v$.value.damagedArea.nearby.$error
-})
-
 const compNearby = computed(() => {
   let nearby = []
-  for (const key in railSurvey.nearby) {
-    if (Object.hasOwnProperty.call(railSurvey.nearby, key)) {
-      const element = railSurvey.nearby[key]
-      nearby.push(variable.zone.filter(z => z.value === element).map(z => z.key))
-    }
-  }
+  Object.keys(railSurvey.nearby).forEach(key => {
+    nearby.push(variable.zone.filter(z => z.value === railSurvey.nearby[key]).map(z => z.key).join())
+  })
   return nearby
 })
-
-const compDate = computed({
-  get() {
-    return railSurvey.date
-  },
-  set(newValue) {
-    return railSurvey.date = newValue
-  }
-})
-
-// watch(railSurvey.signature, (newUsername) => {
-//    // Do something with the updated value.
-//    console.log(newUsername)
-//   //  const { isEmpty, data } = signaturePad.value.saveSignature()
-// })
-
 </script>
 <template>
-  <button @click="convertImage">convertImage</button>
-  <div class="flex flex-col gap-4">
+  <!-- <pre> {{ railSurvey }} </pre> -->
+  <!-- <button @click="convertImage">convertImage</button> -->
+  <div class="container flex flex-col gap-4">
+    <!-- <input :value="railSurvey.kilometers" @input="handleEmit($event)"> -->
     <Border>
       <div class="flex md:flex-row flex-col gap-4">
         <div class="flex-1">
           <label class="_label-sm">วันที่สำรวจ</label>
-          <input disabled v-model="railSurvey.date" type="date" id="date" :class="v$.date.$error ? '_input_error' : '_input'" required>
+          <input disabled :value="railSurvey.date" type="date" id="date" :class="v$.date.$error ? '_input_error' : '_input'" required>
           <p v-if="v$.date.$error" class="text-sm text-red-600">{{ v$.date.$errors[0].$message }}</p>
         </div>
         <div class="flex-1">
           <label class="_label-sm">เขตการเดินรถ</label>
-          <select v-model="railSurvey.zone" @change="handleSelectZone($event.target.value)" id="zone" :class="v$.zone.$error ? '_input_error' : '_input'">
-            <option value="">กรุณาเลือกเขตการเดินรถ</option>
+          <!-- @change="handleSelectZone($event.target.value)" -->
+          <select name="zone" :value="railSurvey.zone" @change="handleEmit($event.target)" id="zone" :class="v$.zone.$error ? '_input_error' : '_input'">
+            <option disabled value="">กรุณาเลือกเขตการเดินรถ</option>
             <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
           </select>
           <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
@@ -349,14 +294,14 @@ const compDate = computed({
           <div class="flex-1">
             <label class="_label-sm">พิกัด GPS</label>
             <div class="flex sm:flex-row flex-col gap-1">
-              <input v-model="railSurvey.coordinates.lattitude" type="text" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
-              <input v-model="railSurvey.coordinates.longitude" type="text" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
+              <input :value="railSurvey.coordinates.lattitude" type="text" name="coordinates.lattitude" @input="handleEmit($event.target)" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
+              <input :value="railSurvey.coordinates.longitude" type="text" name="coordinates.longitude" @input="handleEmit($event.target)" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
             </div>
             <p v-if="v$.coordinates.$error" class="text-sm text-red-600">{{ v$.coordinates.$errors[0].$message }}</p>
           </div>
           <div class="flex-1">
             <label class="_label-sm">หลักกิโลเมตร/เสาโทรเลข</label>
-            <input v-model="railSurvey.kilometers" type="text" id="kmTelegraphPoles" :class="v$.kilometers.$error ? '_input_error' : '_input' " required>
+            <input :value="railSurvey.kilometers" name="kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.kilometers.$error ? '_input_error' : '_input' " required>
             <p v-if="v$.kilometers.$error" class="text-sm text-red-600">{{ v$.kilometers.$errors[0].$message }}</p>
           </div>
         </div>
@@ -372,7 +317,7 @@ const compDate = computed({
           <label class="_label-lg">ชนิดของราง</label>
           <label class="_label-sm">มาตรฐานและเกรด</label>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <select v-model="railSurvey.railType" id="countries" :class="v$.railType.$error ? '_input_error' : '_input'">
+            <select name="railType" :value="railSurvey.railType" @change="handleEmit($event.target)" id="railType" :class="v$.railType.$error ? '_input_error' : '_input'">
               <option disabled :value="null">กรุณาเลือกประเภทของเกจ</option>
               <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
             </select>
@@ -504,12 +449,12 @@ const compDate = computed({
           <div class="flex md:flex-row flex-col gap-4">
             <div class="flex-1">
               <label class="_label-sm">การซ่อมบำรุงครั้งล่าสุด</label>
-              <input v-model="railSurvey.lastMaintenanceDate" type="date" id="email" :class="v$.lastMaintenanceDate.$error ? '_input_error' : '_input' " required>
+              <input :value="railSurvey.lastMaintenanceDate" name="lastMaintenanceDate" @input="handleEmit($event.target)" type="date" id="email" :class="v$.lastMaintenanceDate.$error ? '_input_error' : '_input' " required>
               <p v-if="v$.lastMaintenanceDate.$error" class="text-sm text-red-600">{{ v$.lastMaintenanceDate.$errors[0].$message }}</p>
             </div>
             <div class="flex-1">
               <label class="_label-sm">ความถี่ในการซ่อมบำรุงในรอบปี</label>
-              <input v-model="railSurvey.yearlyMaintenanceTimes" type="number" :min="0" :max="365" id="password" :class="v$.yearlyMaintenanceTimes.$error ? '_input_error' : '_input' " required>
+              <input :value="railSurvey.yearlyMaintenanceTimes" name="yearlyMaintenanceTimes" @input="handleEmit($event.target)" type="number" :min="0" :max="365" id="password" :class="v$.yearlyMaintenanceTimes.$error ? '_input_error' : '_input' " required>
               <p v-if="v$.yearlyMaintenanceTimes.$error" class="text-sm text-red-600">{{ v$.yearlyMaintenanceTimes.$errors[0].$message }}</p>
             </div>
           </div>
@@ -524,7 +469,7 @@ const compDate = computed({
     </Border>
     <Border>
       <label class="_label-lg">ความคิดเห็นของผู้สำรวจความเสียหาย</label>
-      <textarea v-model="railSurvey.note" rows="4" class="_input" placeholder=""></textarea>
+      <textarea :value="railSurvey.note" name="note" @input="handleEmit($event.target)" rows="4" class="_input" placeholder=""></textarea>
     </Border>
     <div class="flex justify-center">
       <div class="w-1/2 border border-solid p-0" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
@@ -537,9 +482,6 @@ const compDate = computed({
         </div>
         <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
       </div>
-    </div>
-    <div class="flex justify-end mt-8">
-      <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" @click="handleSubmit()">Submit</button>
     </div>
   </div>
 
