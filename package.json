@@ -16,6 +16,8 @@
     "flowbite": "^1.5.5",
     "flowbite-vue": "^0.0.10",
     "keycloak-js": "^20.0.3",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.41",
     "postcss": "^8",
     "register-service-worker": "^1.7.2",
     "tailwindcss": "^3",

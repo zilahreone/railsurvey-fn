@@ -7,12 +7,16 @@ export default {
       console.error(`Database error: ${event.target.errorCode}`)
     };
 
-    request.onsuccess = (event) => {
+    request.onsuccess = async (event) => {
       console.log('success');
       // add implementation here
       const db = event.target.result;
 
-      this.insertContact(db, data)
+      const getId = await this.getContactById(db, data.id)
+      // console.log(getId);
+      if (!getId) {
+        this.insertContact(db, data)
+      }
     }
 
     // create the Contacts object store and indexes
@@ -22,23 +26,23 @@ export default {
 
       // create the Contacts object store 
       // with auto-increment id
-      let store = db.createObjectStore('Survey', {
-        autoIncrement: true
+      let objectStore = db.createObjectStore('Rail-Survey', {
+        // autoIncrement: true
+        keyPath: 'id'
       })
+      let index = objectStore.createIndex('id', 'id', { unique: true })
 
       // create an index on the email property
-      let index = store.createIndex('name', 'name', {
-        unique: true
-      })
+      // objectStore.createIndex("hours", "hours", { unique: false });
     }
   },
 
   insertContact(db, contact) {
     // create a new transaction
-    const txn = db.transaction('Survey', 'readwrite')
+    const txn = db.transaction('Rail-Survey', 'readwrite')
 
     // get the Contacts object store
-    const store = txn.objectStore('Survey')
+    const store = txn.objectStore('Rail-Survey')
     //
     let query = store.add(contact)
 
@@ -61,26 +65,31 @@ export default {
   },
 
   getContactById(db, id) {
-    const txn = db.transaction('Survey', 'readonly')
-    const store = txn.objectStore('Survey')
+    return new Promise((resolve, reject) => {
+      const txn = db.transaction('Rail-Survey', 'readonly')
+      const store = txn.objectStore('Rail-Survey')
 
-    let query = store.get(id)
+      let query = store.get(id)
 
-    query.onsuccess = (event) => {
-      if (!event.target.result) {
-        console.log(`The contact with ${id} not found`)
-      } else {
-        console.table(event.target.result)
+      query.onsuccess = (event) => {
+        if (!event.target.result) {
+          // console.log(`The contact with ${id} not found`)
+          resolve(null)
+        } else {
+          // console.table(event.target.result)
+          resolve(event.target.result)
+        }
       }
-    }
-
-    query.onerror = (event) => {
-      console.log(event.target.errorCode)
-    }
-
-    txn.oncomplete = function () {
-      db.close()
-    }
+  
+      query.onerror = (event) => {
+        // console.log(event.target.errorCode)
+        reject(event.target.errorCode)
+      }
+  
+      txn.oncomplete = function () {
+        db.close()
+      }
+    })
   },
 
   getAllContacts2(db_name, version) {
@@ -99,8 +108,8 @@ export default {
         const db = event.target.result;
   
         // this.insertContact(db, data)
-        const txn = db.transaction('Survey', "readonly");
-        const objectStore = txn.objectStore('Survey');
+        const txn = db.transaction('Rail-Survey', "readonly");
+        const objectStore = txn.objectStore('Rail-Survey');
   
         objectStore.openCursor().onsuccess = (event) => {
           let cursor = event.target.result;
@@ -135,8 +144,8 @@ export default {
       const db = event.target.result;
 
       // this.insertContact(db, data)
-      const txn = db.transaction('Survey', "readonly");
-      const objectStore = txn.objectStore('Survey');
+      const txn = db.transaction('Rail-Survey', "readonly");
+      const objectStore = txn.objectStore('Rail-Survey');
 
       objectStore.openCursor().onsuccess = (event) => {
         let cursor = event.target.result;
@@ -169,8 +178,8 @@ export default {
       const db = event.target.result;
 
       // this.insertContact(db, data)
-      const request = db.transaction('Survey')
-        .objectStore('Survey')
+      const request = db.transaction('Rail-Survey')
+        .objectStore('Rail-Survey')
         .getAll();
   
       request.onsuccess = () => {
@@ -191,10 +200,10 @@ export default {
 
   deleteContact(db, id) {
     // create a new transaction
-    const txn = db.transaction('Contacts', 'readwrite');
+    const txn = db.transaction('Rail-Survey', 'readwrite');
 
     // get the Contacts object store
-    const store = txn.objectStore('Contacts');
+    const store = txn.objectStore('Rail-Survey');
     //
     let query = store.delete(id);
 

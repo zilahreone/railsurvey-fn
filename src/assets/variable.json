@@ -216,6 +216,18 @@
       {
         "key": "ฐานราง (Rail foot)",
         "value": "railFoot"
+      },
+      {
+        "key": "เต็มหน้าตัด (Full section)",
+        "value": "fullSection"
+      },
+      {
+        "key": "สันราง (Gauge side)",
+        "value": "gaugeSide"
+      },
+      {
+        "key": "พื้นผิวบนหัวราง (Surface of Rail Head)",
+        "value": "surfaceRailHead"
       }
     ],
     "damageArea": [
@@ -412,6 +424,24 @@
     {
       "key": "ไม่เคย",
       "value": false
+    }
+  ],
+  "maintenanceTime": [
+    {
+      "key": "น้อยกว่า 1 ครั้ง",
+      "value": "lessThan-1"
+    },
+    {
+      "key": "1 ครั้ง",
+      "value": "1"
+    },
+    {
+      "key": "2 ครั้ง",
+      "value": "2"
+    },
+    {
+      "key": "มากกว่า 3 ครั้ง",
+      "value": "moreThan-3"
     }
   ],
   "maintenanceMethod": [

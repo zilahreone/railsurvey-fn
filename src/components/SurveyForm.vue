@@ -8,6 +8,7 @@ import RadioBtnRow from '@/components/RadioBtnRow.vue'
 import RadioBtn from '@/components/RadioBtn.vue'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import RadioImageBtn from '@/components/RadioImageBtn.vue'
+import Accordion from '@/components/Accordion.vue'
 // import { Loader } from '@googlemaps/js-api-loader'
 import variable from '@/assets/variable.json'
 import api from '@/services'
@@ -78,6 +79,7 @@ const signaturePad = ref(null)
 const ta = ref(null)
 const isShowBtnUpload = ref(false)
 const uploadStatus = ref(null)
+const activeName = ref('general')
 
 onMounted(() => {
   signaturePad.value.signatureData = railSurvey.signature
@@ -267,94 +269,333 @@ const compNearby = computed(() => {
 <template>
   <!-- <pre> {{ railSurvey }} </pre> -->
   <!-- <button @click="convertImage">convertImage</button> -->
-  <div class="container flex flex-col gap-4">
-    <!-- <input :value="railSurvey.kilometers" @input="handleEmit($event)"> -->
-    <Border>
-      <div class="flex md:flex-row flex-col gap-4">
-        <div class="flex-1">
-          <label class="_label-sm">วันที่สำรวจ</label>
-          <input disabled :value="railSurvey.date" type="date" id="date" :class="v$.date.$error ? '_input_error' : '_input'" required>
-          <p v-if="v$.date.$error" class="text-sm text-red-600">{{ v$.date.$errors[0].$message }}</p>
-        </div>
-        <div class="flex-1">
-          <label class="_label-sm">เขตการเดินรถ</label>
-          <!-- @change="handleSelectZone($event.target.value)" -->
-          <select name="zone" :value="railSurvey.zone" @change="handleEmit($event.target)" id="zone" :class="v$.zone.$error ? '_input_error' : '_input'">
-            <option disabled value="">กรุณาเลือกเขตการเดินรถ</option>
-            <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
-          </select>
-          <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
-        </div>
-      </div>
-    </Border>
-    <Border>
-      <label class="block mb-2 text-lg font-semibold text-gray-900 dark:text-white">พื้นที่เกิดความเสียหาย</label>
-      <div class="flex flex-col gap-4">
-        <div class="flex md:flex-row flex-col gap-4">
-          <div class="flex-1">
-            <label class="_label-sm">พิกัด GPS</label>
-            <div class="flex sm:flex-row flex-col gap-1">
-              <input :value="railSurvey.coordinates.lattitude" type="text" name="coordinates.lattitude" @input="handleEmit($event.target)" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
-              <input :value="railSurvey.coordinates.longitude" type="text" name="coordinates.longitude" @input="handleEmit($event.target)" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
+  <div class="container">
+    <!-- activeName === 'general' -->
+    <Accordion head :is-active="true">
+      <template #header>ข้อมูลการสำรวจเบื้องต้น</template>
+      <template #body>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <div class="min-w-fit">
+                <label class="_label-sm">วันที่สำรวจ</label>
+                <input disabled :value="railSurvey.date" type="datetime-local" :max="railSurvey.date" id="date" :class="v$.date.$error ? '_input_error' : '_input'" required>
+                <p v-if="v$.date.$error" class="text-sm text-red-600">{{ v$.date.$errors[0].$message }}</p>
+              </div>
             </div>
-            <p v-if="v$.coordinates.$error" class="text-sm text-red-600">{{ v$.coordinates.$errors[0].$message }}</p>
+            <div class="grow">
+              <label class="_label-sm">เขตการเดินรถ</label>
+              <select name="zone" :value="railSurvey.zone" @change="handleEmit($event.target)" id="zone" :class="v$.zone.$error ? '_input_error' : '_input'">
+                <option disabled value="">กรุณาเลือกเขตการเดินรถ</option>
+                <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
+              </select>
+              <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
+            </div>
+            <div class="grow">
+              <label class="_label-sm">หลักกิโลเมตร/เสาโทรเลข</label>
+              <input :value="railSurvey.kilometers" name="kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.kilometers.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.kilometers.$error" class="text-sm text-red-600">{{ v$.kilometers.$errors[0].$message }}</p>
+            </div>
+            <div class="grow">
+              <label class="_label-sm">มาตรฐานและเกรด</label>
+              <select name="railType" :value="railSurvey.railType" @change="handleEmit($event.target)" id="railType" :class="v$.railType.$error ? '_input_error' : '_input'">
+                <option disabled :value="null">กรุณาเลือกประเภทของเกจ</option>
+                <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
+              </select>
+              <p v-if="v$.railType.$error" class="text-sm text-red-600">{{ v$.railType.$errors[0].$message }}</p>
+            </div>
           </div>
-          <div class="flex-1">
-            <label class="_label-sm">หลักกิโลเมตร/เสาโทรเลข</label>
-            <input :value="railSurvey.kilometers" name="kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.kilometers.$error ? '_input_error' : '_input' " required>
-            <p v-if="v$.kilometers.$error" class="text-sm text-red-600">{{ v$.kilometers.$errors[0].$message }}</p>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-sm">พิกัด GPS</label>
+              <div class="flex flex-wrap flex-row gap-2">
+                <div class="grow">
+                  <input :value="railSurvey.coordinates.lattitude" type="text" name="coordinates.lattitude" @input="handleEmit($event.target)" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
+                </div>
+                <div class="grow">
+                  <input :value="railSurvey.coordinates.longitude" type="text" name="coordinates.longitude" @input="handleEmit($event.target)" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
+                </div>
+              </div>
+              <p v-if="v$.coordinates.$error" class="text-sm text-red-600">{{ v$.coordinates.$errors[0].$message }}</p>
+            </div>
+            <div class="grow">
+              <label class="_label-sm">สถานีรถไฟใกล้เคียง</label>
+              <div class="flex flex-wrap flex-row gap-2">
+                <div v-if="railSurvey.zone" v-for="(value, index) in compNearby" :key="index" class="grow">
+                  <input :value="value" disabled type="text" id="nearBy" class="_input">
+                </div>
+                <div v-else v-for="(nb, index_) in compNearby" :key="index_" class="grow">
+                  <input :value="null" disabled type="text" id="nearBy" :class="v$.zone.$error ? '_input_error' : '_input'">
+                </div>
+              </div>
+              <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
+            </div>
           </div>
-        </div>
-        <div class="flex flex-col">
-          <label class="_label-sm">สถานีรถไฟใกล้เคียง</label>
           <div class="flex md:flex-row flex-col gap-4">
-            <input v-if="railSurvey.zone" v-for="(value, index) in compNearby" :key="index" :value="value" disabled type="text" id="nearBy" class="_input">
-            <input v-else v-for="(nb, index_) in compNearby" :key="index_" :value="null" disabled type="text" id="nearBy" :class="v$.zone.$error ? '_input_error' : '_input'">
+            <div class="grow">
+              <label class="_label-sm">ลักษณะพื้นที่ที่เกิดความเสียหาย (Type of failure area)</label>
+              <div class="flex flex-wrap gap-2">
+                <RadioBtn :class="'grow'" v-model="railSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties"></RadioBtn>
+              </div>
+            </div>
           </div>
-          <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
         </div>
-        <div class="flex flex-col">
-          <label class="_label-lg">ชนิดของราง</label>
-          <label class="_label-sm">มาตรฐานและเกรด</label>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <select name="railType" :value="railSurvey.railType" @change="handleEmit($event.target)" id="railType" :class="v$.railType.$error ? '_input_error' : '_input'">
-              <option disabled :value="null">กรุณาเลือกประเภทของเกจ</option>
-              <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
-            </select>
+      </template>
+    </Accordion>
+    <!-- activeName === 'railDamage' -->
+    <Accordion :is-active="true">
+      <template #header>การสำรวจความเสียหายของราง</template>
+      <template #body>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-md">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
+              <div class="flex flex-col gap-2">
+                <input @change="handleUploadImage($event)" name="img" accept="image/x-png,image/gif,image/jpeg" id="uploadImg" type="file" multiple=""
+                  class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                >
+                <div id="preview" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center"></div>
+                <div v-if="isShowBtnUpload">
+                  <button :disabled="['pending', 'success'].includes(uploadStatus)" @click="handleUploadImages()" type="button"
+                    :class="['text-center inline-flex items-center mr-2', uploadStatus === 'success' ? '_button-success' : uploadStatus === 'error' ? '_button-error' : '_button']"
+                  >
+                    <svg v-if="uploadStatus === 'pending'" aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                    </svg>
+                    <svg v-if="uploadStatus === 'error'" class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <svg v-if="uploadStatus === 'success'"  class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    {{ uploadStatus === 'pending' ? 'Uploading' : uploadStatus === 'success' ? 'Done' : uploadStatus === 'error' ? 'Upload Fail' : 'Upload' }}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <p v-if="v$.railType.$error" class="text-sm text-red-600">{{ v$.railType.$errors[0].$message }}</p>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="flex-1">
+              <label class="_label-lg">ความเสียหายของราง (Situation)</label>
+              <div class="flex grow gap-8">
+                <RadioBtn v-model="railSurvey.defectSituation.railAreaDefect" name="railAreaDefect" :items="variable.positionDamage.damageArea"></RadioBtn>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="flex-1">
+              <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง (Location)</label>
+              <div class="flex grow gap-8">
+                <RadioBtn v-model="railSurvey.defectSituation.railPositionDefect" name="railPositionDefect" :items="variable.positionDamage.topRail"></RadioBtn>
+              </div>
+            </div>
+          </div>
+          <div v-if="['railWeb', 'railFoot', 'fullSection', 'surfaceRailHead'].includes(railSurvey.defectSituation.railPositionDefect)" class="flex flex-wrap flex-row gap-2">
+            <div class="flex-1">
+              <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น (Pattern, nature) </label>
+              <div class="flex grow gap-8">
+                <RadioBtn v-model="railSurvey.defectPattern" name="defectPattern" :items="variable.damageProperties"></RadioBtn>
+              </div>
+            </div>
+          </div>
+          <div v-if="['gaugeSide', 'railHead'].includes(railSurvey.defectSituation.railPositionDefect)" class="flex flex-wrap flex-row gap-2">
+            <div class="flex-1">
+              <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น (Pattern, nature) </label>
+              <div class="flex grow gap-8">
+                <RadioImageBtn v-model="railSurvey.surfaceDefect" name="surfaceDefect" :items="variable.scar" imageLabel="title" imagePath="img"></RadioImageBtn>
+              </div>
+            </div>
+          </div>
+
+
+
         </div>
-      </div>
-    </Border>
-    <Border :error="v$.areaCondition.$error">
-      <label class="_label-lg">ลักษณะพื้นที่ที่เกิดความเสียหาย</label>
-      <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-        <RadioBtn v-model="railSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties"></RadioBtn>
-      </div>
-    </Border>
+      </template>
+    </Accordion>
+    <!-- activeName === 'trackDamage' -->
+    <Accordion :is-active="true">
+      <template #header>สำรวจความเสียหายของทาง</template>
+      <template #body>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-md">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
+              <div class="flex flex-col gap-2">
+                <input @change="handleUploadImage($event)" name="img" accept="image/x-png,image/gif,image/jpeg" id="uploadImg" type="file" multiple=""
+                  class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                >
+                <div id="preview" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center"></div>
+                <div v-if="isShowBtnUpload">
+                  <button :disabled="['pending', 'success'].includes(uploadStatus)" @click="handleUploadImages()" type="button"
+                    :class="['text-center inline-flex items-center mr-2', uploadStatus === 'success' ? '_button-success' : uploadStatus === 'error' ? '_button-error' : '_button']"
+                  >
+                    <svg v-if="uploadStatus === 'pending'" aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                    </svg>
+                    <svg v-if="uploadStatus === 'error'" class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <svg v-if="uploadStatus === 'success'"  class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                    {{ uploadStatus === 'pending' ? 'Uploading' : uploadStatus === 'success' ? 'Done' : uploadStatus === 'error' ? 'Upload Fail' : 'Upload' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-lg">Track Geometry</label>
+              <div class="flex grow gap-8">
+                <RadioBtn v-model="railSurvey.trackGeometryCondition" name="trackGeometryCondition" :items="variable.integrity"></RadioBtn>
+              </div>
+            </div>
+          </div>
+          <div v-if="railSurvey.trackGeometryCondition && railSurvey.trackGeometryCondition !== 'perfect'" class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
+              <div class="flex grow gap-8">
+                <RadioImageBtn v-model="railSurvey.trackGeometryCondition" name="defectTrackGeometry" :items="variable.trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-lg">หินโรยทาง (Ballast)</label>
+              <div class="flex grow gap-8">
+                <RadioBtn v-model="railSurvey.ballastCondition" name="ballastCondition" :items="variable.ballast"></RadioBtn>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-lg">หมอนรองทาง (Sleeper)</label>
+              <div class="flex grow gap-8">
+                <RadioBtn v-model="railSurvey.sleeperCondition" name="sleeperCondition" :items="variable.sleeper"></RadioBtn>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-lg">คันทาง</label>
+              <div class="flex grow gap-8">
+                <RadioBtn v-model="railSurvey.trackFoundationCondition" name="trackFoundationCondition" :items="variable.integrity"></RadioBtn>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </template>
+    </Accordion>
+    <!-- activeName === 'maintenance' -->
+    <Accordion :is-active="true">
+      <template #header>การประเมินความเสียหายและการซ่อมบำรุง</template>
+      <template #body>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-md">ความรุนแรงของความเสียหาย</label>
+              <div class="flex grow gap-8">
+                <RadioBtn v-model="railSurvey.severity" name="severity" :items="variable.damagesLevel"></RadioBtn>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-lg">ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุของความเสียหาย</label>
+              <div class="flex grow gap-8">
+                <RadioBtn v-model="railSurvey.isAnalyzeDamage" name="positionDamage" :items="variable.analyse"></RadioBtn>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="flex flex-wrap flex-row gap-2">
+              <div class="grow">
+                <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
+                <div class="flex grow gap-10">
+                  <RadioBtn v-model="railSurvey.hasMaintenanceRecord" name="hasMaintenanceRecord" :items="variable.maintenanceRecord"></RadioBtn>
+                </div>
+              </div>
+            </div>
+            <div v-if="railSurvey.hasMaintenanceRecord" class="flex flex-wrap flex-row gap-2">
+              <div class="grow">
+                <label class="_label-sm">การซ่อมบำรุงครั้งล่าสุด</label>
+                <input :value="railSurvey.lastMaintenanceDate" name="lastMaintenanceDate" @input="handleEmit($event.target)" type="date" id="email" :class="v$.lastMaintenanceDate.$error ? '_input_error' : '_input' " required>
+                <p v-if="v$.lastMaintenanceDate.$error" class="text-sm text-red-600">{{ v$.lastMaintenanceDate.$errors[0].$message }}</p>
+              </div>
+              <div class="grow">
+                <label class="_label-sm">ความถี่ในการซ่อมบำรุงในรอบปี</label>
+                <select name="yearlyMaintenanceTimes" :value="railSurvey.yearlyMaintenanceTimes" @change="handleEmit($event.target)" id="yearlyMaintenanceTimes" :class="v$.yearlyMaintenanceTimes.$error ? '_input_error' : '_input'">
+                  <option disabled value="">กรุณาเลือกครั้งในการซ่อมบำรุง</option>
+                  <option v-for="(mt, index) in variable.maintenanceTime" :value="mt.value" :key="index">{{ mt.key }}</option>
+                </select>
+                <!-- <input :value="railSurvey.yearlyMaintenanceTimes" name="yearlyMaintenanceTimes" @input="handleEmit($event.target)" type="number" :min="0" :max="365" id="password" :class="v$.yearlyMaintenanceTimes.$error ? '_input_error' : '_input' " required> -->
+                <p v-if="v$.yearlyMaintenanceTimes.$error" class="text-sm text-red-600">{{ v$.yearlyMaintenanceTimes.$errors[0].$message }}</p>
+              </div>
+            </div>
+
+          </div>
+          <div class="flex flex-wrap flex-row gap-2">
+            <div class="grow">
+              <label class="_label-lg">ความคิดเห็นของผู้สำรวจความเสียหาย</label>
+              <textarea :value="railSurvey.note" name="note" @input="handleEmit($event.target)" rows="4" class="_input" placeholder=""></textarea>
+            </div>
+
+          </div>
+
+
+            <!-- <Border :error="v$.hasMaintenanceRecord.$error
+              || v$.lastMaintenanceDate.$error
+              || v$.yearlyMaintenanceTimes.$error
+              || v$.maintenanceMethod.$error"
+            >
+              <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
+              <div class="flex flex-col gap-4">
+                <div v-if="railSurvey.hasMaintenanceRecord" class="flex flex-col gap-4">
+                  <div class="flex md:flex-row flex-col gap-4">
+                  </div>
+                  <div>
+                    <label class="_label-lg">วิธีซ่อมบำรุง</label>
+                    <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
+                      <RadioBtn v-model="railSurvey.maintenanceMethod" name="ma" :items="variable.maintenanceMethod"></RadioBtn>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Border>
+            <Border>
+            </Border> -->
+
+
+
+
+
+
+
+        </div>
+      </template>
+    </Accordion>
+    <!-- <input :value="railSurvey.kilometers" @input="handleEmit($event)"> -->
     <Border :error="v$.defectSituation.railPositionDefect.$error || v$.defectSituation.railAreaDefect.$error">
       <div class="flex flex-col gap-4">
         <div>
-          <label class="_label-lg">ตำแหน่งความเสียหายบนราง</label>
-          <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-            <RadioBtn v-model="railSurvey.defectSituation.railPositionDefect" name="railPositionDefect" :items="variable.positionDamage.topRail"></RadioBtn>
-          </div>
+          
         </div>
         <div>
-          <label class="_label-lg">บริเวณความเสียหาย</label>
-          <RadioImageBtn v-model="railSurvey.defectSituation.railAreaDefect" name="railAreaDefect" :items="variable.positionDamage.damageArea" imageLabel="title" imagePath="img"></RadioImageBtn>
         </div>
       </div>
     </Border>
     <Border :error="v$.defectPattern.$error">
-      <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น</label>
       <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-        <RadioBtn v-model="railSurvey.defectPattern" name="defectPattern" :items="variable.damageProperties"></RadioBtn>
+        
       </div>
     </Border>
     <Border v-if="railSurvey.defectPattern?.includes('surfaceDefect')" :error="v$.surfaceDefect.$error">
       <label class="_label-lg">ให้ระบุลักษณะแผล โดยดูรูปต่อไปนี้ประกอบ</label>
-      <RadioImageBtn v-model="railSurvey.surfaceDefect" name="surfaceDefect" :items="variable.scar" imageLabel="title" imagePath="img"></RadioImageBtn>
     </Border>
     <label class="_label-lg">สำรวจความเสียหายของทาง</label>
     <Border :error="v$.railCondition.$error">
@@ -366,61 +607,24 @@ const compNearby = computed(() => {
     <Border :error="v$.trackGeometryCondition.$error">
       <div class="flex flex-col gap-4">
         <div>
-          <label class="_label-lg">Track Geometry</label>
-          <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-            <RadioBtn v-model="railSurvey.trackGeometryCondition" name="trackGeometryCondition" :items="variable.integrity"></RadioBtn>
-          </div>
+          
         </div>
-        <div v-if="railSurvey.trackGeometryCondition && railSurvey.trackGeometryCondition !== 'perfect'">
+        <div >
           <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
-          <RadioImageBtn v-model="railSurvey.trackGeometryCondition" name="defectTrackGeometry" :items="variable.trackGeometry" imageLabel="title" imagePath="img"></RadioImageBtn>
         </div>
       </div>
     </Border>
     <Border :error="v$.ballastCondition.$error">
-      <label class="_label-lg">หินโรยทาง (Ballast)</label>
-      <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-        <RadioBtn v-model="railSurvey.ballastCondition" name="ballastCondition" :items="variable.ballast"></RadioBtn>
-      </div>
     </Border>
     <Border :error="v$.sleeperCondition.$error">
-      <label class="_label-lg">หมอนรองทาง (Sleeper)</label>
-      <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-        <RadioBtn v-model="railSurvey.sleeperCondition" name="sleeperCondition" :items="variable.sleeper"></RadioBtn>
-      </div>
+      
     </Border>
     <Border :error="v$.trackFoundationCondition.$error">
-      <label class="_label-lg">คันทาง</label>
-      <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-        <RadioBtn v-model="railSurvey.trackFoundationCondition" name="trackFoundationCondition" :items="variable.integrity"></RadioBtn>
-      </div>
+      
     </Border>
     <label class="_label-lg">การประเมินความเสียหาย</label>
     <Border>
-      <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
-      <div class="flex flex-col gap-2">
-        <input @change="handleUploadImage($event)" name="img" accept="image/x-png,image/gif,image/jpeg" id="uploadImg" type="file" multiple=""
-          class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-        >
-        <div id="preview" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center"></div>
-        <div v-if="isShowBtnUpload">
-          <button :disabled="['pending', 'success'].includes(uploadStatus)" @click="handleUploadImages()" type="button"
-            :class="['text-center inline-flex items-center mr-2', uploadStatus === 'success' ? '_button-success' : uploadStatus === 'error' ? '_button-error' : '_button']"
-          >
-            <svg v-if="uploadStatus === 'pending'" aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
-              <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
-            </svg>
-            <svg v-if="uploadStatus === 'error'" class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <svg v-if="uploadStatus === 'success'"  class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
-            {{ uploadStatus === 'pending' ? 'Uploading' : uploadStatus === 'success' ? 'Done' : uploadStatus === 'error' ? 'Upload Fail' : 'Upload' }}
-          </button>
-        </div>
-      </div>
+      
     </Border>
     <Border :error="v$.severity.$error">
       <label class="_label-lg">ความรุนแรงของความเสียหาย</label>
@@ -429,10 +633,7 @@ const compNearby = computed(() => {
       </div>
     </Border>
     <Border :error="v$.isAnalyzeDamage.$error">
-      <label class="_label-lg">ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุของความเสียหาย</label>
-      <div class="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-4">
-        <RadioBtn v-model="railSurvey.isAnalyzeDamage" name="positionDamage" :items="variable.analyse"></RadioBtn>
-      </div>
+      
     </Border>
     <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
     <Border :error="v$.hasMaintenanceRecord.$error
@@ -454,7 +655,11 @@ const compNearby = computed(() => {
             </div>
             <div class="flex-1">
               <label class="_label-sm">ความถี่ในการซ่อมบำรุงในรอบปี</label>
-              <input :value="railSurvey.yearlyMaintenanceTimes" name="yearlyMaintenanceTimes" @input="handleEmit($event.target)" type="number" :min="0" :max="365" id="password" :class="v$.yearlyMaintenanceTimes.$error ? '_input_error' : '_input' " required>
+              <select name="yearlyMaintenanceTimes" :value="railSurvey.yearlyMaintenanceTimes" @change="handleEmit($event.target)" id="yearlyMaintenanceTimes" :class="v$.yearlyMaintenanceTimes.$error ? '_input_error' : '_input'">
+                <option disabled value="">กรุณาเลือกครั้งในการซ่อมบำรุง</option>
+                <option v-for="(mt, index) in variable.maintenanceTime" :value="mt.value" :key="index">{{ mt.key }}</option>
+              </select>
+              <!-- <input :value="railSurvey.yearlyMaintenanceTimes" name="yearlyMaintenanceTimes" @input="handleEmit($event.target)" type="number" :min="0" :max="365" id="password" :class="v$.yearlyMaintenanceTimes.$error ? '_input_error' : '_input' " required> -->
               <p v-if="v$.yearlyMaintenanceTimes.$error" class="text-sm text-red-600">{{ v$.yearlyMaintenanceTimes.$errors[0].$message }}</p>
             </div>
           </div>

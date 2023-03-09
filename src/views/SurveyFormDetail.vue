@@ -7,6 +7,7 @@ import SurveyForm from '@/components/SurveyForm'
 import PageNotFound from '@/views/PageNotFound'
 import { useStore } from 'vuex'
 import api from '@/services'
+import moment from 'moment'
 
 const props = defineProps({
   isNew: {
@@ -15,11 +16,17 @@ const props = defineProps({
   }
 })
 
+onMounted(() => {
+  console.log(moment(new Date()).format('YYYY-MM-DDTHH:mm'));
+  console.log(new Date('2018-06-14T20:00'));
+  console.log(new Date('2018-06-14T20:00').toISOString());
+})
+
 const store = useStore()
 const router = useRouter()
 const route = useRoute()
 const railForm = {
-  date: new Date().toISOString().substring(0, 10),
+  date: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
   zone: null,
   coordinates: {
     latitude: null,
@@ -115,7 +122,7 @@ const handleSubmit = async () => {
   console.log(isValid)
   if (isValid) {
     if (props.isNew) {
-      api.post(`/api/rail-survey`, railSurvey, store.state.token).then((resp) => {
+      api.post(`/api/rail-survey`, Object.assign(railSurvey, { lastMaintenanceDate: new Date(railSurvey.lastMaintenanceDate).toISOString() }), store.state.token).then((resp) => {
         if (resp.status === 201) {
           console.log('create success ;)')
           router.push('/survey-list')
@@ -191,7 +198,7 @@ const getSurveyID = (id) => {
 
 </script>
 <template>
-  {{ railSurvey }}
+  <!-- {{ railSurvey }} -->
   <!-- <div v-if="isReady">
   </div>
   <div v-else>

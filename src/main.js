@@ -54,19 +54,21 @@ keycloak.onAuthSuccess = function () {
     email: keycloak.tokenParsed.email,
     username: keycloak.tokenParsed.preferred_username
   })
-  api.get(`/users/${keycloak.tokenParsed.sub}`, null).then((resp) => {
-    if (resp.status === 200) {
-      resp.blob().then((data) => {
-        if (data['size'] === 0) {
-          api.post('/users', store.state.profile, keycloak.token).then((resp) => {
-            if (resp.status === 201) {
-              console.log(resp)
-            }
-          })
-        }
-      })
-    }
-  })
+  // IndexedDB.getContactById('1234')
+  IndexedDB.insertData('railway-survey', 1, { id: '12345', fname: 'wissarut', lname: 'sangjong' })
+  // api.get(`/users/${keycloak.tokenParsed.sub}`, null).then((resp) => {
+  //   if (resp.status === 200) {
+  //     resp.blob().then((data) => {
+  //       if (data['size'] === 0) {
+  //         api.post('/users', store.state.profile, keycloak.token).then((resp) => {
+  //           if (resp.status === 201) {
+  //             console.log(resp)
+  //           }
+  //         })
+  //       }
+  //     })
+  //   }
+  // })
 }
 
 keycloak.onTokenExpired = function () {

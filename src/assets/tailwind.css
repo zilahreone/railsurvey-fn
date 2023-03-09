@@ -34,6 +34,9 @@
 ._label-lg {
   @apply block mb-2 text-gray-900 text-lg font-semibold dark:text-white
 }
+._label-md {
+  @apply block mb-2 text-gray-900 text-base font-medium dark:text-white
+}
 ._label-sm {
   @apply block mb-2 text-gray-900 text-sm font-medium dark:text-white
 }
