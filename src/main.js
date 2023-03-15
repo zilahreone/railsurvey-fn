@@ -9,7 +9,7 @@ import api from '@/services'
 import IndexedDB from '@/IndexedDB'
 import kcJSON from '@/keycloak.json'
 import Keycloak from 'keycloak-js'
-
+const app = createApp(App)
 // CHECK SUPPORT INDEXED_DB
 if (!self.indexedDB) {
   console.warn(`Your browser doesn't support IndexedDB`)
@@ -23,70 +23,77 @@ if (!self.indexedDB) {
 //   }
 // })
 
-const keycloak = new Keycloak(kcJSON)
+// KEYCLOAK HANDLE
+// const keycloak = new Keycloak(kcJSON)
+// keycloak.init({ onLoad: 'login-required', checkLoginIframe: false }).then((auth) => {
+//   if (!auth) {
+//     window.location.reload()
+//   }
+//   // setInterval(() => {
+//   // }, 1000 * 10)
+// }).catch(() => {
+//   console.error('Authenticated Failed')
+// })
 
-keycloak.init({ onLoad: 'login-required', checkLoginIframe: false }).then((auth) => {
-  if (!auth) {
-    window.location.reload()
-  }
-  // setInterval(() => {
-  // }, 1000 * 10)
-}).catch(() => {
-  console.error('Authenticated Failed')
-})
+// keycloak.onAuthSuccess = function () {
+//   // console.log(keycloak.token )
+//   const app = createApp(App)
+//   // app.provide('myGlobalVariable', console.log('hello'))
+//   // app.config.globalProperties.$globalVar = 'globalVar'
+//   app.use(store)
+//   app.use(router)
+//   app.component('VueSignaturePad', VueSignaturePad)
+//   app.mount('#app')
 
-keycloak.onAuthSuccess = function () {
-  // console.log(keycloak.token )
-  const app = createApp(App)
-  // app.provide('myGlobalVariable', console.log('hello'))
-  // app.config.globalProperties.$globalVar = 'globalVar'
-  app.use(store)
-  app.use(router)
-  app.component('VueSignaturePad', VueSignaturePad)
-  app.mount('#app')
-
-  store.commit('setKeycloak', keycloak)
-  store.commit('setToken', keycloak.token)
-  store.commit('setProfile', {
-    id: keycloak.tokenParsed.sub,
-    fname: keycloak.tokenParsed.given_name,
-    lname: keycloak.tokenParsed.family_name,
-    email: keycloak.tokenParsed.email,
-    username: keycloak.tokenParsed.preferred_username
-  })
-  // IndexedDB.getContactById('1234')
-  IndexedDB.insertData('railway-survey', 1, { id: '12345', fname: 'wissarut', lname: 'sangjong' })
-  // api.get(`/users/${keycloak.tokenParsed.sub}`, null).then((resp) => {
-  //   if (resp.status === 200) {
-  //     resp.blob().then((data) => {
-  //       if (data['size'] === 0) {
-  //         api.post('/users', store.state.profile, keycloak.token).then((resp) => {
-  //           if (resp.status === 201) {
-  //             console.log(resp)
-  //           }
-  //         })
-  //       }
-  //     })
-  //   }
-  // })
-}
-
-keycloak.onTokenExpired = function () {
-  keycloak.updateToken(70).then((refreshed) => {
-    // console.log(keycloak.tokenParsed )
-    if (refreshed) {
-      console.log('Token refreshed ' + refreshed)
-      store.commit('setToken', keycloak.token)
-    } else {
-      console.warn('Token not refreshed, valid for ' + Math.round(keycloak.tokenParsed.exp + keycloak.timeSkew - new Date().getTime() / 1000) + ' seconds')
-      window.location.reload()
-    }
-  }).catch(() => {
-    console.error('Failed to refresh token')
-  });
-}
-
-// app.use(store)
-// app.use(router)
-// app.component('VueSignaturePad', VueSignaturePad)
-// app.mount('#app')
+//   store.commit('setKeycloak', keycloak)
+//   store.commit('setToken', keycloak.token)
+//   store.commit('setProfile', {
+//     id: keycloak.tokenParsed.sub,
+//     fname: keycloak.tokenParsed.given_name,
+//     lname: keycloak.tokenParsed.family_name,
+//     email: keycloak.tokenParsed.email,
+//     username: keycloak.tokenParsed.preferred_username
+//   })
+//   // IndexedDB.getContactById('1234')
+//   // IndexedDB.insertData('railway-survey', 1, { id: '12345', fname: 'wissarut', lname: 'sangjong' })
+//   // api.get(`/users/${keycloak.tokenParsed.sub}`, null).then((resp) => {
+//   //   if (resp.status === 200) {
+//   //     resp.blob().then((data) => {
+//   //       if (data['size'] === 0) {
+//   //         api.post('/users', store.state.profile, keycloak.token).then((resp) => {
+//   //           if (resp.status === 201) {
+//   //             console.log(resp)
+//   //           }
+//   //         })
+//   //       }
+//   //     })
+//   //   }
+//   // })
+// }
+// keycloak.onTokenExpired = function () {
+//   keycloak.updateToken(70).then((refreshed) => {
+//     // console.log(keycloak.tokenParsed )
+//     if (refreshed) {
+//       console.log('Token refreshed ' + refreshed)
+//       store.commit('setToken', keycloak.token)
+//     } else {
+//       console.warn('Token not refreshed, valid for ' + Math.round(keycloak.tokenParsed.exp + keycloak.timeSkew - new Date().getTime() / 1000) + ' seconds')
+//       window.location.reload()
+//     }
+//   }).catch(() => {
+//     console.error('Failed to refresh token')
+//   });
+// }
+//////////////////
+const local = localStorage
+// localStorage.clear()
+console.log(local.key(0))
+app.use(router)
+app.use(store)
+app.component('VueSignaturePad', VueSignaturePad)
+// if (localStorage.getItem('Authenticate')) {
+//   app.mount('#app')
+// } else {
+//   app.mount('#login')
+// }
+app.mount('#app')

@@ -10,30 +10,32 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  isActive: {
+  modelValue: {
     type: Boolean,
     default: false
   }
 })
-const emit = defineEmits(['isActive'])
+const emit = defineEmits(['update:modelValue'])
 
 </script>
 <template>
   <div>
     <h2 id="accordion-example-heading-1">
-      <button @click="emit('isActive', !isActive)" type="button" :class="`flex items-center justify-between w-full p-2.5 font-bold text-base text-left border border-${head ? 'b' : 't'}-0 border-gray-200 ${head ? 'rounded-t-xl' : ''} dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800`" aria-expanded="true" aria-controls="accordion-example-body-1">
+      <button @click="emit('update:modelValue', !modelValue)" type="button" :class="`flex items-center justify-between w-full p-2.5 font-bold text-base text-left border border-${head ? 'b' : 't'}-0 border-gray-200 bg-purple ${head ? 'rounded-t-xl' : ''} bg-gray-${modelValue ? '300' : '200'} dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-800`" aria-expanded="true" aria-controls="accordion-example-body-1">
         <span>
           <slot name="header"></slot>
         </span>
-        <svg data-accordion-icon :class="`w-6 h-6 rotate-${isActive ? '180' : '0'} shrink-0`" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        <svg data-accordion-icon :class="`w-6 h-6 rotate-${modelValue ? '180' : '0'} shrink-0`" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
         <!-- <svg data-accordion-icon class="w-6 h-6 rotate-0 shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg> -->
       </button>
     </h2>
-    <div id="accordion-example-body-1" :class="{'hidden': !isActive}" aria-labelledby="accordion-example-heading-1">
+    <div id="accordion-example-body-1" :class="{'hidden': !modelValue}" aria-labelledby="accordion-example-heading-1">
       <div class="p-4 border border-t-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
-        <slot name="body"></slot>
+        <Transition name="fade" mode="out-in">
+        <slot v-if="modelValue" name="body"></slot>
+        </Transition>
+        </div>
       </div>
-    </div>
     <!-- <h2 id="accordion-example-heading-2">
       <button type="button" class="flex items-center justify-between w-full p-5 font-medium text-left text-gray-500 border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800" aria-expanded="false" aria-controls="accordion-example-body-2">
         <span>Is there a Figma file available?</span>
@@ -65,3 +67,14 @@ const emit = defineEmits(['isActive'])
     </div> -->
   </div>
 </template>
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

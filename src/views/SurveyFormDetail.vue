@@ -63,6 +63,7 @@ const railForm = {
   // createdAt: null,
   // createdBy: null
 }
+const surveyForm = ref()
 const isReady = ref(false)
 const railSurvey = reactive(railForm)
 const rules = computed(() => {
@@ -74,6 +75,12 @@ const rules = computed(() => {
           rule[key] = {
             lattitude: { required },
             longitude: { required }
+          }
+          break
+        case 'nearby':
+          rule[key] = {
+            stationBefore: { required },
+            stationAfter: { required }
           }
           break
         case 'defectSituation':
@@ -148,6 +155,11 @@ const handleSubmit = async () => {
         }).catch(console.log())
       })
     }
+  } else {
+    console.log(surveyForm.value.general)
+    surveyForm.value.scrollToError()
+    // console.log(surveyForm.value);
+    // window.scrollTo(0, top)
   }
   // const { isEmpty, data } = signaturePad.value.saveSignature()
   // railSurvey.signature = data
@@ -204,7 +216,7 @@ const getSurveyID = (id) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm v-model="railSurvey" :validate="v$"></SurveyForm>
+  <SurveyForm ref="surveyForm" v-model="railSurvey" :validate="v$"></SurveyForm>
   <div class="container flex justify-end mt-8">
     <button type="button" class="_button" @click="handleSubmit()">Submit</button>
   </div>

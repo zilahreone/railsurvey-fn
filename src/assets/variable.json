@@ -167,16 +167,6 @@
       "value": "r350lht"
     }
   ],
-  "situation": [
-    {
-      "key": "รางปกติ (Plain Rail)",
-      "value": "plainRail"
-    },
-    {
-      "key": "ปลายราง (Rail End)",
-      "value": "railEnd"
-    }
-  ],
   "damageAreaPrperties": [
     {
       "key": "พื้นที่ลาดชัน (Slope)",
@@ -203,66 +193,64 @@
       "value": "flood"
     }
   ],
-  "positionDamage": {
-    "topRail": [
-      {
-        "key": "หัวราง (Rail head)",
-        "value": "railHead"
-      },
-      {
-        "key": "เอวราง (Rail web)",
-        "value": "railWeb"
-      },
-      {
-        "key": "ฐานราง (Rail foot)",
-        "value": "railFoot"
-      },
-      {
-        "key": "เต็มหน้าตัด (Full section)",
-        "value": "fullSection"
-      },
-      {
-        "key": "สันราง (Gauge side)",
-        "value": "gaugeSide"
-      },
-      {
-        "key": "พื้นผิวบนหัวราง (Surface of Rail Head)",
-        "value": "surfaceRailHead"
-      }
-    ],
-    "damageArea": [
-      {
-        "title": "ประกับราง (Fish Plate)",
-        "img": "positionDamage/Picture2.png",
-        "value": "fishPlate"
-      },
-      {
-        "title": "รอยเชื่อมซ่อม (Welding Repair)",
-        "img": "positionDamage/Picture5.png",
-        "value": "weldingRepair"
-      },
-      {
-        "title": "แนวเชื่อมต่อราง (Welding Joint)",
-        "img": "positionDamage/Picture3.png",
-        "value": "weldingJoint"
-      },
-      {
-        "title": "จุดตัดราง (Crossing)",
-        "img": "positionDamage/Picture7.png",
-        "value": "crossing"
-      },
-      {
-        "title": "ประแจ (Turn Out)",
-        "img": "positionDamage/Picture6.png",
-        "value": "turnOut"
-      },
-      {
-        "title": "ทางข้ามราง (Railroad Crossing)",
-        "img": "positionDamage/Picture4.png",
-        "value": "railroadCrossing"
-      }
-    ]
-  },
+  "situation": [
+    {
+      "key": "ประกับราง (Fish Plate)",
+      "img": "positionDamage/Picture2.png",
+      "value": "fishPlate"
+    },
+    {
+      "key": "รอยเชื่อมซ่อม (Welding Repair)",
+      "img": "positionDamage/Picture5.png",
+      "value": "weldingRepair"
+    },
+    {
+      "key": "แนวเชื่อมต่อราง (Welding Joint)",
+      "img": "positionDamage/Picture3.png",
+      "value": "weldingJoint"
+    },
+    {
+      "key": "จุดตัดราง (Crossing)",
+      "img": "positionDamage/Picture7.png",
+      "value": "crossing"
+    },
+    {
+      "key": "ประแจ (Turn Out)",
+      "img": "positionDamage/Picture6.png",
+      "value": "turnOut"
+    },
+    {
+      "key": "ทางข้ามราง (Railroad Crossing)",
+      "img": "positionDamage/Picture4.png",
+      "value": "railroadCrossing"
+    }
+  ],
+  "location": [
+    {
+      "key": "หัวราง (Rail head)",
+      "value": "railHead"
+    },
+    {
+      "key": "เอวราง (Rail web)",
+      "value": "railWeb"
+    },
+    {
+      "key": "ฐานราง (Rail foot)",
+      "value": "railFoot"
+    },
+    {
+      "key": "เต็มหน้าตัด (Full section)",
+      "value": "fullSection"
+    },
+    {
+      "key": "สันราง (Gauge side)",
+      "value": "gaugeSide"
+    },
+    {
+      "key": "พื้นผิวบนหัวราง (Surface of Rail Head)",
+      "value": "surfaceRailHead"
+    }
+  ],
   "damageProperties": [
     {
       "key": "แตกหัก (Fracture)",
@@ -429,7 +417,7 @@
   "maintenanceTime": [
     {
       "key": "น้อยกว่า 1 ครั้ง",
-      "value": "lessThan-1"
+      "value": "lessThan1"
     },
     {
       "key": "1 ครั้ง",
@@ -441,7 +429,7 @@
     },
     {
       "key": "มากกว่า 3 ครั้ง",
-      "value": "moreThan-3"
+      "value": "moreThan3"
     }
   ],
   "maintenanceMethod": [
