@@ -195,9 +195,19 @@
   ],
   "situation": [
     {
-      "key": "ประกับราง (Fish Plate)",
+      "key": "รางปกติ (Plain Rail)",
       "img": "positionDamage/Picture2.png",
-      "value": "fishPlate"
+      "value": "plainRail"
+    },
+    {
+      "key": "ปลายราง (Rail End)",
+      "img": "positionDamage/Picture2.png",
+      "value": "railEnd"
+    },
+    {
+      "key": "จุดตัดราง (Crossing)",
+      "img": "positionDamage/Picture7.png",
+      "value": "crossing"
     },
     {
       "key": "รอยเชื่อมซ่อม (Welding Repair)",
@@ -205,14 +215,14 @@
       "value": "weldingRepair"
     },
     {
+      "key": "ประกับราง (Fish Plate)",
+      "img": "positionDamage/Picture2.png",
+      "value": "fishPlate"
+    },
+    {
       "key": "แนวเชื่อมต่อราง (Welding Joint)",
       "img": "positionDamage/Picture3.png",
       "value": "weldingJoint"
-    },
-    {
-      "key": "จุดตัดราง (Crossing)",
-      "img": "positionDamage/Picture7.png",
-      "value": "crossing"
     },
     {
       "key": "ประแจ (Turn Out)",
@@ -347,36 +357,32 @@
   ],
   "trackGeometry": [
     {
-      "title": "Alignment",
+      "key": "Alignment",
       "img": "trackGeometry/Picture1.png",
       "value": "alignment"
     },
     {
-      "title": "Track Guage",
+      "key": "Track Guage",
       "img": "trackGeometry/Picture2.png",
       "value": "trackGuage"
     },
     {
-      "title": "Longitudinal Level",
+      "key": "Longitudinal Level",
       "img": "trackGeometry/Picture3.png",
       "value": "longitudinalLevel"
     },
     {
-      "title": "Super Elevation",
+      "key": "Super Elevation",
       "img": "trackGeometry/Picture4.png",
       "value": "superElevation"
     },
     {
-      "title": "Twist",
+      "key": "Twist",
       "img": "trackGeometry/Picture5.png",
       "value": "twist"
     }
   ],
   "ballast": [
-    {
-      "key": "สมบูรณ์",
-      "value": "perfect"
-    },
     {
       "key": "พร่อง (Lack)",
       "value": "lack"
@@ -384,13 +390,13 @@
     {
       "key": "มีลักษณะกลม (Round)",
       "value": "round"
+    },
+    {
+      "key": "หินฟอกขาว",
+      "value": "bleachedStone"
     }
   ],
   "sleeper": [
-    {
-      "key": "สมบูรณ์",
-      "value": "perfect"
-    },
     {
       "key": "แตกหัก (Fracture)",
       "value": "fracture"
@@ -412,6 +418,40 @@
     {
       "key": "ไม่เคย",
       "value": false
+    }
+  ],
+  "lastMaintenance": [
+    {
+      "key": "3 เดือน",
+      "value": "3months"
+    },
+    {
+      "key": "6 เดือน",
+      "value": "6months"
+    },
+    {
+      "key": "1 ปี",
+      "value": "1year"
+    },
+    {
+      "key": "2 ปี",
+      "value": "2years"
+    },
+    {
+      "key": "3 ปี",
+      "value": "3years"
+    },
+    {
+      "key": "4 ปี",
+      "value": "4years"
+    },
+    {
+      "key": "5 ปี",
+      "value": "5years"
+    },
+    {
+      "key": "มากกว่า 5 ปี",
+      "value": "moreThan5years"
     }
   ],
   "maintenanceTime": [

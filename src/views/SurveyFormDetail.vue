@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { required, helpers, requiredIf, minValue, maxValue, requiredUnless } from '@vuelidate/validators'
+import { required, helpers, requiredIf, minValue, maxValue, requiredUnless, minLength } from '@vuelidate/validators'
 import { useRouter, useRoute } from 'vue-router'
 import SurveyForm from '@/components/SurveyForm'
 import PageNotFound from '@/views/PageNotFound'
@@ -38,18 +38,18 @@ const railForm = {
     stationAfter: null
   },
   railType: null,
-  areaCondition: null,
+  areaCondition: [],
   defectSituation: {
     railPositionDefect: null,
-    railAreaDefect: null,
+    railAreaDefect: [],
   },
   defectPattern: null,
   surfaceDefect: null,
   railCondition: null,
   trackGeometryCondition: null,
   // defectTrackGeometry: null,
-  ballastCondition: null,
-  sleeperCondition: null,
+  ballastCondition: [],
+  sleeperCondition: [],
   trackFoundationCondition: null,
   uploadImage: null,
   severity: null,
@@ -57,7 +57,7 @@ const railForm = {
   hasMaintenanceRecord: null,
   lastMaintenanceDate: null,
   yearlyMaintenanceTimes: null,
-  maintenanceMethod: null,
+  maintenanceMethod: [],
   note: null,
   signature: null
   // createdAt: null,
@@ -83,16 +83,25 @@ const rules = computed(() => {
             stationAfter: { required }
           }
           break
+        case 'areaCondition':
+          rule[key] = { required, minLength: minLength(1) }
+          break
         case 'defectSituation':
           rule[key] = {
             railPositionDefect: { required },
-            railAreaDefect: { required }
+            railAreaDefect: { required, minLength: minLength(1) }
           }
           break
         case 'surfaceDefect':
           rule[key] = {
             defectPattern: requiredIf(() => railSurvey.defectPattern === 'surfaceDefect')
           }
+          break
+        case 'ballastCondition':
+          rule[key] = { required, minLength: minLength(1) }
+          break
+        case 'sleeperCondition':
+          rule[key] = { required, minLength: minLength(1) }
           break
         case 'trackGeometryCondition':
           rule[key] = {
@@ -111,8 +120,11 @@ const rules = computed(() => {
           break
         case 'maintenanceMethod':
           rule[key] = {
-            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord)
+            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord),
+            minLength: minLength(1)
           }
+          // rule[key] = {
+          // },
           break
         default:
           rule[key] = { required }
@@ -216,10 +228,10 @@ const getSurveyID = (id) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm ref="surveyForm" v-model="railSurvey" :validate="v$"></SurveyForm>
-  <div class="container flex justify-end mt-8">
+  <SurveyForm ref="surveyForm" v-model="railSurvey" :validate="v$" @submit="handleSubmit()"></SurveyForm>
+  <!-- <div class="container flex justify-end mt-8">
     <button type="button" class="_button" @click="handleSubmit()">Submit</button>
-  </div>
+  </div> -->
   <!-- {{ route.params.id }}
   detail -->
 </template>

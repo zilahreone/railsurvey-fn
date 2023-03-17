@@ -6,10 +6,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  tail: {
-    type: Boolean,
-    default: false
-  },
   modelValue: {
     type: Boolean,
     default: false
@@ -31,9 +27,10 @@ const emit = defineEmits(['update:modelValue'])
     </h2>
     <div id="accordion-example-body-1" :class="{'hidden': !modelValue}" aria-labelledby="accordion-example-heading-1">
       <div class="p-4 border border-t-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
-        <Transition name="fade" mode="out-in">
+        <!-- <Transition name="fade" mode="out-in">
         <slot v-if="modelValue" name="body"></slot>
-        </Transition>
+      </Transition> -->
+          <slot name="body"></slot>
         </div>
       </div>
     <!-- <h2 id="accordion-example-heading-2">
