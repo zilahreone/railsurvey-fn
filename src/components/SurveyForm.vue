@@ -197,58 +197,30 @@ const onEnd = () => {
 const handleFilterLocation = (value) => {
   if (value === 'situation') {
     if (railSurvey.railDamageSurvey.location.length > 0 ) {
-      emit('update:modelValue', Object.assign(railSurvey.railDamageSurvey, { location: railSurvey.railDamageSurvey.location.filter(rd => !compDisablesLocation.value.includes(rd)) }))
+      emit('update:modelValue', Object.assign(railSurvey, { railDamageSurvey: Object.assign(railSurvey.railDamageSurvey, { location: railSurvey.railDamageSurvey.location.filter(rd => !compDisablesLocation.value.includes(rd)) }) }))
+      // emit('update:modelValue', Object.assign(railSurvey.railDamageSurvey, { location: railSurvey.railDamageSurvey.location.filter(rd => !compDisablesLocation.value.includes(rd)) }))
     }
   }
 }
 
 const handleFilterdefectPattern = () => {
   if (railSurvey.railDamageSurvey.defectPattern.length > 0 ) {
-    emit('update:modelValue', Object.assign(railSurvey.railDamageSurvey, { defectPattern: railSurvey.railDamageSurvey.defectPattern.filter(rd => !compDisablesDefectPattern.value.includes(rd)) }))
+    emit('update:modelValue', Object.assign(railSurvey, { railDamageSurvey: Object.assign(railSurvey.railDamageSurvey, { defectPattern: railSurvey.railDamageSurvey.defectPattern.filter(rd => !compDisablesDefectPattern.value.includes(rd)) }) }))
   }
 }
 
 const handleEmit = (target) => {
   const arr = target.name.split('\.')
   console.log(arr);
-  if (arr[0] === 'generalSurvey') {
+  if (['coordinates', 'nearby', 'maintenanceRecord'].includes(arr[1])) {
+    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: arr[1] === 'coordinates' ? parseFloat(target.value) : target.value }) }) }))
+  } else if (['zone', 'kilometers', 'railType'].includes(arr[1])) {
     if (arr[1] === 'zone') {
-      emit('update:modelValue', Object.assign(railSurvey, Object.assign(railSurvey[arr[0]])))
-    } else if (arr[1] === 'coordinates') {
-      emit('update:modelValue', Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: parseFloat(target.value) }))
-    } else if (arr[1] === 'nearby') {
-      emit('update:modelValue', Object.assign(railSurvey, Object.assign(railSurvey[arr[0]], Object.assign(railSurvey[arr[1]], { [arr[2]]: target.value } ))))
+      emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value, nearby:  handleSelectZone(target.value) }) }))
     } else {
-      // console.log(Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value }))
-      // railSurvey[arr[0]][arr[1]] =  target.value
-      // emit('update:modelValue', Object.assign(railSurvey, railSurvey[arr[0]] ))
       emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value }) }))
-      // { railSurvey[arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value }) }
     }
   }
-  else if (arr[0] === 'railDamageSurvey') {}
-  else if (arr[0] === 'trackDamageSurvey') {}
-  else if (arr[0] === 'maintenanceRate') {
-    if (arr[1] === 'maintenanceRecord') {
-      
-      emit('update:modelValue', Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: target.value }))
-    }
-  }
-  // if (arr[0] === 'coordinates') {
-  //   let coord = JSON.parse(JSON.stringify(railSurvey[arr[0]]))
-  //   coord[arr[1]] = parseFloat(target.value)
-  //   emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: coord }))
-  // } else if (arr[0] === 'zone') {
-  //   emit('update:modelValue', Object.assign(railSurvey, { [target.name]: target.value, nearby: handleSelectZone(target.value) }))
-  // } else if (arr[0] === 'nearby') {
-  //   let nearby = JSON.parse(JSON.stringify(railSurvey[arr[0]]))
-  //   nearby[arr[1]] = target.value
-  //   emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: nearby }))
-  // } else if (arr[0] === 'yearlyMaintenanceTimes') {
-  //   emit('update:modelValue', Object.assign(railSurvey, { [target.name]: parseInt(target.value) }))
-  // } else {
-  //   emit('update:modelValue', Object.assign(railSurvey, { [target.name]: target.value }))
-  // }
 }
 
 // COMPUTED //
@@ -272,7 +244,6 @@ const compDisablesDefectPattern = computed(() => {
 const compDefectPattern = computed(() => {
   const location = railSurvey.railDamageSurvey.location.filter((location, index) => ['railHead', 'railWeb', 'railFoot', 'fullSection'].includes(location))
   const location2 = railSurvey.railDamageSurvey.location.filter((location, index) => ['gaugeSide','surfaceRailHead'].includes(location))
-  console.log(location.length > 0 && location2 === 0);
   if (location.length > 0 && location2.length === 0) {
     return variable.defectPattern.filter(defect => ['fracture', 'rupture', 'wear', 'bend', 'corrosion'].includes(defect.value))
   } else if (location.length === 0 && location2.length > 0) {
