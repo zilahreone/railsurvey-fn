@@ -16,15 +16,10 @@ const props = defineProps({
   }
 })
 
-onMounted(() => {
-  console.log(moment(new Date()).format('YYYY-MM-DDTHH:mm'));
-  console.log(new Date('2018-06-14T20:00'));
-  console.log(new Date('2018-06-14T20:00').toISOString());
-})
-
 const store = useStore()
 const router = useRouter()
 const route = useRoute()
+
 const railForm = {
   generalSurvey: {
     date: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
@@ -49,9 +44,18 @@ const railForm = {
   },
   trackDamageSurvey: {
     uploadImages: {},
-    trackGeometryCondition: [],
-    ballastCondition: [],
-    sleeperCondition: [],
+    trackGeometryCondition: {
+      isPerfect: null,
+      condition: []
+    },
+    ballastCondition: {
+      isPerfect: null,
+      condition: []
+    },
+    sleeperCondition: {
+      isPerfect: null,
+      condition: []
+    },
     trackFoundationCondition: null,
   },
   maintenanceRate: {
@@ -92,12 +96,27 @@ const rules = computed(() => {
             rule[key1][key2] = { required }
           }
         })
-      } else if (key1 === 'railDamageSurvey' || key1 === 'trackDamageSurvey') {
+      } else if (key1 === 'railDamageSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
-          if (key2 !== 'uploadImages') {
+          if (!['uploadImages'].includes(key2)) {
             rule[key1][key2] = { required, minLength: minLength(1) }
+          }
+        })
+      } else if (key1 === 'trackDamageSurvey') {
+        Object.keys(railForm[key1]).forEach((key2) => {
+          if (['trackGeometryCondition', 'ballastCondition', 'sleeperCondition'].includes(key2)) {
+            rule[key1][key2] = {}
+            Object.keys(railForm[key1][key2]).forEach((key3) => {
+              if (key3 === 'condition') {
+                rule[key1][key2][key3] = { isPerfect: requiredIf(() => railSurvey[key1][key2]['isPerfect'] === 'imperfect'), minLength: minLength(1) }
+              } else {
+                rule[key1][key2][key3] = { required }
+              }
+            })
           } else {
-            rule[key1][key2] = { required }
+            if (key2 !== 'uploadImages') {
+              rule[key1][key2] = { required }
+            }
           }
         })
       } else if (key1 === 'maintenanceRate') {
@@ -108,7 +127,7 @@ const rules = computed(() => {
               if (key3 === 'hasMaintenanceRecord') {
                 rule[key1][key2][key3] = { required }
               } else {
-                rule[key1][key2][key3] = { hasMaintenanceRecord: requiredIf(() => railForm[key1][key2][key3]) }
+                rule[key1][key2][key3] = { hasMaintenanceRecord: requiredIf(() => railSurvey[key1][key2]['hasMaintenanceRecord']) }
               }
             })
           } else if (key2 === 'maintenanceMethod') {
@@ -184,15 +203,20 @@ const handleSubmit = async () => {
 }
 
 onMounted(() => {
+  railSurvey.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm')
   navigator.geolocation.getCurrentPosition((position)=> {
     const p = position.coords;
     railSurvey.generalSurvey.coordinates.latitude = p.latitude
     railSurvey.generalSurvey.coordinates.longitude = p.longitude
     // console.log(p.latitude, p.longitude);
   })
+
   if (!props.isNew) {
     // getSurveyID(route.params.id)
   }
+  // console.log(moment(new Date()).format('YYYY-MM-DDTHH:mm'));
+  // console.log(new Date('2018-06-14T20:00'));
+  // console.log(new Date('2018-06-14T20:00').toISOString());
 })
 
 const getSurveyID = (id) => {
@@ -221,7 +245,7 @@ const test = (val) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm ref="surveyForm" @input="test($event.target.value)" v-model="railSurvey" :validate="v$" @submit="handleSubmit()"></SurveyForm>
+  <SurveyForm ref="surveyForm" v-model="railSurvey" :validate="v$" @submit="handleSubmit()"></SurveyForm>
   <!-- <div class="container flex justify-end mt-8">
     <button type="button" class="_button" @click="handleSubmit()">Submit</button>
   </div> -->
