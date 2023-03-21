@@ -261,6 +261,67 @@
       "value": "surfaceRailHead"
     }
   ],
+  "defectPattern": [
+    {
+      "key": "แตกหัก (Fracture)",
+      "value": "fracture"
+    },
+    {
+      "key": "แตกร้าว (Rupture)",
+      "value": "rupture"
+    },
+    {
+      "key": "สึกหรอ (Wear)",
+      "value": "wear"
+    },
+    {
+      "key": "รางคดงอ (Bend)",
+      "value": "bend"
+    },
+    {
+      "key": "เกิดสนิม/กัดกร่อน (Corrosion)",
+      "value": "corrosion"
+    },
+    {
+      "key": "เป็นแผล/เสียรูป เสียเนื้อโลหะ/เพียงบางส่วน (Surface Defect)",
+      "value": "surfaceDefect"
+    },
+    {
+      "key": "Crushed Head",
+      "img": "scar/Picture1.jpg",
+      "value": "crushedHead"
+    },
+    {
+      "key": "Head Checking",
+      "img": "scar/Picture2.jpg",
+      "value": "headChecking"
+    },
+    {
+      "key": "Spalling",
+      "img": "scar/Picture3.jpg",
+      "value": "spalling"
+    },
+    {
+      "key": "Side Wear",
+      "img": "scar/Picture4.jpg",
+      "value": "sideWear"
+    },
+    {
+      "key": "Shelling",
+      "img": "scar/Picture5.jpg",
+      "value": "shelling"
+      
+    },
+    {
+      "key": "Burned Rail",
+      "img": "scar/Picture6.jpg",
+      "value": "burnedRail"
+    },
+    {
+      "key": "รูปแบบอื่นๆ",
+      "value": "other"
+    }
+  ],
   "damageProperties": [
     {
       "key": "แตกหัก (Fracture)",

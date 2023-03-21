@@ -29,40 +29,40 @@ const props = defineProps({
   modelValue: {
     type: [Object, null],
     default: {
-      date: new Date().toISOString().substring(0, 10),
-      zone: null,
-      coordinates: {
-        latitude: null,
-        longitude: null
-      },
-      kilometers: null,
-      nearby: {
-        stationBefore: null,
-        stationAfter: null
-      },
-      railType: null,
-      areaCondition: [],
-      defectSituation: {
-        railPositionDefect: null,
-        railAreaDefect: [],
-      },
-      defectPattern: null,
-      surfaceDefect: null,
-      railCondition: null,
-      trackGeometryCondition: null,
-      // defectTrackGeometry: null,
-      ballastCondition: [],
-      sleeperCondition: [],
-      trackFoundationCondition: null,
-      uploadImage: null,
-      severity: null,
-      isAnalyzeDamage: null,
-      hasMaintenanceRecord: null,
-      lastMaintenanceDate: null,
-      yearlyMaintenanceTimes: null,
-      maintenanceMethod: [],
-      note: null,
-      signature: null
+      // date: new Date().toISOString().substring(0, 10),
+      // zone: null,
+      // coordinates: {
+      //   latitude: null,
+      //   longitude: null
+      // },
+      // kilometers: null,
+      // nearby: {
+      //   stationBefore: null,
+      //   stationAfter: null
+      // },
+      // railType: null,
+      // areaCondition: [],
+      // defectSituation: {
+      //   railAreaDefect: [],
+      //   railPositionDefect: [],
+      // },
+      // defectPattern: null,
+      // surfaceDefect: null,
+      // railCondition: null,
+      // trackGeometryCondition: null,
+      // // defectTrackGeometry: null,
+      // ballastCondition: [],
+      // sleeperCondition: [],
+      // trackFoundationCondition: null,
+      // uploadImage: null,
+      // severity: null,
+      // isAnalyzeDamage: null,
+      // hasMaintenanceRecord: null,
+      // lastMaintenanceDate: null,
+      // yearlyMaintenanceTimes: null,
+      // maintenanceMethod: [],
+      // note: null,
+      // signature: null
       // createdAt: null,
       // createdBy: null
     }
@@ -90,7 +90,7 @@ const isActiveMA = ref(true)
 const general = ref(null)
 
 onMounted(() => {
-  signaturePad.value.signatureData = railSurvey.signature
+  // signaturePad.value.signatureData = railSurvey.signature
 })
 
 const undo = () => {
@@ -195,32 +195,71 @@ const onEnd = () => {
 }
 
 const handleEmit = (target) => {
+  console.log(target.name);
+  console.log(target.value);
+  console.log(parseFloat(target.value));
   const arr = target.name.split('\.')
-  if (arr[0] === 'coordinates') {
-    let coord = JSON.parse(JSON.stringify(railSurvey[arr[0]]))
-    coord[arr[1]] = parseFloat(target.value)
-    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: coord }))
-  } else if (arr[0] === 'zone') {
-    emit('update:modelValue', Object.assign(railSurvey, { [target.name]: target.value, nearby: handleSelectZone(target.value) }))
-  } else if (arr[0] === 'nearby') {
-    let nearby = JSON.parse(JSON.stringify(railSurvey[arr[0]]))
-    nearby[arr[1]] = target.value
-    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: nearby }))
-  } else if (arr[0] === 'yearlyMaintenanceTimes') {
-    emit('update:modelValue', Object.assign(railSurvey, { [target.name]: parseInt(target.value) }))
-  } else {
-    emit('update:modelValue', Object.assign(railSurvey, { [target.name]: target.value }))
+  console.log(arr);
+  if (arr[0] === 'generalSurvey') {
+    if (arr[1] === 'zone') {
+      emit('update:modelValue', Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value, nearby: handleSelectZone(target.value) }))
+    } else if (arr[1] === 'coordinates') {
+      emit('update:modelValue', Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: parseFloat(target.value)}))
+    } else {
+      emit('update:modelValue', Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value }))
+    }
   }
+  else if (arr[0] === 'railDamageSurvey') {
+  }
+  else if (arr[0] === 'trackDamageSurvey') {}
+  else if (arr[0] === 'maintenanceRate') {}
+  // if (arr[0] === 'coordinates') {
+  //   let coord = JSON.parse(JSON.stringify(railSurvey[arr[0]]))
+  //   coord[arr[1]] = parseFloat(target.value)
+  //   emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: coord }))
+  // } else if (arr[0] === 'zone') {
+  //   emit('update:modelValue', Object.assign(railSurvey, { [target.name]: target.value, nearby: handleSelectZone(target.value) }))
+  // } else if (arr[0] === 'nearby') {
+  //   let nearby = JSON.parse(JSON.stringify(railSurvey[arr[0]]))
+  //   nearby[arr[1]] = target.value
+  //   emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: nearby }))
+  // } else if (arr[0] === 'yearlyMaintenanceTimes') {
+  //   emit('update:modelValue', Object.assign(railSurvey, { [target.name]: parseInt(target.value) }))
+  // } else {
+  //   emit('update:modelValue', Object.assign(railSurvey, { [target.name]: target.value }))
+  // }
 }
 
 // COMPUTED //
-// const compNearby = computed(() => {
-//   let nearby = []
-//   Object.keys(railSurvey.nearby).forEach(key => {
-//     nearby.push(variable.zone.filter(z => z.value === railSurvey.nearby[key]).map(z => z.key).join())
-//   })
-//   return nearby
-// })
+const compDisablesLocation = computed(() => {
+  const filteredArray = railSurvey.railDamageSurvey.situation.filter(rd => ['weldingJoint','fishPlate','railroadCrossing','turnOut'].includes(rd))
+  if (filteredArray.length > 0) {
+    return ['gaugeSide','surfaceRailHead']
+  }
+  return []
+})
+const compDisablesDefectPattern = computed(() => {
+  const location = railSurvey.railDamageSurvey.location.filter((location, index) => ['railHead', 'railWeb', 'railFoot', 'fullSection'].includes(location))
+  const location2 = railSurvey.railDamageSurvey.location.filter((location, index) => ['gaugeSide','surfaceRailHead'].includes(location))
+  if (location.length > 0 && location2.length === 0) {
+    return ['surfaceDefect', 'crushedHead', 'headChecking', 'spalling', 'sideWear', 'shelling', 'burnedRail', 'other']
+  } else if (location.length === 0 && location2.length > 0) {
+    return ['fracture', 'rupture', 'wear', 'bend', 'corrosion']
+  }
+  return []
+})
+const compDefectPattern = computed(() => {
+  const location = railSurvey.railDamageSurvey.location.filter((location, index) => ['railHead', 'railWeb', 'railFoot', 'fullSection'].includes(location))
+  const location2 = railSurvey.railDamageSurvey.location.filter((location, index) => ['gaugeSide','surfaceRailHead'].includes(location))
+  console.log(location.length > 0 && location2 === 0);
+  if (location.length > 0 && location2.length === 0) {
+    return variable.defectPattern.filter(defect => ['fracture', 'rupture', 'wear', 'bend', 'corrosion'].includes(defect.value))
+  } else if (location.length === 0 && location2.length > 0) {
+    return variable.defectPattern.filter(defect => ['surfaceDefect', 'crushedHead', 'headChecking', 'spalling', 'sideWear', 'shelling', 'burnedRail', 'other'].includes(defect.value))
+  } else {
+    return variable.defectPattern
+  }
+})
 </script>
 <template>
   <!-- <pre> {{ railSurvey }} </pre> -->
@@ -234,60 +273,57 @@ const handleEmit = (target) => {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-2">
             <div>
               <label class="_label-sm">วันที่สำรวจ</label>
-              <input disabled :value="railSurvey.date" type="datetime-local" :max="railSurvey.date" id="date" :class="v$.date.$error ? '_input_error' : '_input'" required>
-              <p v-if="v$.date.$error" class="text-sm text-red-600">{{ v$.date.$errors[0].$message }}</p>
+              <input disabled :value="railSurvey.generalSurvey.date" type="datetime-local" :max="railSurvey.generalSurvey.date" id="date" :class="'_input'" required>
+              <!-- <p v-if="v$.generalSurvey.date.$error" class="text-sm text-red-600">{{ v$.generalSurvey.date.$errors[0].$message }}</p> -->
             </div>
             <div>
               <label class="_label-sm">เขตการเดินรถ</label>
-              <select name="zone" :value="railSurvey.zone" @change="handleEmit($event.target)" id="zone" :class="v$.zone.$error ? '_input_error' : '_input'">
+              <select name="generalSurvey.zone" :value="railSurvey.generalSurvey.zone" @change="handleEmit($event.target)" id="zone" :class="v$.generalSurvey.zone.$error ? '_input_error' : '_input'">
                 <option disabled value="">กรุณาเลือกเขตการเดินรถ</option>
                 <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
               </select>
-              <p v-if="v$.zone.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
+              <p v-if="v$.generalSurvey.zone.$error" class="text-sm text-red-600">{{ v$.generalSurvey.zone.$errors[0].$message }}</p>
             </div>
             <div>
               <label class="_label-sm">หลักกิโลเมตร/เสาโทรเลข</label>
-              <input :value="railSurvey.kilometers" name="kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.kilometers.$error ? '_input_error' : '_input' " required>
-              <p v-if="v$.kilometers.$error" class="text-sm text-red-600">{{ v$.kilometers.$errors[0].$message }}</p>
+              <input :value="railSurvey.generalSurvey.kilometers" name="generalSurvey.kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.generalSurvey.kilometers.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.generalSurvey.kilometers.$error" class="text-sm text-red-600">{{ v$.generalSurvey.kilometers.$errors[0].$message }}</p>
             </div>
             <div>
               <label class="_label-sm">มาตรฐานและเกรด</label>
-              <select name="railType" :value="railSurvey.railType" @change="handleEmit($event.target)" id="railType" :class="v$.railType.$error ? '_input_error' : '_input'">
+              <select name="railType" :value="railSurvey.generalSurvey.railType" @change="handleEmit($event.target)" id="railType" :class="v$.generalSurvey.railType.$error ? '_input_error' : '_input'">
                 <option disabled value="">กรุณาเลือกประเภทของเกจ</option>
                 <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
               </select>
-              <p v-if="v$.railType.$error" class="text-sm text-red-600">{{ v$.railType.$errors[0].$message }}</p>
+              <p v-if="v$.generalSurvey.railType.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.$errors[0].$message }}</p>
             </div>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-2 gap-y-4">
             <div>
               <label class="_label-sm">พิกัด GPS</label>
-              <div class="flex md:flex-row flex-col gap-2">
-                <div class="flex-1">
-                  <input :value="railSurvey.coordinates.lattitude" type="text" name="coordinates.lattitude" @input="handleEmit($event.target)" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
-                </div>
-                <div class="flex-1">
-                  <input :value="railSurvey.coordinates.longitude" type="text" name="coordinates.longitude" @input="handleEmit($event.target)" :class="v$.coordinates.$error ? '_input_error' : '_input' " required>
-                </div>
-              </div>
-              <p v-if="v$.coordinates.$error" class="text-sm text-red-600">{{ v$.coordinates.$errors[0].$message }}</p>
+              <input :value="railSurvey.generalSurvey.coordinates.latitude" type="text" name="generalSurvey.coordinates.latitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.latitude.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.generalSurvey.coordinates.latitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.latitude.$errors[0].$message }}</p>
+            </div>
+            <div class="pt-7">
+              <input :value="railSurvey.generalSurvey.coordinates.longitude" type="text" name="generalSurvey.coordinates.longitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.longitude.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.generalSurvey.coordinates.longitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.longitude.$errors[0].$message }}</p>
             </div>
             <div>
               <label class="_label-sm">สถานีรถไฟใกล้เคียง</label>
               <div class="flex md:flex-row flex-col gap-2">
                 <div class="flex-1">
-                  <select name="nearby.stationBefore" :value="railSurvey.nearby.stationBefore" @change="handleEmit($event.target)" id="stationBefore" :class="v$.nearby.stationBefore.$error ? '_input_error' : '_input'">
+                  <select name="generalSurvey.nearby.stationBefore" :value="railSurvey.generalSurvey.nearby.stationBefore" @change="handleEmit($event.target)" id="stationBefore" :class="v$.generalSurvey.nearby.stationBefore.$error ? '_input_error' : '_input'">
                     <option disabled value="">กรุณาเลือกสถานีก่อนหน้า</option>
                     <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
                   </select>
-                  <p v-if="v$.nearby.stationBefore.$error" class="text-sm text-red-600">{{ v$.nearby.stationBefore.$errors[0].$message }}</p>
+                  <p v-if="v$.generalSurvey.nearby.stationBefore.$error" class="text-sm text-red-600">{{ v$.generalSurvey.nearby.stationBefore.$errors[0].$message }}</p>
                 </div>
                 <div class="flex-1">
-                  <select name="nearby.stationAfter" :value="railSurvey.nearby.stationAfter" @change="handleEmit($event.target)" id="stationAfter" :class="v$.nearby.stationAfter.$error ? '_input_error' : '_input'">
+                  <select name="nearby.stationAfter" :value="railSurvey.generalSurvey.nearby.stationAfter" @change="handleEmit($event.target)" id="stationAfter" :class="v$.generalSurvey.nearby.stationAfter.$error ? '_input_error' : '_input'">
                     <option disabled value="">กรุณาเลือกสถานีถัดไป</option>
                     <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
                   </select>
-                  <p v-if="v$.nearby.stationAfter.$error" class="text-sm text-red-600">{{ v$.nearby.stationAfter.$errors[0].$message }}</p>
+                  <p v-if="v$.generalSurvey.nearby.stationAfter.$error" class="text-sm text-red-600">{{ v$.generalSurvey.nearby.stationAfter.$errors[0].$message }}</p>
                 </div>
               </div>
             </div>
@@ -295,10 +331,9 @@ const handleEmit = (target) => {
           <div>
             <label class="_label-sm">ลักษณะพื้นที่ที่เกิดความเสียหาย (Type of failure area)</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-              <!-- <SelectBtn :error="v$.areaCondition.$error" :class="''" v-model="railSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties"></SelectBtn> -->
-              <SelectBtn type="checkbox" :error="v$.areaCondition.$error" v-model="railSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties"></SelectBtn>
+              <SelectBtn type="checkbox" :error="v$.generalSurvey.areaCondition.$error" v-model="railSurvey.generalSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties"></SelectBtn>
             </div>
-            <p v-if="v$.areaCondition.$error" class="text-sm text-red-600">{{ v$.zone.$errors[0].$message }}</p>
+            <p v-if="v$.generalSurvey.areaCondition.$error" class="text-sm text-red-600">{{ v$.generalSurvey.areaCondition.$errors[0].$message }}</p>
           </div>
         </div>
       </template>
@@ -309,12 +344,12 @@ const handleEmit = (target) => {
       <template #body>
         <div class="flex flex-col gap-4">
           <div>
-            <label class="_label-md">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
+            <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
             <div class="flex flex-col gap-2">
               <input @change="handleUploadImage($event)" name="railImg" accept="image/x-png,image/gif,image/jpeg" id="railUploadImg" type="file" multiple=""
                 class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
               >
-              <div id="railDamagePreview" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center"></div>
+              <div id="railDamagePreview" class="grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1 items-center"></div>
               <div v-if="isShowBtnUpload">
                 <button :disabled="['pending', 'success'].includes(uploadStatus)" @click="handleUploadImages()" type="button"
                   :class="['text-center inline-flex items-center mr-2', uploadStatus === 'success' ? '_button-success' : uploadStatus === 'error' ? '_button-error' : '_button']"
@@ -336,32 +371,39 @@ const handleEmit = (target) => {
           </div>
           <div>
             <label class="_label-lg">ความเสียหายของราง (Situation)</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-              <SelectBtn type="checkbox" :error="v$.defectSituation.railAreaDefect.$error" :class="''" v-model="railSurvey.defectSituation.railAreaDefect" name="railAreaDefect" :items="variable.situation"></SelectBtn>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+              <SelectBtn type="checkbox" :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" name="situation" :items="variable.situation"></SelectBtn>
             </div>
-            <p v-if="v$.defectSituation.railAreaDefect.$error" class="text-sm text-red-600">{{ v$.defectSituation.railAreaDefect.$errors[0].$message }}</p>
+            <!-- <div class="flex flex-col gap-4">
+              <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                <SelectBtn type="checkbox" :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" name="situation" :items="variable.situation.filter((sit, index) => index < 4 )"></SelectBtn>
+              </div>
+              <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                <SelectBtn type="checkbox" :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" name="situation" :items="variable.situation.filter((sit, index) => index >= 4)"></SelectBtn>
+              </div>
+            </div> -->
+            <p v-if="v$.railDamageSurvey.situation.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.situation.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง (Location)</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-              <SelectBtn :error="v$.defectSituation.railPositionDefect.$error" :class="''" v-model="railSurvey.defectSituation.railPositionDefect" name="railPositionDefect" :items="variable.situation"></SelectBtn>
+              <SelectBtn type="checkbox" :disables="compDisablesLocation" :error="v$.railDamageSurvey.location.$error" v-model="railSurvey.railDamageSurvey.location" name="location" :items="variable.location"></SelectBtn>
             </div>
-            <p v-if="v$.defectSituation.railPositionDefect.$error" class="text-sm text-red-600">{{ v$.defectSituation.railPositionDefect.$errors[0].$message }}</p>
+            <p v-if="v$.railDamageSurvey.location.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.location.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น (Pattern, nature) </label>
-            <div v-if="['railHead', 'railWeb', 'railFoot', 'fullSection'].includes(railSurvey.defectSituation.railPositionDefect)">
-              <div  class="flex grow gap-8">
-                <RadioBtn :error="v$.defectPattern.$error" v-model="railSurvey.defectPattern" name="defectPattern" :items="variable.damageProperties"></RadioBtn>
-              </div>
-              <p v-if="v$.defectPattern.$error" class="text-sm text-red-600">{{ v$.defectPattern.$errors[0].$message }}</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+              <SelectBtn type="checkbox" :disables="compDisablesDefectPattern" :error="v$.railDamageSurvey.defectPattern.$error" v-model="railSurvey.railDamageSurvey.defectPattern" name="defectPattern" :items="variable.defectPattern"></SelectBtn>
             </div>
-            <div v-else>
-              <div class="flex grow gap-8">
-                <RadioImageBtn v-model="railSurvey.surfaceDefect" name="surfaceDefect" :items="variable.scar" imageLabel="title" imagePath="img"></RadioImageBtn>
+            <!-- <div class="flex flex-col gap-4">
+              <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                <SelectBtn type="checkbox" :disables="compDisablesDefectPattern" :error="v$.railDamageSurvey.defectPattern.$error" v-model="railSurvey.railDamageSurvey.defectPattern" name="defectPattern" :items="variable.defectPattern.filter(defect => !compDisablesDefectPattern.includes(defect.value))"></SelectBtn>
               </div>
-              <p v-if="v$.surfaceDefect.$error" class="text-sm text-red-600">{{ v$.surfaceDefect.$errors[0].$message }}</p>
-            </div>
+              <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                <SelectBtn type="checkbox" :disables="compDisablesDefectPattern" :error="v$.railDamageSurvey.defectPattern.$error" v-model="railSurvey.railDamageSurvey.defectPattern" name="defectPattern" :items="variable.defectPattern.filter(defect => compDisablesDefectPattern.includes(defect.value))"></SelectBtn>
+              </div>
+            </div> -->
           </div>
         </div>
       </template>
@@ -372,7 +414,7 @@ const handleEmit = (target) => {
       <template #body>
         <div class="flex flex-col gap-4">
           <div>
-            <label class="_label-md">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
+            <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
             <div class="flex flex-col gap-2">
               <input @change="handleUploadImage($event)" name="trackImg" accept="image/x-png,image/gif,image/jpeg" id="trackUploadImg" type="file" multiple=""
                 class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
@@ -400,113 +442,107 @@ const handleEmit = (target) => {
           <div>
             <label class="_label-lg">Track Geometry</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
-              <SelectBtn type="radio" :error="v$.trackGeometryCondition.$error" :class="''" v-model="railSurvey.trackGeometryCondition" name="trackGeometryCondition" :items="variable.integrity"></SelectBtn>
+              <SelectBtn type="radio" :error="v$.trackDamageSurvey.trackGeometryCondition.$error" :class="''" v-model="railSurvey.trackDamageSurvey.trackGeometryCondition" name="trackGeometryCondition" :items="variable.integrity"></SelectBtn>
             </div>
-            <p v-if="v$.trackGeometryCondition.$error" class="text-sm text-red-600">{{ v$.trackGeometryCondition.$errors[0].$message }}</p>
+            <p v-if="v$.trackDamageSurvey.trackGeometryCondition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.trackGeometryCondition.$errors[0].$message }}</p>
           </div>
-          <div v-if="!!railSurvey.trackGeometryCondition && railSurvey.trackGeometryCondition !== 'perfect'">
+          <div v-if="!!railSurvey.trackDamageSurvey.trackGeometryCondition && railSurvey.trackDamageSurvey.trackGeometryCondition !== 'perfect'">
             <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-              <SelectBtn type="checkbox" :error="v$.trackGeometryCondition.$error" image-key="img" :class="''" v-model="railSurvey.trackGeometryCondition" name="trackGeometryCondition" :items="variable.trackGeometry"></SelectBtn>
+              <SelectBtn type="checkbox" :error="v$.trackDamageSurvey.trackGeometryCondition.$error" image-key="img" :class="''" v-model="railSurvey.trackDamageSurvey.trackGeometryCondition" name="trackGeometryCondition" :items="variable.trackGeometry"></SelectBtn>
             </div>
           </div>
           <div>
             <label class="_label-lg">หินโรยทาง (Ballast)</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
-              <SelectBtn type="radio" :error="v$.ballastCondition.$error" :class="''" v-model="railSurvey.ballastCondition" name="ballastCondition" :items="variable.integrity"></SelectBtn>
+              <SelectBtn type="radio" :error="v$.trackDamageSurvey.ballastCondition.$error" :class="''" v-model="railSurvey.trackDamageSurvey.ballastCondition" name="ballastCondition" :items="variable.integrity"></SelectBtn>
             </div>
-            <p v-if="v$.ballastCondition.$error" class="text-sm text-red-600">{{ v$.ballastCondition.$errors[0].$message }}</p>
+            <p v-if="v$.trackDamageSurvey.ballastCondition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.$errors[0].$message }}</p>
           </div>
-          <div v-if="railSurvey.ballastCondition && railSurvey.ballastCondition !== 'perfect'">
+          <div v-if="railSurvey.trackDamageSurvey.ballastCondition && railSurvey.trackDamageSurvey.ballastCondition !== 'perfect'">
             <label class="_label-lg">รูปแบบ Ballast ที่ผิดปกติ</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
-              <SelectBtn type="checkbox" :error="v$.ballastCondition.$error" :class="''" v-model="railSurvey.ballastCondition" name="ballastCondition" :items="variable.ballast"></SelectBtn>
+              <SelectBtn type="checkbox" :error="v$.trackDamageSurvey.ballastCondition.$error" :class="''" v-model="railSurvey.trackDamageSurvey.ballastCondition" name="ballastCondition" :items="variable.ballast"></SelectBtn>
             </div>
-            <p v-if="v$.ballastCondition.$error" class="text-sm text-red-600">{{ v$.ballastCondition.$errors[0].$message }}</p>
+            <p v-if="v$.trackDamageSurvey.ballastCondition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">หมอนรองทาง (Sleeper)</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
-              <SelectBtn type="radio" :error="v$.sleeperCondition.$error" :class="''" v-model="railSurvey.sleeperCondition" name="sleeperCondition" :items="variable.integrity"></SelectBtn>
+              <SelectBtn type="radio" :error="v$.trackDamageSurvey.sleeperCondition.$error" :class="''" v-model="railSurvey.trackDamageSurvey.sleeperCondition" name="sleeperCondition" :items="variable.integrity"></SelectBtn>
             </div>
-            <p v-if="v$.sleeperCondition.$error" class="text-sm text-red-600">{{ v$.sleeperCondition.$errors[0].$message }}</p>
+            <p v-if="v$.trackDamageSurvey.sleeperCondition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.$errors[0].$message }}</p>
           </div>
-          <div v-if="railSurvey.sleeperCondition && railSurvey.sleeperCondition !== 'perfect'">
+          <div v-if="railSurvey.trackDamageSurvey.sleeperCondition && railSurvey.trackDamageSurvey.sleeperCondition !== 'perfect'">
             <label class="_label-lg">รูปแบบ Sleeper ที่ผิดปกติ</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
-              <SelectBtn type="checkbox" :error="v$.sleeperCondition.$error" :class="''" v-model="railSurvey.sleeperCondition" name="sleeperCondition" :items="variable.sleeper"></SelectBtn>
+              <SelectBtn type="checkbox" :error="v$.trackDamageSurvey.sleeperCondition.$error" :class="''" v-model="railSurvey.trackDamageSurvey.sleeperCondition" name="sleeperCondition" :items="variable.sleeper"></SelectBtn>
             </div>
-            <p v-if="v$.sleeperCondition.$error" class="text-sm text-red-600">{{ v$.sleeperCondition.$errors[0].$message }}</p>
+            <p v-if="v$.trackDamageSurvey.sleeperCondition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">คันทาง</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
-              <SelectBtn type="radio" is-specify :error="v$.trackFoundationCondition.$error" :class="''" v-model="railSurvey.trackFoundationCondition" name="trackFoundationCondition" :items="[variable.integrity[0]]"></SelectBtn>
+              <SelectBtn type="radio" is-specify :error="v$.trackDamageSurvey.trackFoundationCondition.$error" :class="''" v-model="railSurvey.trackDamageSurvey.trackFoundationCondition" name="trackFoundationCondition" :items="[variable.integrity[0]]"></SelectBtn>
             </div>
-            <p v-if="v$.trackFoundationCondition.$error" class="text-sm text-red-600">{{ v$.trackFoundationCondition.$errors[0].$message }}</p>
+            <p v-if="v$.trackDamageSurvey.trackFoundationCondition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.trackFoundationCondition.$errors[0].$message }}</p>
           </div>
         </div>
       </template>
     </Accordion>
     <!-- activeName === 'maintenance' -->
-    <Accordion v-model="isActiveMA" :error="v$.hasMaintenanceRecord.$error
-      || v$.severity.$error
-      || v$.isAnalyzeDamage.$error
-      || v$.lastMaintenanceDate.$error
-      || v$.yearlyMaintenanceTimes.$error
-      || v$.maintenanceMethod.$error">
+    <Accordion v-model="isActiveMA">
       <template #header>การประเมินความเสียหายและการซ่อมบำรุง</template>
       <template #body>
         <div class="flex flex-col gap-4">
           <div>
-            <label class="_label-md">ความรุนแรงของความเสียหาย</label>
+            <label class="_label-lg">ความรุนแรงของความเสียหาย</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
-              <SelectBtn type="radio" :error="v$.severity.$error" :class="''" v-model="railSurvey.severity" name="severity" :items="variable.damagesLevel"></SelectBtn>
+              <SelectBtn type="radio" :error="v$.maintenanceRate.severity.$error" :class="''" v-model="railSurvey.maintenanceRate.severity" name="severity" :items="variable.damagesLevel"></SelectBtn>
             </div>
-            <p v-if="v$.severity.$error" class="text-sm text-red-600">{{ v$.severity.$errors[0].$message }}</p>
+            <p v-if="v$.maintenanceRate.severity.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.severity.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุของความเสียหาย</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-              <SelectBtn type="radio" :error="v$.isAnalyzeDamage.$error" :class="''" v-model="railSurvey.isAnalyzeDamage" name="isAnalyzeDamage" :items="variable.analyse"></SelectBtn>
+              <SelectBtn type="radio" :error="v$.maintenanceRate.isAnalyzeDamage.$error" :class="''" v-model="railSurvey.maintenanceRate.isAnalyzeDamage" name="isAnalyzeDamage" :items="variable.analyse"></SelectBtn>
             </div>
-            <p v-if="v$.isAnalyzeDamage.$error" class="text-sm text-red-600">{{ v$.isAnalyzeDamage.$errors[0].$message }}</p>
+            <p v-if="v$.maintenanceRate.isAnalyzeDamage.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.isAnalyzeDamage.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-              <SelectBtn type="radio" :error="v$.hasMaintenanceRecord.$error" :class="''" v-model="railSurvey.hasMaintenanceRecord" name="hasMaintenanceRecord" :items="variable.maintenanceRecord"></SelectBtn>
+              <SelectBtn type="radio" :error="v$.maintenanceRate.maintenanceRecord.hasMaintenanceRecord.$error" :class="''"
+                v-model="railSurvey.maintenanceRate.maintenanceRecord.hasMaintenanceRecord" name="hasMaintenanceRecord" :items="variable.maintenanceRecord"
+              >
+              </SelectBtn>
             </div>
-            <p v-if="v$.hasMaintenanceRecord.$error" class="text-sm text-red-600">{{ v$.hasMaintenanceRecord.$errors[0].$message }}</p>
+            <p v-if="v$.maintenanceRate.maintenanceRecord.hasMaintenanceRecord.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.maintenanceRecord.hasMaintenanceRecord.$errors[0].$message }}</p>
           </div>
-          <div v-if="railSurvey.hasMaintenanceRecord" class="grid md:grid-cols-2 gap-x-2 gap-y-4">
+          <div v-if="railSurvey.maintenanceRate.maintenanceRecord.hasMaintenanceRecord" class="grid md:grid-cols-2 gap-x-2 gap-y-4">
             <div>
               <label class="_label-sm">การซ่อมบำรุงครั้งล่าสุด</label>
-              <select name="lastMaintenanceDate" :value="railSurvey.lastMaintenanceDate" @change="handleEmit($event.target)" id="lastMaintenanceDate" :class="v$.lastMaintenanceDate.$error ? '_input_error' : '_input'">
+              <select name="maintenanceRate.maintenanceRecord.lastMaintenanceTimes" :value="railSurvey.maintenanceRate.maintenanceRecord.lastMaintenanceTimes" @change="handleEmit($event.target)" id="lastMaintenanceTimes" :class="v$.maintenanceRate.maintenanceRecord.lastMaintenanceTimes.$error ? '_input_error' : '_input'">
                 <option disabled value="">กรุณาเลือกครั้งในการซ่อมบำรุง</option>
                 <option v-for="(lm, index) in variable.lastMaintenance" :value="lm.value" :key="index">{{ lm.key }}</option>
               </select>
-              <p v-if="v$.lastMaintenanceDate.$error" class="text-sm text-red-600">{{ v$.lastMaintenanceDate.$errors[0].$message }}</p>
+              <p v-if="v$.maintenanceRate.maintenanceRecord.lastMaintenanceTimes.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.maintenanceRecord.lastMaintenanceTimes.$errors[0].$message }}</p>
             </div>
             <div>
               <label class="_label-sm">ความถี่ในการซ่อมบำรุงในรอบปี</label>
-              <select name="yearlyMaintenanceTimes" :value="railSurvey.yearlyMaintenanceTimes" @change="handleEmit($event.target)" id="yearlyMaintenanceTimes" :class="v$.yearlyMaintenanceTimes.$error ? '_input_error' : '_input'">
+              <select name="maintenanceRate.maintenanceRecord.yearlyMaintenanceTimes" :value="railSurvey.maintenanceRate.maintenanceRecord.yearlyMaintenanceTimes" @change="handleEmit($event.target)" id="yearlyMaintenanceTimes" :class="v$.maintenanceRate.maintenanceRecord.yearlyMaintenanceTimes.$error ? '_input_error' : '_input'">
                 <option disabled value="">กรุณาเลือกครั้งในการซ่อมบำรุง</option>
                 <option v-for="(mt, index) in variable.maintenanceTime" :value="mt.value" :key="index">{{ mt.key }}</option>
               </select>
-              <p v-if="v$.yearlyMaintenanceTimes.$error" class="text-sm text-red-600">{{ v$.yearlyMaintenanceTimes.$errors[0].$message }}</p>
+              <p v-if="v$.maintenanceRate.maintenanceRecord.yearlyMaintenanceTimes.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.maintenanceRecord.yearlyMaintenanceTimes.$errors[0].$message }}</p>
             </div>
           </div>
           <div>
             <label class="_label-lg">คำแนะนำวิธีการซ่อมบำรุง</label>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-              <SelectBtn type="checkbox" :error="v$.maintenanceMethod.$error" :class="''" v-model="railSurvey.maintenanceMethod" name="maintenanceMethod" :items="variable.maintenanceMethod"></SelectBtn>
+              <SelectBtn type="checkbox" :error="v$.maintenanceRate.maintenanceMethod.$error" :class="''" v-model="railSurvey.maintenanceRate.maintenanceMethod" name="maintenanceMethod" :items="variable.maintenanceMethod"></SelectBtn>
             </div>
-            <p v-if="v$.maintenanceMethod.$error" class="text-sm text-red-600">{{ v$.maintenanceMethod.$errors[0].$message }}</p>
-          </div>
-          <div>
-            <label class="_label-lg">ความคิดเห็นของผู้สำรวจความเสียหาย</label>
-            <textarea :value="railSurvey.note" name="note" @input="handleEmit($event.target)" rows="4" class="_input" placeholder=""></textarea>
+            <p v-if="v$.maintenanceRate.maintenanceMethod.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.maintenanceMethod.$errors[0].$message }}</p>
           </div>
         </div>
       </template>

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { required, helpers, requiredIf, minValue, maxValue, requiredUnless, minLength } from '@vuelidate/validators'
+import { required, helpers, requiredIf, minValue, maxValue, requiredUnless, minLength, decimal } from '@vuelidate/validators'
 import { useRouter, useRoute } from 'vue-router'
 import SurveyForm from '@/components/SurveyForm'
 import PageNotFound from '@/views/PageNotFound'
@@ -26,110 +26,100 @@ const store = useStore()
 const router = useRouter()
 const route = useRoute()
 const railForm = {
-  date: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
-  zone: null,
-  coordinates: {
-    latitude: null,
-    longitude: null
+  generalSurvey: {
+    date: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+    zone: null,
+    coordinates: {
+      latitude: null,
+      longitude: null
+    },
+    kilometers: null,
+    nearby: {
+      stationBefore: null,
+      stationAfter: null
+    },
+    railType: null,
+    areaCondition: []
   },
-  kilometers: null,
-  nearby: {
-    stationBefore: null,
-    stationAfter: null
+  railDamageSurvey: {
+    uploadImages: {},
+    situation: [],
+    location: [],
+    defectPattern: []
   },
-  railType: null,
-  areaCondition: [],
-  defectSituation: {
-    railPositionDefect: null,
-    railAreaDefect: [],
+  trackDamageSurvey: {
+    uploadImages: {},
+    trackGeometryCondition: [],
+    ballastCondition: [],
+    sleeperCondition: [],
+    trackFoundationCondition: null,
   },
-  defectPattern: null,
-  surfaceDefect: null,
-  railCondition: null,
-  trackGeometryCondition: null,
-  // defectTrackGeometry: null,
-  ballastCondition: [],
-  sleeperCondition: [],
-  trackFoundationCondition: null,
-  uploadImage: null,
-  severity: null,
-  isAnalyzeDamage: null,
-  hasMaintenanceRecord: null,
-  lastMaintenanceDate: null,
-  yearlyMaintenanceTimes: null,
-  maintenanceMethod: [],
-  note: null,
+  maintenanceRate: {
+    severity: null,
+    isAnalyzeDamage: null,
+    maintenanceRecord: {
+      hasMaintenanceRecord: null,
+      lastMaintenanceTimes: null,
+      yearlyMaintenanceTimes: null,
+    },
+    maintenanceMethod: []
+  },
   signature: null
-  // createdAt: null,
-  // createdBy: null
 }
 const surveyForm = ref()
-const isReady = ref(false)
 const railSurvey = reactive(railForm)
 const rules = computed(() => {
   const rule = {}
-  Object.keys(railForm).forEach((key) => {
-    if (!['uploadImage', 'note'].includes(key)) {
-      switch (key) {
-        case 'coordinates':
-          rule[key] = {
-            lattitude: { required },
-            longitude: { required }
+  Object.keys(railForm).forEach((key1) => {
+    if (['generalSurvey', 'railDamageSurvey', 'trackDamageSurvey', 'maintenanceRate'].includes(key1)) {
+      rule[key1] = {}
+      if (key1 === 'generalSurvey') {
+        Object.keys(railForm[key1]).forEach((key2) => {
+          if (['coordinates', 'nearby'].includes(key2)) {
+            rule[key1][key2] = {}
+            if (key2 === 'coordinates') {
+              Object.keys(railForm[key1][key2]).forEach((key3) => {
+                rule[key1][key2][key3] = { required, decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0)  }
+              })
+            } else if (key2 === 'nearby') {
+              Object.keys(railForm[key1][key2]).forEach((key3) => {
+                rule[key1][key2][key3] = { required }
+              })
+            }
+          } else if (key2 === 'areaCondition') {
+            rule[key1][key2] = { required, minLength: minLength(1) }
+          } else {
+            rule[key1][key2] = { required }
           }
-          break
-        case 'nearby':
-          rule[key] = {
-            stationBefore: { required },
-            stationAfter: { required }
+        })
+      } else if (key1 === 'railDamageSurvey' || key1 === 'trackDamageSurvey') {
+        Object.keys(railForm[key1]).forEach((key2) => {
+          if (key2 !== 'uploadImages') {
+            rule[key1][key2] = { required, minLength: minLength(1) }
+          } else {
+            rule[key1][key2] = { required }
           }
-          break
-        case 'areaCondition':
-          rule[key] = { required, minLength: minLength(1) }
-          break
-        case 'defectSituation':
-          rule[key] = {
-            railPositionDefect: { required },
-            railAreaDefect: { required, minLength: minLength(1) }
+        })
+      } else if (key1 === 'maintenanceRate') {
+        Object.keys(railForm[key1]).forEach((key2) => {
+          if (key2 === 'maintenanceRecord') {
+            rule[key1][key2] = {}
+            Object.keys(railForm[key1][key2]).forEach((key3) => {
+              if (key3 === 'hasMaintenanceRecord') {
+                rule[key1][key2][key3] = { required }
+              } else {
+                rule[key1][key2][key3] = { hasMaintenanceRecord: requiredIf(() => railForm[key1][key2][key3]) }
+              }
+            })
+          } else if (key2 === 'maintenanceMethod') {
+            rule[key1][key2] = { required, minLength: minLength(1) }
+          } else {
+            rule[key1][key2] = { required }
           }
-          break
-        case 'surfaceDefect':
-          rule[key] = {
-            defectPattern: requiredIf(() => railSurvey.defectPattern === 'surfaceDefect')
-          }
-          break
-        case 'ballastCondition':
-          rule[key] = { required, minLength: minLength(1) }
-          break
-        case 'sleeperCondition':
-          rule[key] = { required, minLength: minLength(1) }
-          break
-        case 'trackGeometryCondition':
-          rule[key] = {
-            track: (value) => value && value !== 'imperfect'
-          }
-          break
-        case 'lastMaintenanceDate':
-          rule[key] = {
-            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord)
-          }
-          break
-        case 'yearlyMaintenanceTimes':
-          rule[key] = {
-            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord)
-          }
-          break
-        case 'maintenanceMethod':
-          rule[key] = {
-            hasMaintenanceRecord: requiredIf(() => railSurvey.hasMaintenanceRecord),
-            minLength: minLength(1)
-          }
-          // rule[key] = {
-          // },
-          break
-        default:
-          rule[key] = { required }
-          break
+        })
       }
+    } else {
+      rule[key1] = { required }
     }
   })
   return rule
@@ -196,12 +186,12 @@ const handleSubmit = async () => {
 onMounted(() => {
   navigator.geolocation.getCurrentPosition((position)=> {
     const p = position.coords;
-    railSurvey.coordinates.lattitude = p.latitude
-    railSurvey.coordinates.longitude = p.longitude
+    railSurvey.generalSurvey.coordinates.latitude = p.latitude
+    railSurvey.generalSurvey.coordinates.longitude = p.longitude
     // console.log(p.latitude, p.longitude);
   })
   if (!props.isNew) {
-    getSurveyID(route.params.id)
+    // getSurveyID(route.params.id)
   }
 })
 
@@ -219,6 +209,9 @@ const getSurveyID = (id) => {
     }
   })
 }
+const test = (val) => {
+  console.log(val);
+}
 
 </script>
 <template>
@@ -228,7 +221,7 @@ const getSurveyID = (id) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm ref="surveyForm" v-model="railSurvey" :validate="v$" @submit="handleSubmit()"></SurveyForm>
+  <SurveyForm ref="surveyForm" @input="test($event.target.value)" v-model="railSurvey" :validate="v$" @submit="handleSubmit()"></SurveyForm>
   <!-- <div class="container flex justify-end mt-8">
     <button type="button" class="_button" @click="handleSubmit()">Submit</button>
   </div> -->
