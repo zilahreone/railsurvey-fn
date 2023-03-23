@@ -11,6 +11,7 @@ import SelectBtn from '@/components/SelectBtn.vue'
 import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import RadioImageBtn from '@/components/RadioImageBtn.vue'
 import Accordion from '@/components/Accordion.vue'
+import UploadFiles from '@/components/UploadFiles.vue'
 // import { Loader } from '@googlemaps/js-api-loader'
 import variable from '@/assets/variable.json'
 import api from '@/services'
@@ -72,14 +73,15 @@ const props = defineProps({
     default: {}
   }
 })
-const railSurvey = props.modelValue
-const emit = defineEmits(['update:modelValue'])
+let railSurvey = props.modelValue
+const emit = defineEmits(['update:modelValue', 'onSubmit'])
 
 const v$ = props.validate
 
 const signaturePad = ref(null)
 const ta = ref(null)
-const isShowBtnUpload = ref(false)
+const isShowRailUploadBtn = ref(false)
+const isShowTrackUploadBtn = ref(false)
 const uploadStatus = ref(null)
 
 const isActiveGeneral = ref(true)
@@ -136,41 +138,66 @@ const handleSelectZone = (value) => {
   }
 }
 
-const handleUploadImage = (event) => {
+const handleUploadImage = (target) => {
   uploadStatus.value = null
-  const id = eval(event.target.id)
+  const arr = target.name.split('\.')
+  const id = eval(target.id)
   const files = id.files
-  console.log(id.name)
+  let images = eval(`railSurvey.${target.name}`)
+  // let images = []
   Array.from(files).forEach((file, index) => {
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(file)
-    img.alt = file.name
-    if (id.name === 'railImg') {
-      document.querySelector('#railDamagePreview').append(img);
-    } else if (id.name === 'trackImg') {
-      document.querySelector('#trackPreview').append(img);
+    if (['image/jpeg', 'image/pjpeg', 'image/png', 'image/apng'].includes(file.type)) {
+      // console.log(file)
+      images.push({
+        originalname: file.name,
+        originalPath: URL.createObjectURL(file),
+        mimetype: file.type,
+        destination: null,
+        filename: null,
+        size: file.size
+      })
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file)
+      img.alt = file.name
+      if (arr[0] === 'railDamageSurvey' && arr[1] === 'uploadImages') {
+        document.querySelector('#railDamagePreview').append(img);
+        isShowRailUploadBtn.value = true
+      } else if (arr[0] === 'trackDamageSurvey' && arr[1] === 'uploadImages') {
+        document.querySelector('#trackDamagePreview').append(img);
+        isShowTrackUploadBtn.value = true
+      }
     }
   })
-  isShowBtnUpload.value = true
+  handleEmit({ name: target.name, value: images })
 }
 
-const handleUploadImages = () => {
-  const files = uploadImg.files
+const uploadImages = (images) => {
+  console.log(images)
+  // imagesPath.split('\.')
+  // const images = eval(`{imagesPath}`)
+  let formData = new FormData()
+  // railSurvey[]
+}
+
+const handleUploadImages = (id) => {
+  const eId = eval(id)
+  const files = eId.files
+  console.log(files)
   let formData = new FormData()
   Array.from(files).forEach((file, index) => {
     formData.append('file', file)
   })
-  api.uploadFils('/api/uploads', formData, null).then((resp) => {
-    uploadStatus.value = 'pending'
-    if (resp.status === 201) {
-      resp.json().then((json) => {
-        console.log(json)
-      })
-      uploadStatus.value = 'success'
-    }
-  }).catch((err) => {
-    uploadStatus.value = 'error'
-  })
+  // api.uploadFils('/api/uploads', formData, null).then((resp) => {
+  //   uploadStatus.value = 'pending'
+  //   if (resp.status === 201) {
+  //     resp.json().then((json) => {
+  //       console.log(json)
+  //     })
+  //     uploadStatus.value = 'success'
+  //   }
+  // }).catch((err) => {
+  //   uploadStatus.value = 'error'
+  // })
 }
 
 const scrollToError = () => {
@@ -188,6 +215,7 @@ const onBegin = () => {
 const onEnd = () => {
   // console.log('=== End ===');
   const { isEmpty, data } = signaturePad.value.saveSignature()
+  console.log(isEmpty)
   if (!isEmpty) {
     // railSurvey.signature = data
     handleEmit({ name: 'signature', value: data })
@@ -211,15 +239,16 @@ const handleFilterdefectPattern = () => {
 
 const handleEmit = (target) => {
   const arr = target.name.split('\.')
-  console.log(arr);
+  // console.log(arr);
+  if (['signature'].includes(arr[0])) {
+    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: target.value }))
+  }
   if (['coordinates', 'nearby', 'maintenanceRecord'].includes(arr[1])) {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: arr[1] === 'coordinates' ? parseFloat(target.value) : target.value }) }) }))
-  } else if (['zone', 'kilometers', 'railType'].includes(arr[1])) {
-    if (arr[1] === 'zone') {
-      emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value, nearby:  handleSelectZone(target.value) }) }))
-    } else {
-      emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value }) }))
-    }
+  } else if (['zone'].includes(arr[1])) {
+    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value, nearby: handleSelectZone(target.value) }) }))
+  } else if (['kilometers', 'railType', 'uploadImages'].includes(arr[1])) {
+    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value }) }))
   }
 }
 
@@ -338,30 +367,7 @@ const compDefectPattern = computed(() => {
       <template #body>
         <div class="flex flex-col gap-4">
           <div>
-            <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
-            <div class="flex flex-col gap-2">
-              <input @change="handleUploadImage($event)" name="railImg" accept="image/x-png,image/gif,image/jpeg" id="railUploadImg" type="file" multiple=""
-                class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-              >
-              <div id="railDamagePreview" class="grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1 items-center"></div>
-              <div v-if="isShowBtnUpload">
-                <button :disabled="['pending', 'success'].includes(uploadStatus)" @click="handleUploadImages()" type="button"
-                  :class="['text-center inline-flex items-center mr-2', uploadStatus === 'success' ? '_button-success' : uploadStatus === 'error' ? '_button-error' : '_button']"
-                >
-                  <svg v-if="uploadStatus === 'pending'" aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
-                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
-                  </svg>
-                  <svg v-if="uploadStatus === 'error'" class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  <svg v-if="uploadStatus === 'success'"  class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
-                  {{ uploadStatus === 'pending' ? 'Uploading' : uploadStatus === 'success' ? 'Done' : uploadStatus === 'error' ? 'Upload Fail' : 'Upload' }}
-                </button>
-              </div>
-            </div>
+            <UploadFiles v-model="railSurvey.railDamageSurvey.uploadImages" :error="v$.railDamageSurvey.uploadImages.$each.$response.$errors"></UploadFiles>
           </div>
           <div>
             <label class="_label-lg">ความเสียหายของราง (Situation)</label>
@@ -394,12 +400,12 @@ const compDefectPattern = computed(() => {
           <div>
             <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
             <div class="flex flex-col gap-2">
-              <input @change="handleUploadImage($event)" name="trackImg" accept="image/x-png,image/gif,image/jpeg" id="trackUploadImg" type="file" multiple=""
+              <input @change="handleUploadImage($event.target)" name="trackDamageSurvey.uploadImages" accept="image/jpeg, image/pjpeg, image/png, image/apng" id="trackUploadImg" type="file" multiple
                 class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
               >
-              <div id="trackPreview" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center"></div>
-              <div v-if="isShowBtnUpload">
-                <button :disabled="['pending', 'success'].includes(uploadStatus)" @click="handleUploadImages()" type="button"
+              <div id="trackDamagePreview" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center"></div>
+              <div v-if="isShowTrackUploadBtn">
+                <button :disabled="['pending', 'success'].includes(uploadStatus)" @click="handleUploadImages('trackUploadImg')" type="button"
                   :class="['text-center inline-flex items-center mr-2', uploadStatus === 'success' ? '_button-success' : uploadStatus === 'error' ? '_button-error' : '_button']"
                 >
                   <svg v-if="uploadStatus === 'pending'" aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -414,6 +420,14 @@ const compDefectPattern = computed(() => {
                   </svg>
                   {{ uploadStatus === 'pending' ? 'Uploading' : uploadStatus === 'success' ? 'Done' : uploadStatus === 'error' ? 'Upload Fail' : 'Upload' }}
                 </button>
+              </div>
+            </div>
+          </div>
+          <div v-for="(image, index) in railSurvey.trackDamageSurvey.uploadImages" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center">
+            <img :src="image.originalPath" :alt="image.originalname">
+            <div v-for="(value, key) in v$.trackDamageSurvey.uploadImages.$each.$response.$errors[index]">
+              <div v-if="v$.trackDamageSurvey.uploadImages.$each.$response.$errors[index][key].length > 0">
+                {{key}} {{ v$.trackDamageSurvey.uploadImages.$each.$response.$errors[index][key][0].$message }}
               </div>
             </div>
           </div>
@@ -530,7 +544,7 @@ const compDefectPattern = computed(() => {
         <div class="flex justify-center">
           <button @click="undo" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-x rounded-bl-md text-sm px-5 py-1">Undo</button>
           <button @click="clear" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r text-sm px-5 py-1">Clear</button>
-          <button @click="emit('submit')" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r rounded-br-md text-sm px-5 py-1">Submit</button>
+          <button @click="emit('onSubmit')" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r rounded-br-md text-sm px-5 py-1">Submit</button>
         </div>
         <VueSignaturePad width="400px" height="120px" :options="{ onBegin, onEnd }" ref="signaturePad" />
         <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>

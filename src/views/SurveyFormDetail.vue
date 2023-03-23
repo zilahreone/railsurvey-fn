@@ -37,13 +37,13 @@ const railForm = {
     areaCondition: []
   },
   railDamageSurvey: {
-    uploadImages: {},
+    uploadImages: [],
     situation: [],
     location: [],
     defectPattern: []
   },
   trackDamageSurvey: {
-    uploadImages: {},
+    uploadImages: [],
     trackGeometryCondition: {
       isPerfect: null,
       condition: []
@@ -71,9 +71,17 @@ const railForm = {
   signature: null
 }
 const surveyForm = ref()
-const railSurvey = reactive(railForm)
+let railSurvey = reactive(railForm)
 const rules = computed(() => {
   const rule = {}
+  const uploadImage = {
+    originalname: { required },
+    originalPath: { required },
+    mimetype: { required },
+    // destination: { required },
+    // filename: { required },
+    size: { maxValue: helpers.withMessage(`Maximum value allowed is 5MB`, maxValue(5 * 1024 * 1024)) }
+  }
   Object.keys(railForm).forEach((key1) => {
     if (['generalSurvey', 'railDamageSurvey', 'trackDamageSurvey', 'maintenanceRate'].includes(key1)) {
       rule[key1] = {}
@@ -98,7 +106,11 @@ const rules = computed(() => {
         })
       } else if (key1 === 'railDamageSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
-          if (!['uploadImages'].includes(key2)) {
+          if (key2 === 'uploadImages') {
+            rule[key1][key2] = {
+              $each: helpers.forEach(uploadImage)
+            }
+          } else {
             rule[key1][key2] = { required, minLength: minLength(1) }
           }
         })
@@ -113,10 +125,12 @@ const rules = computed(() => {
                 rule[key1][key2][key3] = { required }
               }
             })
-          } else {
-            if (key2 !== 'uploadImages') {
-              rule[key1][key2] = { required }
+          } else if (key2 === 'uploadImages') {
+            rule[key1][key2] = {
+              $each: helpers.forEach(uploadImage)
             }
+          } else {  
+            rule[key1][key2] = { required }
           }
         })
       } else if (key1 === 'maintenanceRate') {
@@ -147,13 +161,15 @@ const v$ = useVuelidate(rules, railSurvey, { $autoDirty: true })
 
 const handleSubmit = async () => {
   const isValid = await v$.value.$validate()
-  console.log(isValid)
+  console.log(isValid, props.isNew)
   if (isValid) {
     if (props.isNew) {
-      api.post(`/api/rail-survey`, Object.assign(railSurvey, { lastMaintenanceDate: new Date(railSurvey.lastMaintenanceDate).toISOString() }), store.state.token).then((resp) => {
+      console.log('is New');
+      // api.post(`/api/rail-survey`, Object.assign(railSurvey, {generalSurvey: Object.assign(railSurvey.generalSurvey, { date: new Date(railSurvey.generalSurvey.date).toISOString() } )}) , null).then((resp) => {
+      api.post(`/api/rail-survey`, railSurvey, null).then((resp) => {
         if (resp.status === 201) {
           console.log('create success ;)')
-          router.push('/survey-list')
+          // router.push('/survey-list')
         } else {
         }
       }).catch(() => {
@@ -163,7 +179,7 @@ const handleSubmit = async () => {
         }).catch(console.log())
       })
     } else {
-      api.put(`/api/rail-survey/${railSurvey.id}`, railSurvey, store.state.token).then((resp) => {
+      api.put(`/api/rail-survey/${railSurvey.id}`, railSurvey, null).then((resp) => {
         if (resp.status === 200) {
           console.log('update success ;)')
           router.push('/survey-list')
@@ -245,7 +261,7 @@ const test = (val) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm ref="surveyForm" v-model="railSurvey" :validate="v$" @submit="handleSubmit()"></SurveyForm>
+  <SurveyForm ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
   <!-- <div class="container flex justify-end mt-8">
     <button type="button" class="_button" @click="handleSubmit()">Submit</button>
   </div> -->
