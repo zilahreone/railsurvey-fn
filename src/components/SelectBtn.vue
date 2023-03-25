@@ -73,6 +73,15 @@ const isChecked = (val) => {
   }
   return props.modelValue?.includes(val)
 }
+const isCheckedSpecify = (val) => {
+  return props.modelValue !== null && props.modelValue === val && props.items.filter(item => item.value === val).length === 0
+  // props.items.forEach(item => {
+  //   if (item.value === val) {
+  //     return
+  //   }
+  // })
+  // return false
+}
 </script>
 <template>
   <div v-for="(item ,index) in items" :key="index" :class="[{'bg-gray-100': disables.includes(item.value)}, `flex items-center pl-2 border ${error ? 'border-red-600' : 'border-gray-200'} rounded dark:border-gray-700`]">
@@ -83,7 +92,7 @@ const isChecked = (val) => {
     </label>
   </div>
   <div v-if="isSpecify" :class="`flex items-center pl-2 border ${error ? 'border-red-600' : 'border-gray-200'} rounded dark:border-gray-700`">
-    <input :id="`${name}-${type}-input`" :type="type" :name="name" :checked="modelValue" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-    <input @input="handleEmit($event.target.value)" @focus="handleEmit($event.target.value)" type="text" id="kmTelegraphPoles" placeholder="อื่นๆ โปรดระบุ" :class="`_input w-full my-2 mx-2`" required>
+    <input :id="`${name}-${type}-input`" :type="type" :name="name" :checked="isCheckedSpecify(modelValue)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <input @input="handleEmit($event.target.value)" @focus="handleEmit($event.target.value)" type="text" placeholder="อื่นๆ โปรดระบุ" :class="`_input w-full my-2 mx-2`" required>
   </div>
 </template>

@@ -72,6 +72,8 @@ const railForm = {
 }
 const surveyForm = ref()
 let railSurvey = reactive(railForm)
+
+// COMPUTED
 const rules = computed(() => {
   const rule = {}
   const uploadImage = {
@@ -158,6 +160,19 @@ const rules = computed(() => {
   return rule
 })
 const v$ = useVuelidate(rules, railSurvey, { $autoDirty: true })
+const compSubmitForm = computed(() => {
+  let rtnRail = JSON.parse(JSON.stringify(railSurvey))
+  Object.keys(rtnRail.trackDamageSurvey).forEach(key => {
+    if (['trackGeometryCondition', 'ballastCondition', 'sleeperCondition'].includes(key)) {
+      if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
+        rtnRail.trackDamageSurvey[key] = ['perfect']
+      } else {
+        rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+      }
+    }
+  })
+  return rtnRail
+})
 
 const handleSubmit = async () => {
   const isValid = await v$.value.$validate()
@@ -166,7 +181,7 @@ const handleSubmit = async () => {
     if (props.isNew) {
       console.log('is New');
       // api.post(`/api/rail-survey`, Object.assign(railSurvey, {generalSurvey: Object.assign(railSurvey.generalSurvey, { date: new Date(railSurvey.generalSurvey.date).toISOString() } )}) , null).then((resp) => {
-      api.post(`/api/rail-survey`, railSurvey, null).then((resp) => {
+      api.post(`/api/rail-survey`, compSubmitForm.value, null).then((resp) => {
         if (resp.status === 201) {
           console.log('create success ;)')
           // router.push('/survey-list')
@@ -179,7 +194,7 @@ const handleSubmit = async () => {
         }).catch(console.log())
       })
     } else {
-      api.put(`/api/rail-survey/${railSurvey.id}`, railSurvey, null).then((resp) => {
+      api.put(`/api/rail-survey/${railSurvey.id}`, compSubmitForm.value, null).then((resp) => {
         if (resp.status === 200) {
           console.log('update success ;)')
           router.push('/survey-list')
@@ -255,7 +270,6 @@ const test = (val) => {
 
 </script>
 <template>
-  <!-- {{ railSurvey }} -->
   <!-- <div v-if="isReady">
   </div>
   <div v-else>

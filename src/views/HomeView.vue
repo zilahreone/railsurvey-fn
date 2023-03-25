@@ -27,7 +27,7 @@ const install = async () => {
 <template>
   <Transition>
     <div v-if="isLoad" class="flex flex-grow">
-      <button @click="install">install</button>
+      <!-- <button @click="install">install</button> -->
       <div class="flex items-center text-center lg:text-left px-8 md:px-12 lg:w-1/2">
         <div>
           <h2 class="text-3xl font-semibold text-gray-800 md:text-4xl">บันทึกความเสียหายของ <span
@@ -41,10 +41,10 @@ const install = async () => {
               class="px-4 py-3 bg-gray-900 text-gray-200 text-xs font-semibold rounded hover:bg-gray-800">เริ่ม
               สำรวจความเสียหาย</router-link>
             <router-link to="/survey-list"
-              class="ml-4 px-4 py-3 bg-gray-500 text-gray-200 text-xs font-semibold rounded hover:bg-gray-800">Survey
-              List</router-link>
-            <a class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400"
-              href="#">Learn More</a>
+              class="ml-4 px-4 py-3 bg-gray-500 text-gray-200 text-xs font-semibold rounded hover:bg-gray-800">
+              รายการสำรวจความเสียหาย</router-link>
+            <!-- <a class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400"
+              href="#">Learn More</a> -->
           </div>
         </div>
       </div>

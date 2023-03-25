@@ -97,21 +97,26 @@ onMounted(() => {
 
 const undo = () => {
   signaturePad.value.undoSignature()
-}
-const save = () => {
   const { isEmpty, data } = signaturePad.value.saveSignature()
-  console.log(isEmpty)
-  console.log(data)
+  if (isEmpty) {
+    handleEmit({ name: 'signature', value: null })
+  }
 }
+// const save = () => {
+//   const { isEmpty, data } = signaturePad.value.saveSignature()
+//   console.log(isEmpty)
+//   console.log(data)
+// }
 const clear = () => {
   signaturePad.value.clearSignature()
+  handleEmit({ name: 'signature', value: null })
 }
 
-const validateSignature = () => {
-  const { isEmpty, data } = signaturePad.value.saveSignature()
-  console.log(isEmpty)
-  return !isEmpty
-}
+// const validateSignature = () => {
+//   const { isEmpty, data } = signaturePad.value.saveSignature()
+//   console.log(isEmpty)
+//   return !isEmpty
+// }
 
 // METHOD //
 // const handleGetLocation = () => {
@@ -217,8 +222,8 @@ const onEnd = () => {
   const { isEmpty, data } = signaturePad.value.saveSignature()
   console.log(isEmpty)
   if (!isEmpty) {
-    // railSurvey.signature = data
-    handleEmit({ name: 'signature', value: data })
+    // console.log(data);
+    handleEmit({ name: 'signature', value: `${data}` })
   }
 }
 
@@ -270,17 +275,6 @@ const compDisablesDefectPattern = computed(() => {
   }
   return []
 })
-const compDefectPattern = computed(() => {
-  const location = railSurvey.railDamageSurvey.location.filter((location, index) => ['railHead', 'railWeb', 'railFoot', 'fullSection'].includes(location))
-  const location2 = railSurvey.railDamageSurvey.location.filter((location, index) => ['gaugeSide','surfaceRailHead'].includes(location))
-  if (location.length > 0 && location2.length === 0) {
-    return variable.defectPattern.filter(defect => ['fracture', 'rupture', 'wear', 'bend', 'corrosion'].includes(defect.value))
-  } else if (location.length === 0 && location2.length > 0) {
-    return variable.defectPattern.filter(defect => ['surfaceDefect', 'crushedHead', 'headChecking', 'spalling', 'sideWear', 'shelling', 'burnedRail', 'other'].includes(defect.value))
-  } else {
-    return variable.defectPattern
-  }
-})
 </script>
 <template>
   <!-- <pre> {{ railSurvey }} </pre> -->
@@ -291,7 +285,7 @@ const compDefectPattern = computed(() => {
       <template #header>ข้อมูลการสำรวจเบื้องต้น</template>
       <template #body>
         <div class="flex flex-col gap-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-2">
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-2">
             <div>
               <label class="_label-sm">วันที่สำรวจ</label>
               <input disabled :value="railSurvey.generalSurvey.date" type="datetime-local" id="date" :class="'_input'" required>
@@ -319,7 +313,7 @@ const compDefectPattern = computed(() => {
               <p v-if="v$.generalSurvey.railType.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.$errors[0].$message }}</p>
             </div>
           </div>
-          <div class="grid lg:grid-cols-2 gap-x-2 gap-y-4">
+          <div class="grid sm:grid-cols-2 gap-x-2 gap-y-4">
             <div class="grid md:grid-cols-2 gap-x-2 gap-y-4">
               <div>
                 <label class="_label-sm">พิกัด ละติจูด</label>
@@ -353,7 +347,7 @@ const compDefectPattern = computed(() => {
           </div>
           <div>
             <label class="_label-sm">ลักษณะพื้นที่ที่เกิดความเสียหาย (Type of failure area)</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+            <div class="grid sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-2">
               <SelectBtn type="checkbox" :error="v$.generalSurvey.areaCondition.$error" v-model="railSurvey.generalSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties"></SelectBtn>
             </div>
             <p v-if="v$.generalSurvey.areaCondition.$error" class="text-sm text-red-600">{{ v$.generalSurvey.areaCondition.$errors[0].$message }}</p>
@@ -367,25 +361,26 @@ const compDefectPattern = computed(() => {
       <template #body>
         <div class="flex flex-col gap-4">
           <div>
-            <UploadFiles v-model="railSurvey.railDamageSurvey.uploadImages" :error="v$.railDamageSurvey.uploadImages.$each.$response.$errors"></UploadFiles>
+            <!-- {{ v$.railDamageSurvey.uploadImages }} -->
+            <UploadFiles v-model="railSurvey.railDamageSurvey.uploadImages" id="railDamageSurvey" :errors="v$.railDamageSurvey.uploadImages"></UploadFiles>
           </div>
           <div>
             <label class="_label-lg">ความเสียหายของราง (Situation)</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
               <SelectBtn type="checkbox" :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" @onEvent="handleFilterLocation('situation')" name="situation" :items="variable.situation"></SelectBtn>
             </div>
             <p v-if="v$.railDamageSurvey.situation.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.situation.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง (Location)</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               <SelectBtn type="checkbox" :disables="compDisablesLocation" :error="v$.railDamageSurvey.location.$error" v-model="railSurvey.railDamageSurvey.location" @onEvent="handleFilterdefectPattern()" name="location" :items="variable.location"></SelectBtn>
             </div>
             <p v-if="v$.railDamageSurvey.location.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.location.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น (Pattern, nature) </label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               <SelectBtn type="checkbox" :disables="compDisablesDefectPattern" :error="v$.railDamageSurvey.defectPattern.$error" v-model="railSurvey.railDamageSurvey.defectPattern" name="defectPattern" :items="variable.defectPattern"></SelectBtn>
             </div>
           </div>
@@ -398,83 +393,52 @@ const compDefectPattern = computed(() => {
       <template #body>
         <div class="flex flex-col gap-4">
           <div>
-            <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
-            <div class="flex flex-col gap-2">
-              <input @change="handleUploadImage($event.target)" name="trackDamageSurvey.uploadImages" accept="image/jpeg, image/pjpeg, image/png, image/apng" id="trackUploadImg" type="file" multiple
-                class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-              >
-              <div id="trackDamagePreview" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center"></div>
-              <div v-if="isShowTrackUploadBtn">
-                <button :disabled="['pending', 'success'].includes(uploadStatus)" @click="handleUploadImages('trackUploadImg')" type="button"
-                  :class="['text-center inline-flex items-center mr-2', uploadStatus === 'success' ? '_button-success' : uploadStatus === 'error' ? '_button-error' : '_button']"
-                >
-                  <svg v-if="uploadStatus === 'pending'" aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
-                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
-                  </svg>
-                  <svg v-if="uploadStatus === 'error'" class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  <svg v-if="uploadStatus === 'success'"  class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
-                  {{ uploadStatus === 'pending' ? 'Uploading' : uploadStatus === 'success' ? 'Done' : uploadStatus === 'error' ? 'Upload Fail' : 'Upload' }}
-                </button>
-              </div>
-            </div>
-          </div>
-          <div v-for="(image, index) in railSurvey.trackDamageSurvey.uploadImages" class="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-1 items-center">
-            <img :src="image.originalPath" :alt="image.originalname">
-            <div v-for="(value, key) in v$.trackDamageSurvey.uploadImages.$each.$response.$errors[index]">
-              <div v-if="v$.trackDamageSurvey.uploadImages.$each.$response.$errors[index][key].length > 0">
-                {{key}} {{ v$.trackDamageSurvey.uploadImages.$each.$response.$errors[index][key][0].$message }}
-              </div>
-            </div>
+            <UploadFiles v-model="railSurvey.trackDamageSurvey.uploadImages" id="trackDamageSurvey" :errors="v$.trackDamageSurvey.uploadImages"></UploadFiles>
           </div>
           <div>
             <label class="_label-lg">Track Geometry</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
               <SelectBtn type="radio" :error="v$.trackDamageSurvey.trackGeometryCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.trackGeometryCondition.isPerfect" name="trackGeometryCondition" :items="variable.integrity"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.trackGeometryCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.trackGeometryCondition.isPerfect.$errors[0].$message }}</p>
           </div>
           <div v-if="railSurvey.trackDamageSurvey.trackGeometryCondition.isPerfect && railSurvey.trackDamageSurvey.trackGeometryCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
-            <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+            <div class="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
               <SelectBtn type="checkbox" :error="v$.trackDamageSurvey.trackGeometryCondition.condition.$error" image-key="img" v-model="railSurvey.trackDamageSurvey.trackGeometryCondition.condition" name="trackGeometryConditionFail" :items="variable.trackGeometry"></SelectBtn>
             </div>
           </div>
           <div>
             <label class="_label-lg">หินโรยทาง (Ballast)</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
               <SelectBtn type="radio" :error="v$.trackDamageSurvey.ballastCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.isPerfect" name="ballastCondition" :items="variable.integrity"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.ballastCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.isPerfect.$errors[0].$message }}</p>
           </div>
           <div v-if="railSurvey.trackDamageSurvey.ballastCondition.isPerfect && railSurvey.trackDamageSurvey.ballastCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Ballast ที่ผิดปกติ</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
               <SelectBtn type="checkbox" :error="v$.trackDamageSurvey.ballastCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.condition" name="ballastConditionFail" :items="variable.ballast"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.ballastCondition.condition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.condition.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">หมอนรองทาง (Sleeper)</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
               <SelectBtn type="radio" :error="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect" name="sleeperCondition" :items="variable.integrity"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.isPerfect.$errors[0].$message }}</p>
           </div>
           <div v-if="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect && railSurvey.trackDamageSurvey.sleeperCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Sleeper ที่ผิดปกติ</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
               <SelectBtn type="checkbox" :error="v$.trackDamageSurvey.sleeperCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.condition" name="sleeperConditionFail" :items="variable.sleeper"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.condition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.condition.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">คันทาง</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
               <SelectBtn type="radio" is-specify :error="v$.trackDamageSurvey.trackFoundationCondition.$error" v-model="railSurvey.trackDamageSurvey.trackFoundationCondition" name="trackFoundationCondition" :items="[variable.integrity[0]]"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.trackFoundationCondition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.trackFoundationCondition.$errors[0].$message }}</p>
@@ -489,21 +453,21 @@ const compDefectPattern = computed(() => {
         <div class="flex flex-col gap-4">
           <div>
             <label class="_label-lg">ความรุนแรงของความเสียหาย</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 xl:md:grid-cols-4 gap-2">
               <SelectBtn type="radio" :error="v$.maintenanceRate.severity.$error" v-model="railSurvey.maintenanceRate.severity" name="severity" :items="variable.damagesLevel"></SelectBtn>
             </div>
             <p v-if="v$.maintenanceRate.severity.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.severity.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุของความเสียหาย</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2">
               <SelectBtn type="radio" :error="v$.maintenanceRate.isAnalyzeDamage.$error" v-model="railSurvey.maintenanceRate.isAnalyzeDamage" name="isAnalyzeDamage" :items="variable.analyse"></SelectBtn>
             </div>
             <p v-if="v$.maintenanceRate.isAnalyzeDamage.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.isAnalyzeDamage.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               <SelectBtn type="radio" :error="v$.maintenanceRate.maintenanceRecord.hasMaintenanceRecord.$error" :class="''"
                 v-model="railSurvey.maintenanceRate.maintenanceRecord.hasMaintenanceRecord" name="hasMaintenanceRecord" :items="variable.maintenanceRecord"
               >
@@ -531,7 +495,7 @@ const compDefectPattern = computed(() => {
           </div>
           <div>
             <label class="_label-lg">คำแนะนำวิธีการซ่อมบำรุง</label>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+            <div class="grid sm:grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-2">
               <SelectBtn type="checkbox" :error="v$.maintenanceRate.maintenanceMethod.$error" v-model="railSurvey.maintenanceRate.maintenanceMethod" name="maintenanceMethod" :items="variable.maintenanceMethod"></SelectBtn>
             </div>
             <p v-if="v$.maintenanceRate.maintenanceMethod.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.maintenanceMethod.$errors[0].$message }}</p>
@@ -553,10 +517,3 @@ const compDefectPattern = computed(() => {
   </div>
 
 </template>
-<style>
-.image-column {
-  display: block;
-  height: 100%;
-  background-size: cover;
-}
-</style>

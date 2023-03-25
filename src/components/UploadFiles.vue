@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import api from '@/services'
 
 const props = defineProps({
@@ -7,88 +7,117 @@ const props = defineProps({
     type: Array,
     default: []
   },
-  error: {
-    type: Array,
-    default: []
+  id: {
+    type: String,
+    default: '',
+    required: true
+  },
+  errors: {
+    type: Object,
+    default: {}
   }
 })
 const emit = defineEmits(['update:modelValue', 'onUploadImages'])
 
 const showUploadBtn = ref(false)
+const disableUploadBtn = ref(false)
 const uploadStatus = ref(null)
 
 // METHOD
-const handleUploadImages = () => {
-  const files = uploadImg.files
+const handleUploadImages = (event) => {
+  const files = eval(event.target.id).files
   let images = [...props.modelValue]
   // let images = []
   Array.from(files).forEach((file, index) => {
     if (['image/jpeg', 'image/pjpeg', 'image/png', 'image/apng'].includes(file.type)) {
-      // console.log(file)
-      images.push({
-        originalname: file.name,
-        originalPath: URL.createObjectURL(file),
-        mimetype: file.type,
-        destination: null,
-        filename: null,
-        size: file.size
-      })
-      // const img = document.createElement("img");
-      // img.src = URL.createObjectURL(file)
-      // img.alt = file.name
-      // if (arr[0] === 'railDamageSurvey' && arr[1] === 'uploadImages') {
-      //   document.querySelector('#railDamagePreview').append(img);
-      //   isShowRailUploadBtn.value = true
-      // } else if (arr[0] === 'trackDamageSurvey' && arr[1] === 'uploadImages') {
-      //   document.querySelector('#trackDamagePreview').append(img);
-      //   isShowTrackUploadBtn.value = true
-      // }
+      if (images.filter(image =>
+        image.originalname === file.name
+        && image.size === file.size
+        && image.mimetype === file.type).length === 0) {
+        // console.log(file)
+        images.push({
+          originalname: file.name,
+          originalPath: URL.createObjectURL(file),
+          mimetype: file.type,
+          destination: null,
+          filename: null,
+          size: file.size
+        })
+      }
     }
   })
   emit('update:modelValue', images)
   uploadStatus.value = null
   showUploadBtn.value = true
 }
-const uploadImages = () => {
-  uploadStatus.value = 'pending'
-  let formData = new FormData()
-  const files = uploadImg.files
-  Array.from(files).forEach((file, index) => {
-    console.log(file);
-    formData.append('file', file)
-  })
-  api.uploadFils('/api/uploads', formData, null).then((resp) => {
-    if (resp.status === 201) {
-      resp.json().then((json) => {
-        console.log(json)
-      })
-      uploadStatus.value = 'success'
-    }
-  }).catch((err) => {
-    uploadStatus.value = 'error'
-  })
+const handleRemoveImage = (index) => {
+  let images = [...props.modelValue]
+  images.splice(index, 1)
+  emit('update:modelValue', images)
+  document.getElementById(props.id).value = ''
+  if (images.length === 0) showUploadBtn.value = false
 }
+const uploadImages = () => {
+  console.log('upload');
+  // uploadStatus.value = 'pending'
+  let formData = new FormData()
+  // const files = uploadImg.files
+  // Array.from(files).forEach((file, index) => {
+  //   console.log(file);
+  //   formData.append('file', file)
+  // })
+  // api.uploadFils('/api/uploads', formData, null).then((resp) => {
+  //   if (resp.status === 201) {
+  //     resp.json().then((json) => {
+  //       console.log(json)
+  //     })
+  //     uploadStatus.value = 'success'
+  //   }
+  // }).catch((err) => {
+  //   uploadStatus.value = 'error'
+  // })
+}
+// COMPUTED
+const compCSSUploadBtn = computed(() => {
+  // console.log(props.error.filter(err => Object.keys(err).filter(obj => err[obj].length > 0)).length > 0)
+  if (props.errors.$error) {
+    return '_button-disable'
+  } else {
+    if (uploadStatus.value === 'success') {
+    } else if (uploadStatus.value === 'success') {
+      return '_button-success'
+    } else if (uploadStatus.value === 'error') {
+      return '_button-error'
+    } else {
+      return '_button'
+    }
+  }
+})
 </script>
 <template>
   <div class="flex flex-col gap-2">
     <div>
       <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
-      <input @change="handleUploadImages($event)" name="uploadImg" accept="image/x-png,image/gif,image/jpeg" id="uploadImg" type="file" multiple=""
+      <input @change="handleUploadImages($event)" title="เลือกรูปภาพ" :name="id" accept="image/x-png,image/gif,image/jpeg" :id="id" type="file" multiple=""
         class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
       >
     </div>
     <slot name="default">
-      <div class="flex items-stretch flex-wrap gap-1">
+      <div class="flex flex-wrap gap-x-1">
         <div v-for="(image, index) in modelValue" :key="index">
-          <img :src="image.originalPath" :alt="image.originalname" class="object-contain h-56">
-          <div v-for="(value, key) in error[index]">
-            <p v-if="error[index][key].length > 0" class="text-sm text-red-600">{{ error[index][key][0].$message }}</p>
+          <div class="flex flex-col">
+            <img :src="image.originalPath" :alt="image.originalname" class="object-contain h-56">
+            <button @click="handleRemoveImage(index)" class="bg-red-500 hover:bg-red-600 w-full p-2 rounded-b-md text-white text-sm">Remove</button>
+            <p v-if="errors.$error && errors.$errors[0].$message[index].length > 0" class="text-sm text-red-600">{{ errors.$errors[0].$message[index].join('') }}</p>
+            <!-- <div v-for="(value, key) in errors[index]" :key="key">
+            </div> -->
           </div>
         </div>
       </div>
       <div v-if="showUploadBtn">
-        <button :disabled="['pending', 'success'].includes(uploadStatus) || error" @click="uploadImages()" type="button"
-          :class="['text-center inline-flex items-center mr-2', uploadStatus === 'success' ? '_button-success' : uploadStatus === 'error' ? '_button-error' : '_button']"
+        <button :disabled="['pending', 'success'].includes(uploadStatus)" type="button"
+          @click="uploadImages()"
+          :class="['text-center inline-flex items-center mr-2', compCSSUploadBtn]"
         >
           <svg v-if="uploadStatus === 'pending'" aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
