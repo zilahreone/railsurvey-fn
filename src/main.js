@@ -1,6 +1,5 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import Login from './Login.vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
@@ -11,7 +10,6 @@ import IndexedDB from '@/IndexedDB'
 import kcJSON from '@/keycloak.json'
 import Keycloak from 'keycloak-js'
 const app = createApp(App)
-const app2 = createApp(Login)
 // CHECK SUPPORT INDEXED_DB
 if (!self.indexedDB) {
   console.warn(`Your browser doesn't support IndexedDB`)
@@ -99,4 +97,3 @@ app.component('VueSignaturePad', VueSignaturePad)
 //   app.mount('#login')
 // }
 app.mount('#app')
-app2.mount('#app2')

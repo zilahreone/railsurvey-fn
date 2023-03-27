@@ -3,6 +3,10 @@ import { ref, computed } from 'vue';
 import api from '@/services'
 
 const props = defineProps({
+  isPreview: {
+    type: Boolean,
+    default: false
+  },
   modelValue: {
     type: Array,
     default: []
@@ -55,6 +59,7 @@ const handleRemoveImage = (index) => {
   images.splice(index, 1)
   emit('update:modelValue', images)
   document.getElementById(props.id).value = ''
+  console.log(images.length);
   if (images.length === 0) showUploadBtn.value = false
 }
 const uploadImages = () => {
@@ -98,7 +103,7 @@ const compCSSUploadBtn = computed(() => {
   <div class="flex flex-col gap-2">
     <div>
       <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
-      <input @change="handleUploadImages($event)" title="เลือกรูปภาพ" :name="id" accept="image/x-png,image/gif,image/jpeg" :id="id" type="file" multiple=""
+      <input v-if="!isPreview" :disabled="isPreview" @change="handleUploadImages($event)" title="เลือกรูปภาพ" :name="id" accept="image/x-png,image/gif,image/jpeg" :id="id" type="file" multiple=""
         class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
       >
     </div>
@@ -107,7 +112,7 @@ const compCSSUploadBtn = computed(() => {
         <div v-for="(image, index) in modelValue" :key="index">
           <div class="flex flex-col">
             <img :src="image.originalPath" :alt="image.originalname" class="object-contain h-56">
-            <button @click="handleRemoveImage(index)" class="bg-red-500 hover:bg-red-600 w-full p-2 rounded-b-md text-white text-sm">Remove</button>
+            <button v-if="!isPreview" @click="handleRemoveImage(index)" class="bg-red-500 hover:bg-red-600 w-full p-2 rounded-b-md text-white text-sm">Remove</button>
             <p v-if="errors.$error && errors.$errors[0].$message[index].length > 0" class="text-sm text-red-600">{{ errors.$errors[0].$message[index].join('') }}</p>
             <!-- <div v-for="(value, key) in errors[index]" :key="key">
             </div> -->

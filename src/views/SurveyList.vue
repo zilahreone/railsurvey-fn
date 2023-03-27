@@ -8,13 +8,17 @@ import api from '@/services'
 import IndexDB from '@/IndexedDB'
 import moment from 'moment'
 import tz from 'moment-timezone'
+import TailTable from '@/components/TailTable.vue'
 
 const store = useStore()
 
 const surveyList = ref([])
+const count = ref(null)
+const offset = ref(0)
 
 onMounted (() => {
   getSurveyList2()
+  getCount()
   if(navigator.onLine){
   console.log('online');
  } else {
@@ -23,10 +27,22 @@ onMounted (() => {
 })
 
 const getSurveyList2 = () => {
-  api.get('/api/rail-survey', store.state.token).then((resp) => {
+  // store.state.token
+  api.get(`/api/rail-survey/?offset=${offset.value}`, null).then((resp) => {
     if (resp.status === 200) {
       resp.json().then((json) => {
         surveyList.value = json
+      })
+    }
+  }).catch((err) => {
+  })
+}
+
+const getCount = () => {
+  api.get('/api/rail-survey/count', null).then((resp) => {
+    if (resp.status === 200) {
+      resp.json().then((json) => {
+        count.value = json
       })
     }
   }).catch((err) => {
@@ -91,13 +107,13 @@ const convertUTCDateToLocalDate = (isoDateString) => {
 }
 
 const compSurveyList = computed(() => {
-  console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  // console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
   return surveyList.value.map(sl => {
     return {
       createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss'),
       id: sl.id,
       date: sl.date,
-      zone: variable.zone.filter((z) => z.value === sl.zone)[0].key,
+      zone: variable.zone.filter((z) => z.value === sl.zone)[0],
       createdBy: sl.createdBy.username
     }
   })
@@ -105,7 +121,7 @@ const compSurveyList = computed(() => {
 
 </script>
 <template>
-  {{ surveyList.map(l => l.createdAt) }}
+  <!-- {{ surveyList.map(l => l.createdAt) }} -->
   <div class="container h-full">
     <!-- <pre>{{ surveyList }}</pre> -->
     <Table :tbody="compSurveyList">
@@ -139,5 +155,6 @@ const compSurveyList = computed(() => {
         </td> -->
       </template>
     </Table>
+    <TailTable :count="count" :offset="offset" @next="" @previous=""></TailTable>
   </div>
 </template>

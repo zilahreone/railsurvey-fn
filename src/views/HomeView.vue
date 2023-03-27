@@ -1,14 +1,19 @@
 <script setup>
+import Banner from '@/components/Banner.vue';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter()
 const isLoad = ref(false)
 const deferredPrompt = ref(null)
+
+
+
 onMounted(() => {
+  console.log('asdfsda');
   isLoad.value = true
   window.addEventListener('beforeinstallprompt', e => {
-    console.log(e.prompt())
+    // console.log(e);
     e.preventDefault()
     // Stash the event so it can be triggered later.
     deferredPrompt.value = e
@@ -25,9 +30,20 @@ const install = async () => {
 }
 </script>
 <template>
+  <Banner>
+    <template #button>
+      <a @click="install"
+        class="inline-flex px-3 py-2 mr-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+        Install
+      </a>
+      <a @click="dismiss"
+        class="inline-flex px-3 py-2 mr-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+        dismiss
+      </a>
+    </template>
+  </Banner>
   <Transition>
     <div v-if="isLoad" class="flex flex-grow">
-      <!-- <button @click="install">install</button> -->
       <div class="flex items-center text-center lg:text-left px-8 md:px-12 lg:w-1/2">
         <div>
           <h2 class="text-3xl font-semibold text-gray-800 md:text-4xl">บันทึกความเสียหายของ <span

@@ -57,16 +57,16 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from, next) => {
-  // If the user is not logged in, redirect to /login
-  const isLoggedIn = !!localStorage.getItem('login');
-  if (!isLoggedIn && to.name !== 'login') {
-    return next({ path: '/login' });
-  } else {
-    return next();
-    // return next({ path: '/' })
-  }
-});
+// router.beforeEach((to, from, next) => {
+//   // If the user is not logged in, redirect to /login
+//   const isLoggedIn = !!localStorage.getItem('login');
+//   if (!isLoggedIn && to.name !== 'login') {
+//     return next({ path: '/login' });
+//   } else {
+//     return next();
+//     // return next({ path: '/' })
+//   }
+// });
 
 
 export default router

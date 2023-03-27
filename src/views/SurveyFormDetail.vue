@@ -8,6 +8,8 @@ import PageNotFound from '@/views/PageNotFound'
 import { useStore } from 'vuex'
 import api from '@/services'
 import moment from 'moment'
+import Modal from '@/components/Modal.vue'
+import Banner from '@/components/Banner.vue'
 
 const props = defineProps({
   isNew: {
@@ -71,6 +73,7 @@ const railForm = {
   signature: null
 }
 const surveyForm = ref()
+const modalActive = ref(false)
 let railSurvey = reactive(railForm)
 
 // COMPUTED
@@ -176,37 +179,9 @@ const compSubmitForm = computed(() => {
 
 const handleSubmit = async () => {
   const isValid = await v$.value.$validate()
-  console.log(isValid, props.isNew)
+  // console.log(isValid, props.isNew)
   if (isValid) {
-    if (props.isNew) {
-      console.log('is New');
-      // api.post(`/api/rail-survey`, Object.assign(railSurvey, {generalSurvey: Object.assign(railSurvey.generalSurvey, { date: new Date(railSurvey.generalSurvey.date).toISOString() } )}) , null).then((resp) => {
-      api.post(`/api/rail-survey`, compSubmitForm.value, null).then((resp) => {
-        if (resp.status === 201) {
-          console.log('create success ;)')
-          // router.push('/survey-list')
-        } else {
-        }
-      }).catch(() => {
-        navigator.serviceWorker.ready.then(registration => {
-          // console.log(registration)
-          registration.sync.register('some-unique-tag')
-        }).catch(console.log())
-      })
-    } else {
-      api.put(`/api/rail-survey/${railSurvey.id}`, compSubmitForm.value, null).then((resp) => {
-        if (resp.status === 200) {
-          console.log('update success ;)')
-          router.push('/survey-list')
-        } else {
-        }
-      }).catch(() => {
-        navigator.serviceWorker.ready.then(registration => {
-          // console.log(registration)
-          registration.sync.register('some-unique-tag')
-        }).catch(console.log())
-      })
-    }
+    modalActive.value = true
   } else {
     console.log(surveyForm.value.general)
     surveyForm.value.scrollToError()
@@ -231,6 +206,37 @@ const handleSubmit = async () => {
   // })
   // // IndexDB.createDB('test-db', 1, 'book', { id: 'js', name: 'Harry Porter' })
   // router.push('/survey-list')
+}
+const submit = () => {
+  if (props.isNew) {
+    console.log('is New');
+    // api.post(`/api/rail-survey`, Object.assign(railSurvey, {generalSurvey: Object.assign(railSurvey.generalSurvey, { date: new Date(railSurvey.generalSurvey.date).toISOString() } )}) , null).then((resp) => {
+    api.post(`/api/rail-survey`, compSubmitForm.value, null).then((resp) => {
+      if (resp.status === 201) {
+        console.log('create success ;)')
+        // router.push('/survey-list')
+      } else {
+      }
+    }).catch(() => {
+      navigator.serviceWorker.ready.then(registration => {
+        // console.log(registration)
+        registration.sync.register('some-unique-tag')
+      }).catch(console.log())
+    })
+  } else {
+    api.put(`/api/rail-survey/${railSurvey.id}`, compSubmitForm.value, null).then((resp) => {
+      if (resp.status === 200) {
+        console.log('update success ;)')
+        router.push('/survey-list')
+      } else {
+      }
+    }).catch(() => {
+      navigator.serviceWorker.ready.then(registration => {
+        // console.log(registration)
+        registration.sync.register('some-unique-tag')
+      }).catch(console.log())
+    })
+  }
 }
 
 onMounted(() => {
@@ -276,7 +282,13 @@ const test = (val) => {
     <PageNotFound></PageNotFound>
   </div> -->
   <SurveyForm ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
-  <!-- <div class="container flex justify-end mt-8">
+  <button @click="modalActive = true">modalActive</button>
+  <Modal content v-model="modalActive">
+    <template #content>
+      <SurveyForm ref="surveyForm" is-preview v-model="railSurvey" :validate="v$"></SurveyForm>
+    </template>
+  </Modal>
+  <!-- <div class="container flex justify-center mt-4">
     <button type="button" class="_button" @click="handleSubmit()">Submit</button>
   </div> -->
   <!-- {{ route.params.id }}
