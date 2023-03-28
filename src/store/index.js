@@ -1,7 +1,6 @@
 import { createStore } from 'vuex'
 import kcJSON from '@/keycloak.json'
 import Keycloak from 'keycloak-js'
-console.log('storage')
 export default createStore({
   state: {
     count: 0,

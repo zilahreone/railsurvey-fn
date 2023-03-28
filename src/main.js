@@ -10,6 +10,22 @@ import IndexedDB from '@/IndexedDB'
 import kcJSON from '@/keycloak.json'
 import Keycloak from 'keycloak-js'
 const app = createApp(App)
+
+// REGISTER SERVICEWORKER
+// if ("serviceWorker" in navigator) {
+//   // Register a service worker hosted at the root of the
+//   // site using the default scope.
+//   navigator.serviceWorker.register('./service-worker.js').then(
+//     (registration) => {
+//       console.log("Service worker registration succeeded:", registration);
+//     },
+//     (error) => {
+//       console.error(`Service worker registration failed: ${error}`);
+//     }
+//   );
+// } else {
+//   console.error("Service workers are not supported.");
+// }
 // CHECK SUPPORT INDEXED_DB
 if (!self.indexedDB) {
   console.warn(`Your browser doesn't support IndexedDB`)
@@ -87,7 +103,7 @@ if (!self.indexedDB) {
 //////////////////
 const local = localStorage
 // localStorage.clear()
-console.log(local.key(0))
+// console.log(local.key(0))
 app.use(router)
 app.use(store)
 app.component('VueSignaturePad', VueSignaturePad)

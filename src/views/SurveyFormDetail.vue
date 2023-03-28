@@ -281,11 +281,11 @@ const test = (val) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
+  <SurveyForm :isPreview="modalActive" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
   <button @click="modalActive = true">modalActive</button>
   <Modal content v-model="modalActive">
     <template #content>
-      <SurveyForm ref="surveyForm" is-preview v-model="railSurvey" :validate="v$"></SurveyForm>
+      <SurveyForm isPreview v-model="railSurvey" ref="surveyForm" :validate="v$"></SurveyForm>
     </template>
   </Modal>
   <!-- <div class="container flex justify-center mt-4">

@@ -14,7 +14,8 @@ const store = useStore()
 
 const surveyList = ref([])
 const count = ref(null)
-const offset = ref(0)
+const perPage = ref(20)
+const page = ref(1)
 
 onMounted (() => {
   getSurveyList2()
@@ -26,9 +27,9 @@ onMounted (() => {
  }
 })
 
-const getSurveyList2 = () => {
-  // store.state.token
-  api.get(`/api/rail-survey/?offset=${offset.value}`, null).then((resp) => {
+const getSurveyList2 = (p) => {
+  if (p) page.value = p
+  api.get(`/api/rail-survey/?offset=${(perPage.value * page.value) - perPage.value}`, null).then((resp) => {
     if (resp.status === 200) {
       resp.json().then((json) => {
         surveyList.value = json
@@ -36,6 +37,7 @@ const getSurveyList2 = () => {
     }
   }).catch((err) => {
   })
+  // store.state.token
 }
 
 const getCount = () => {
@@ -155,6 +157,6 @@ const compSurveyList = computed(() => {
         </td> -->
       </template>
     </Table>
-    <TailTable :count="count" :offset="offset" @next="" @previous=""></TailTable>
+    <TailTable :count="count" :page="page" :per-page="perPage" @page="getSurveyList2($event)"></TailTable>
   </div>
 </template>

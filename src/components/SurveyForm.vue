@@ -266,19 +266,71 @@ const handleEmit = (target) => {
 // COMPUTED //
 const compDisablesLocation = computed(() => {
   const filteredArray = railSurvey.railDamageSurvey.situation.filter(rd => ['weldingJoint','fishPlate','railroadCrossing','turnOut'].includes(rd))
-  if (filteredArray.length > 0) {
-    return ['gaugeSide','surfaceRailHead']
+  if (props.isPreview) {
+    return variable.location.map(dp => dp.value)
+  } else {
+    if (filteredArray.length > 0) {
+      return ['gaugeSide','surfaceRailHead']
+    }
+    return []
   }
-  return []
 })
 const compDisablesDefectPattern = computed(() => {
   const location = railSurvey.railDamageSurvey.location.filter((location, index) => ['railHead', 'railWeb', 'railFoot', 'fullSection'].includes(location))
   const location2 = railSurvey.railDamageSurvey.location.filter((location, index) => ['gaugeSide','surfaceRailHead'].includes(location))
-  if (location.length > 0 && location2.length === 0) {
-    return ['surfaceDefect', 'crushedHead', 'headChecking', 'spalling', 'sideWear', 'shelling', 'burnedRail', 'other']
-  } else if (location.length === 0 && location2.length > 0) {
-    return ['fracture', 'rupture', 'wear', 'bend', 'corrosion']
+  if (props.isPreview) {
+    return variable.defectPattern.map(dp => dp.value)
+  } else {
+    if (location.length > 0 && location2.length === 0) {
+      return ['surfaceDefect', 'crushedHead', 'headChecking', 'spalling', 'sideWear', 'shelling', 'burnedRail', 'other']
+    } else if (location.length === 0 && location2.length > 0) {
+      return ['fracture', 'rupture', 'wear', 'bend', 'corrosion']
+    }
   }
+  return []
+})
+const compDisableAreaCondition = computed(() => {
+  if (props.isPreview) return variable.damageAreaPrperties.map(dp => dp.value)
+  return []
+})
+const compDisableSituation = computed(() => {
+  if (props.isPreview) return variable.situation.map(sit => sit.value)
+  return []
+})
+const compDisablePerfect = computed(() => {
+  if (props.isPreview) return variable.integrity.map(inte => inte.value)
+  return []
+})
+const compDisabletrackGeometryCondition = computed(() => {
+  if (props.isPreview) return variable.trackGeometry.map(tg => tg.value)
+  return []
+})
+const compDisableBallast = computed(() => {
+  if (props.isPreview) return variable.ballast.map(tg => tg.value)
+  return []
+})
+const compDisableSleeper = computed(() => {
+  if (props.isPreview) return variable.sleeper.map(tg => tg.value)
+  return []
+})
+const compDisableTrackFoundationCondition = computed(() => {
+  if (props.isPreview) return [variable.integrity[0]].map(tg => tg.value)
+  return []
+})
+const compDisableSeverity = computed(() => {
+  if (props.isPreview) return variable.damagesLevel.map(dam => dam.value)
+  return []
+})
+const compDisableAnalyse = computed(() => {
+  if (props.isPreview) return variable.analyse.map(ana => ana.value)
+  return []
+})
+const compDisableHasMaintenanceRecord = computed(() => {
+  if (props.isPreview) return variable.maintenanceRecord.map(mr => mr.value)
+  return []
+})
+const compDisableMaintenanceMethod = computed(() => {
+  if (props.isPreview) return variable.maintenanceMethod.map(mm => mm.value)
   return []
 })
 </script>
@@ -354,7 +406,7 @@ const compDisablesDefectPattern = computed(() => {
           <div>
             <label class="_label-sm">ลักษณะพื้นที่ที่เกิดความเสียหาย (Type of failure area)</label>
             <div class="grid sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.generalSurvey.areaCondition.$error" v-model="railSurvey.generalSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.generalSurvey.areaCondition.$error" v-model="railSurvey.generalSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties" :disables="compDisableAreaCondition"></SelectBtn>
             </div>
             <p v-if="v$.generalSurvey.areaCondition.$error" class="text-sm text-red-600">{{ v$.generalSurvey.areaCondition.$errors[0].$message }}</p>
           </div>
@@ -373,7 +425,7 @@ const compDisablesDefectPattern = computed(() => {
           <div>
             <label class="_label-lg">ความเสียหายของราง (Situation)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" @onEvent="handleFilterLocation('situation')" name="situation" :items="variable.situation"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" @onEvent="handleFilterLocation('situation')" name="situation" :items="variable.situation" :disables="compDisableSituation"></SelectBtn>
             </div>
             <p v-if="v$.railDamageSurvey.situation.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.situation.$errors[0].$message }}</p>
           </div>
@@ -404,48 +456,48 @@ const compDisablesDefectPattern = computed(() => {
           <div>
             <label class="_label-lg">Track Geometry</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.trackGeometryCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.trackGeometryCondition.isPerfect" name="trackGeometryCondition" :items="variable.integrity"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.trackGeometryCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.trackGeometryCondition.isPerfect" name="trackGeometryCondition" :items="variable.integrity" :disables="compDisablePerfect"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.trackGeometryCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.trackGeometryCondition.isPerfect.$errors[0].$message }}</p>
           </div>
           <div v-if="railSurvey.trackDamageSurvey.trackGeometryCondition.isPerfect && railSurvey.trackDamageSurvey.trackGeometryCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Track Geometry ที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.trackGeometryCondition.condition.$error" image-key="img" v-model="railSurvey.trackDamageSurvey.trackGeometryCondition.condition" name="trackGeometryConditionFail" :items="variable.trackGeometry"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.trackGeometryCondition.condition.$error" image-key="img" v-model="railSurvey.trackDamageSurvey.trackGeometryCondition.condition" name="trackGeometryConditionFail" :items="variable.trackGeometry" :disables="compDisabletrackGeometryCondition"></SelectBtn>
             </div>
           </div>
           <div>
             <label class="_label-lg">หินโรยทาง (Ballast)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.ballastCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.isPerfect" name="ballastCondition" :items="variable.integrity"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.ballastCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.isPerfect" name="ballastCondition" :items="variable.integrity" :disables="compDisablePerfect"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.ballastCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.isPerfect.$errors[0].$message }}</p>
           </div>
           <div v-if="railSurvey.trackDamageSurvey.ballastCondition.isPerfect && railSurvey.trackDamageSurvey.ballastCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Ballast ที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.ballastCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.condition" name="ballastConditionFail" :items="variable.ballast"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.ballastCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.condition" name="ballastConditionFail" :items="variable.ballast" :disables="compDisableBallast"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.ballastCondition.condition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.condition.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">หมอนรองทาง (Sleeper)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect" name="sleeperCondition" :items="variable.integrity"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect" name="sleeperCondition" :items="variable.integrity" :disables="compDisablePerfect"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.isPerfect.$errors[0].$message }}</p>
           </div>
           <div v-if="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect && railSurvey.trackDamageSurvey.sleeperCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Sleeper ที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.sleeperCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.condition" name="sleeperConditionFail" :items="variable.sleeper"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.sleeperCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.condition" name="sleeperConditionFail" :items="variable.sleeper" :disables="compDisableSleeper"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.condition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.condition.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">คันทาง</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-              <SelectBtn :is-preview="isPreview" type="radio" is-specify :error="v$.trackDamageSurvey.trackFoundationCondition.$error" v-model="railSurvey.trackDamageSurvey.trackFoundationCondition" name="trackFoundationCondition" :items="[variable.integrity[0]]"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="radio" is-specify :error="v$.trackDamageSurvey.trackFoundationCondition.$error" v-model="railSurvey.trackDamageSurvey.trackFoundationCondition" name="trackFoundationCondition" :items="[variable.integrity[0]]" :disables="compDisableTrackFoundationCondition"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.trackFoundationCondition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.trackFoundationCondition.$errors[0].$message }}</p>
           </div>
@@ -460,14 +512,14 @@ const compDisablesDefectPattern = computed(() => {
           <div>
             <label class="_label-lg">ความรุนแรงของความเสียหาย</label>
             <div class="grid sm:grid-cols-2 md:grid-cols-3 xl:md:grid-cols-4 gap-2">
-              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.maintenanceRate.severity.$error" v-model="railSurvey.maintenanceRate.severity" name="severity" :items="variable.damagesLevel"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.maintenanceRate.severity.$error" v-model="railSurvey.maintenanceRate.severity" name="severity" :items="variable.damagesLevel" :disables="compDisableSeverity"></SelectBtn>
             </div>
             <p v-if="v$.maintenanceRate.severity.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.severity.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุของความเสียหาย</label>
             <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2">
-              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.maintenanceRate.isAnalyzeDamage.$error" v-model="railSurvey.maintenanceRate.isAnalyzeDamage" name="isAnalyzeDamage" :items="variable.analyse"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.maintenanceRate.isAnalyzeDamage.$error" v-model="railSurvey.maintenanceRate.isAnalyzeDamage" name="isAnalyzeDamage" :items="variable.analyse" :disables="compDisableAnalyse"></SelectBtn>
             </div>
             <p v-if="v$.maintenanceRate.isAnalyzeDamage.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.isAnalyzeDamage.$errors[0].$message }}</p>
           </div>
@@ -475,7 +527,7 @@ const compDisablesDefectPattern = computed(() => {
             <label class="_label-lg">ประวัติการซ่อมบำรุง</label>
             <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               <SelectBtn :is-preview="isPreview" type="radio" :error="v$.maintenanceRate.maintenanceRecord.hasMaintenanceRecord.$error" :class="''"
-                v-model="railSurvey.maintenanceRate.maintenanceRecord.hasMaintenanceRecord" name="hasMaintenanceRecord" :items="variable.maintenanceRecord"
+                v-model="railSurvey.maintenanceRate.maintenanceRecord.hasMaintenanceRecord" name="hasMaintenanceRecord" :items="variable.maintenanceRecord" :disables="compDisableHasMaintenanceRecord"
               >
               </SelectBtn>
             </div>
@@ -502,7 +554,7 @@ const compDisablesDefectPattern = computed(() => {
           <div>
             <label class="_label-lg">คำแนะนำวิธีการซ่อมบำรุง</label>
             <div class="grid sm:grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.maintenanceRate.maintenanceMethod.$error" v-model="railSurvey.maintenanceRate.maintenanceMethod" name="maintenanceMethod" :items="variable.maintenanceMethod"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.maintenanceRate.maintenanceMethod.$error" v-model="railSurvey.maintenanceRate.maintenanceMethod" name="maintenanceMethod" :items="variable.maintenanceMethod" :disables="compDisableMaintenanceMethod"></SelectBtn>
             </div>
             <p v-if="v$.maintenanceRate.maintenanceMethod.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.maintenanceMethod.$errors[0].$message }}</p>
           </div>

@@ -2,45 +2,48 @@
 import Banner from '@/components/Banner.vue';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import Cookies from 'js-cookie';
 
 const router = useRouter()
 const isLoad = ref(false)
 const deferredPrompt = ref(null)
-
-
+const isShowBanner = ref(false)
 
 onMounted(() => {
-  console.log('asdfsda');
   isLoad.value = true
   window.addEventListener('beforeinstallprompt', e => {
-    // console.log(e);
-    e.preventDefault()
-    // Stash the event so it can be triggered later.
-    deferredPrompt.value = e
+    // e.preventDefault()
+    if (Cookies.get('add-to-home-screen') === undefined) {
+      // Stash the event so it can be triggered later.
+      deferredPrompt.value = e
+      isShowBanner.value = true
+    }
   });
   window.addEventListener('appinstalled', () => {
     deferredPrompt.value = null
   });
 })
 const dismiss = async () => {
-  deferredPrompt.value = null
+  Cookies.set('add-to-home-screen', null, { expires: 15 })
+  deferredPrompt.vaue = null
+  isShowBanner.value = false
 }
 const install = async () => {
   deferredPrompt.value.prompt()
 }
 </script>
 <template>
-  <Banner>
+  <Banner v-model="isShowBanner">
     <template #button>
-      <a @click="install"
+      <button @click="install"
         class="inline-flex px-3 py-2 mr-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
         Install
-      </a>
-      <a @click="dismiss"
+      </button>
+      <button @click="dismiss"
         class="inline-flex px-3 py-2 mr-2 text-xs font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
         dismiss
-      </a>
-    </template>
+      </button>
+  </template>
   </Banner>
   <Transition>
     <div v-if="isLoad" class="flex flex-grow">
@@ -60,7 +63,7 @@ const install = async () => {
               class="ml-4 px-4 py-3 bg-gray-500 text-gray-200 text-xs font-semibold rounded hover:bg-gray-800">
               รายการสำรวจความเสียหาย</router-link>
             <!-- <a class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400"
-              href="#">Learn More</a> -->
+                href="#">Learn More</a> -->
           </div>
         </div>
       </div>
@@ -79,4 +82,5 @@ const install = async () => {
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
-}</style>
+}
+</style>

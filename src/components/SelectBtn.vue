@@ -78,13 +78,8 @@ const isChecked = (val) => {
   return props.modelValue?.includes(val)
 }
 const isCheckedSpecify = (val) => {
-  return props.modelValue !== null && props.modelValue === val && props.items.filter(item => item.value === val).length === 0
-  // props.items.forEach(item => {
-  //   if (item.value === val) {
-  //     return
-  //   }
-  // })
-  // return false
+  // return props.modelValue !== null && props.modelValue === val && props.items.filter(item => item.value === val).length === 0
+  return props.modelValue === val
 }
 const compDisableBtn = computed(() => {
   if (props.isPreview) {
@@ -110,8 +105,8 @@ const compDisableBtn = computed(() => {
       {{ item.key }}
     </label>
   </div>
-  <div v-if="isSpecify" :class="`flex items-center pl-2 border ${error ? 'border-red-600' : 'border-gray-200'} rounded dark:border-gray-700`">
+  <div v-if="isSpecify" :class="`flex items-center pl-2 border ${isPreview ? 'bg-gray-100' : ''} ${error ? 'border-red-600' : 'border-gray-200'} rounded dark:border-gray-700`">
     <input :disabled="isPreview" :id="`${name}-${type}-input`" :type="type" :name="name" :checked="isCheckedSpecify(modelValue)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-    <input :disabled="isPreview" @input="handleEmit($event.target.value)" @focus="handleEmit($event.target.value)" type="text" placeholder="อื่นๆ โปรดระบุ" :class="`_input w-full my-2 mx-2`" required>
+    <input :disabled="isPreview" :value="modelValue" @input="handleEmit($event.target.value)" @focus="handleEmit($event.target.value)" type="text" placeholder="อื่นๆ โปรดระบุ" :class="`${isPreview ? '_input' : '_input-disable'} w-full my-2 mx-2`" required>
   </div>
 </template>
