@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { required, helpers, requiredIf, minValue, maxValue, requiredUnless, minLength, decimal } from '@vuelidate/validators'
+import { required, helpers, requiredIf, minValue, maxValue, requiredUnless, minLength, decimal, maxLength } from '@vuelidate/validators'
 import { useRouter, useRoute } from 'vue-router'
 import SurveyForm from '@/components/SurveyForm'
 import PageNotFound from '@/views/PageNotFound'
@@ -31,11 +31,18 @@ const railForm = {
       longitude: null
     },
     kilometers: null,
+    telegram: {
+      telegramBefore: null,
+      telegramAfter: null
+    },
     nearby: {
       stationBefore: null,
       stationAfter: null
     },
-    railType: null,
+    railType: {
+      type: null,
+      weight: null
+    },
     areaCondition: []
   },
   railDamageSurvey: {
@@ -74,6 +81,7 @@ const railForm = {
 }
 const surveyForm = ref()
 const modalActive = ref(false)
+const isConfirm = ref(false)
 let railSurvey = reactive(railForm)
 
 // COMPUTED
@@ -92,13 +100,13 @@ const rules = computed(() => {
       rule[key1] = {}
       if (key1 === 'generalSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
-          if (['coordinates', 'nearby'].includes(key2)) {
+          if (['coordinates', 'nearby', 'railType', 'telegram'].includes(key2)) {
             rule[key1][key2] = {}
-            if (key2 === 'coordinates') {
+            if (['coordinates', 'railType'].includes(key2)) {
               Object.keys(railForm[key1][key2]).forEach((key3) => {
                 rule[key1][key2][key3] = { required, decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0)  }
               })
-            } else if (key2 === 'nearby') {
+            } else {
               Object.keys(railForm[key1][key2]).forEach((key3) => {
                 rule[key1][key2][key3] = { required }
               })
@@ -113,7 +121,8 @@ const rules = computed(() => {
         Object.keys(railForm[key1]).forEach((key2) => {
           if (key2 === 'uploadImages') {
             rule[key1][key2] = {
-              $each: helpers.forEach(uploadImage)
+              $each: helpers.forEach(uploadImage),
+              maxLength: maxLength(3)
             }
           } else {
             rule[key1][key2] = { required, minLength: minLength(1) }
@@ -183,10 +192,7 @@ const handleSubmit = async () => {
   if (isValid) {
     modalActive.value = true
   } else {
-    console.log(surveyForm.value.general)
-    surveyForm.value.scrollToError()
-    // console.log(surveyForm.value);
-    // window.scrollTo(0, top)
+    // surveyForm.value.scrollToError()
   }
   // const { isEmpty, data } = signaturePad.value.saveSignature()
   // railSurvey.signature = data
@@ -207,7 +213,7 @@ const handleSubmit = async () => {
   // // IndexDB.createDB('test-db', 1, 'book', { id: 'js', name: 'Harry Porter' })
   // router.push('/survey-list')
 }
-const submit = () => {
+const submitForm = () => {
   if (props.isNew) {
     console.log('is New');
     // api.post(`/api/rail-survey`, Object.assign(railSurvey, {generalSurvey: Object.assign(railSurvey.generalSurvey, { date: new Date(railSurvey.generalSurvey.date).toISOString() } )}) , null).then((resp) => {
@@ -281,16 +287,29 @@ const test = (val) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm :isPreview="modalActive" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
+  <SurveyForm :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
   <button @click="modalActive = true">modalActive</button>
   <Modal content v-model="modalActive">
     <template #content>
-      <SurveyForm isPreview v-model="railSurvey" ref="surveyForm" :validate="v$"></SurveyForm>
+      <SurveyForm is-preview v-model="railSurvey" ref="surveyForm" :validate="v$"></SurveyForm>
+    </template>
+    <template #footer>
+      <button @click="isConfirm = true" data-modal-hide="extralarge-modal" type="button" class="_button">ส่งแบบฟอร์ม</button>
+      <button @click="modalActive = false" data-modal-hide="extralarge-modal" type="button" class="_button-error">แก้ไขแบบฟอร์ม</button>
     </template>
   </Modal>
+  <Modal create v-model="isConfirm"></Modal>
   <!-- <div class="container flex justify-center mt-4">
     <button type="button" class="_button" @click="handleSubmit()">Submit</button>
   </div> -->
   <!-- {{ route.params.id }}
   detail -->
 </template>
+<style>
+#parent {
+  /* width: 100%;
+  height: 100%; */
+  /* position: fixed; */
+  overflow:scroll;
+}
+</style>

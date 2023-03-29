@@ -48,6 +48,12 @@ const props = defineProps({
   }
 })
 
+// onMounted(() => {
+//   if (props.isSpecify) specify.value = props.modelValue
+// })
+
+const specify = ref(null)
+
 const emit = defineEmits(['update:modelValue', 'onEvent'])
 const handleEmit = (val) => {
   let out = null
@@ -72,14 +78,14 @@ const handleEmit = (val) => {
   emit('onEvent', out)
 }
 const isChecked = (val) => {
-  if (typeof val == 'boolean') {
-    return props.modelValue === val
+  if (props.type === 'checkbox') {
+    return props.modelValue?.includes(val)
   }
-  return props.modelValue?.includes(val)
+  return props.modelValue === val
 }
 const isCheckedSpecify = (val) => {
   // return props.modelValue !== null && props.modelValue === val && props.items.filter(item => item.value === val).length === 0
-  return props.modelValue === val
+  return props.modelValue !== null && props.modelValue === val && props.items.filter(item => item.value === val).length === 0
 }
 const compDisableBtn = computed(() => {
   if (props.isPreview) {
@@ -99,14 +105,14 @@ const compDisableBtn = computed(() => {
 </script>
 <template>
   <div v-for="(item ,index) in items" :key="index" :class="[{'bg-gray-100': disables.includes(item.value)}, `flex items-center pl-2 border ${error ? 'border-red-600' : 'border-gray-200'} rounded dark:border-gray-700`]">
-    <input :id="`${name}-${item.value}-${type}-${index}`" :type="type" :disabled="disables.includes(item.value)" @input="handleEmit(item.value)" :checked="isChecked(item.value)" :name="name" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-    <label :for="`${name}-${item.value}-${type}-${index}`" :class="`flex flex-col gap-2 ${imageKey && item[imageKey] ? 'items-center' : ''}  w-full py-2 ml-2 text-sm font-medium ${error ? 'text-red-600' : 'text-gray-900'} dark:text-gray-300`">
+    <input :id="`${name}-${index}`" :value="item.value" :type="type" :disabled="disables.includes(item.value)" @input="handleEmit(item.value)" :checked="isChecked(item.value)" :name="`${name}${isPreview ? '-preview' : ''}`" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <label :for="`${name}-${index}`" :class="`flex flex-col gap-2 ${imageKey && item[imageKey] ? 'items-center' : ''}  w-full py-2 ml-2 text-sm font-medium ${error ? 'text-red-600' : 'text-gray-900'} dark:text-gray-300`">
       <img v-if="imageKey && item[imageKey]" class="" :src="require(`@/assets/${item[imageKey]}`)" alt="img">
       {{ item.key }}
     </label>
   </div>
   <div v-if="isSpecify" :class="`flex items-center pl-2 border ${isPreview ? 'bg-gray-100' : ''} ${error ? 'border-red-600' : 'border-gray-200'} rounded dark:border-gray-700`">
-    <input :disabled="isPreview" :id="`${name}-${type}-input`" :type="type" :name="name" :checked="isCheckedSpecify(modelValue)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-    <input :disabled="isPreview" :value="modelValue" @input="handleEmit($event.target.value)" @focus="handleEmit($event.target.value)" type="text" placeholder="อื่นๆ โปรดระบุ" :class="`${isPreview ? '_input' : '_input-disable'} w-full my-2 mx-2`" required>
+    <input :disabled="isPreview" :id="`${name}-${type}-input`" :type="type" :name="name" :checked="isCheckedSpecify(specify)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <input :disabled="isPreview" v-model="specify" @input="handleEmit($event.target.value)" @focus="handleEmit($event.target.value)" type="text" placeholder="อื่นๆ โปรดระบุ" :class="`${isPreview ? '_input' : '_input-disable'} w-full my-2 mx-2`" required>
   </div>
 </template>

@@ -91,8 +91,8 @@ const modal = computed(() => {
         </div>
       </div>
       <div v-if="content" id="extralarge-modal" tabindex="-1" class="fixed inset-0 z-10 overflow-y-auto">
-        <div class="flex min-h-full sm:p-8">
-          <div class="relative w-full h-full max-w-7xl md:h-auto">
+        <div class="flex justify-center min-h-full sm:p-8">
+          <div class="relative w-full h-full max-w-7xl">
             <!-- Modal content -->
             <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <!-- Modal header -->
@@ -118,8 +118,9 @@ const modal = computed(() => {
               </div>
             <!-- Modal footer -->
             <div class="flex justify-end items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-              <button @click="handleButtonClickConfirm()" data-modal-hide="extralarge-modal" type="button" class="_button">ส่งแบบฟอร์ม</button>
-              <button @click="handleButtonClick()" data-modal-hide="extralarge-modal" type="button" class="_button-error">แก้ไขแบบฟอร์ม</button>
+              <slot name="footer"></slot>
+              <!-- <button @click="handleButtonClickConfirm()" data-modal-hide="extralarge-modal" type="button" class="_button">ส่งแบบฟอร์ม</button>
+              <button @click="handleButtonClick()" data-modal-hide="extralarge-modal" type="button" class="_button-error">แก้ไขแบบฟอร์ม</button> -->
             </div>
           </div>
         </div>

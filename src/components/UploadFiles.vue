@@ -16,6 +16,10 @@ const props = defineProps({
     default: '',
     required: true
   },
+  count: {
+    type: Number,
+    default: 3
+  },
   errors: {
     type: Object,
     default: {}
@@ -31,6 +35,7 @@ const uploadStatus = ref(null)
 const handleUploadImages = (event) => {
   const files = eval(event.target.id).files
   let images = [...props.modelValue]
+  // console.log(files.length, images.length);
   // let images = []
   Array.from(files).forEach((file, index) => {
     if (['image/jpeg', 'image/pjpeg', 'image/png', 'image/apng'].includes(file.type)) {
@@ -50,6 +55,8 @@ const handleUploadImages = (event) => {
       }
     }
   })
+  // if (files.length <= props.count) {
+  // }
   emit('update:modelValue', images)
   uploadStatus.value = null
   showUploadBtn.value = true
@@ -108,16 +115,17 @@ const compCSSUploadBtn = computed(() => {
       >
     </div>
     <slot name="default">
-      <div class="flex flex-wrap gap-x-1">
-        <div v-for="(image, index) in modelValue" :key="index">
-          <div class="flex flex-col">
-            <img :src="image.originalPath" :alt="image.originalname" class="object-contain h-56">
-            <button v-if="!isPreview" @click="handleRemoveImage(index)" class="bg-red-500 hover:bg-red-600 w-full p-2 rounded-b-md text-white text-sm">Remove</button>
-            <p v-if="errors.$error && errors.$errors[0].$message[index].length > 0" class="text-sm text-red-600">{{ errors.$errors[0].$message[index].join('') }}</p>
-            <!-- <div v-for="(value, key) in errors[index]" :key="key">
-            </div> -->
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-wrap gap-1">
+          <div v-for="(image, index) in modelValue" :key="index" class="flex flex-col gap-1">
+            <div>
+              <img :src="image.originalPath" :alt="image.originalname" class="object-contain h-56">
+              <button v-if="!isPreview" @click="handleRemoveImage(index)" class="bg-red-500 hover:bg-red-600 w-full p-2 rounded-b-md text-white text-sm">Remove</button>
+              <p v-if="errors.$error && errors.$errors.filter(err => err.$validator === '$each').length > 0" class="text-sm text-red-600">{{ errors.$errors[0].$message[index].join('')}}</p>
+            </div>
           </div>
         </div>
+        <p v-if="errors.$error && errors.$errors.filter(err => err.$validator !== '$each').length > 0" class="text-sm text-red-600">{{ errors.$errors.filter(err => err.$validator !== '$each')[0].$message}}</p>
       </div>
       <div v-if="showUploadBtn">
         <button :disabled="['pending', 'success'].includes(uploadStatus)" type="button"

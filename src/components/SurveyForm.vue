@@ -98,9 +98,14 @@ const general = ref(null)
 
 onMounted(() => {
   // signaturePad.value.signatureData = railSurvey.signature
-  if (props.isPreview) signaturePad.value.lockSignaturePad()
+  // const { isEmpty, data } = signaturePad.value.saveSignature()
+  if (props.isPreview) {
+    signaturePad.value.lockSignaturePad()
+    if (railSurvey.signature) signaturePad.value.fromDataURL(railSurvey.signature)
+  }
 })
 
+// METHOD
 const undo = () => {
   signaturePad.value.undoSignature()
   const { isEmpty, data } = signaturePad.value.saveSignature()
@@ -108,30 +113,10 @@ const undo = () => {
     handleEmit({ name: 'signature', value: null })
   }
 }
-// const save = () => {
-//   const { isEmpty, data } = signaturePad.value.saveSignature()
-//   console.log(isEmpty)
-//   console.log(data)
-// }
 const clear = () => {
   signaturePad.value.clearSignature()
   handleEmit({ name: 'signature', value: null })
 }
-
-// const validateSignature = () => {
-//   const { isEmpty, data } = signaturePad.value.saveSignature()
-//   console.log(isEmpty)
-//   return !isEmpty
-// }
-
-// METHOD //
-// const handleGetLocation = () => {
-//   navigator.geolocation.getCurrentPosition((position) => {
-//       const p = position.coords;
-//       // console.log(p.latitude, p.longitude);
-//       railSurvey.coordinates = `${p.latitude}, ${p.longitude}`
-//   })
-// }
 const getAPI = () => {
   api.get(`/`, null).then((resp) => {
     resp.json().then((json) => {
@@ -210,19 +195,15 @@ const handleUploadImages = (id) => {
   //   uploadStatus.value = 'error'
   // })
 }
-
 const scrollToError = () => {
   window.scrollTo(0, general.value.offsetTop)
 }
-
 defineExpose({
   scrollToError
 })
-
 const onBegin = () => {
   // console.log('=== Begin ===');
 }
-
 const onEnd = () => {
   // console.log('=== End ===');
   const { isEmpty, data } = signaturePad.value.saveSignature()
@@ -232,7 +213,6 @@ const onEnd = () => {
     handleEmit({ name: 'signature', value: `${data}` })
   }
 }
-
 const handleFilterLocation = (value) => {
   if (value === 'situation') {
     if (railSurvey.railDamageSurvey.location.length > 0 ) {
@@ -241,21 +221,19 @@ const handleFilterLocation = (value) => {
     }
   }
 }
-
 const handleFilterdefectPattern = () => {
   if (railSurvey.railDamageSurvey.defectPattern.length > 0 ) {
     emit('update:modelValue', Object.assign(railSurvey, { railDamageSurvey: Object.assign(railSurvey.railDamageSurvey, { defectPattern: railSurvey.railDamageSurvey.defectPattern.filter(rd => !compDisablesDefectPattern.value.includes(rd)) }) }))
   }
 }
-
 const handleEmit = (target) => {
   const arr = target.name.split('\.')
   // console.log(arr);
   if (['signature'].includes(arr[0])) {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: target.value }))
   }
-  if (['coordinates', 'nearby', 'maintenanceRecord'].includes(arr[1])) {
-    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: arr[1] === 'coordinates' ? parseFloat(target.value) : target.value }) }) }))
+  if (['coordinates', 'nearby', 'maintenanceRecord', 'railType' , 'telegram'].includes(arr[1])) {
+    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: ['coordinates', 'railType'].includes(arr[1]) ? parseFloat(target.value) : target.value }) }) }))
   } else if (['zone'].includes(arr[1])) {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value, nearby: handleSelectZone(target.value) }) }))
   } else if (['kilometers', 'railType', 'uploadImages'].includes(arr[1])) {
@@ -358,49 +336,68 @@ const compDisableMaintenanceMethod = computed(() => {
               <p v-if="v$.generalSurvey.zone.$error" class="text-sm text-red-600">{{ v$.generalSurvey.zone.$errors[0].$message }}</p>
             </div>
             <div>
+              <label class="_label-sm">สถานีรถไฟก่อนหน้า</label>
+              <select :disabled="isPreview" name="generalSurvey.nearby.stationBefore" :value="railSurvey.generalSurvey.nearby.stationBefore" @change="handleEmit($event.target)" id="stationBefore" :class="v$.generalSurvey.nearby.stationBefore.$error ? '_input_error' : '_input'">
+                <option disabled value="">กรุณาเลือกสถานีก่อนหน้า</option>
+                <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
+              </select>
+              <p v-if="v$.generalSurvey.nearby.stationBefore.$error" class="text-sm text-red-600">{{ v$.generalSurvey.nearby.stationBefore.$errors[0].$message }}</p>
+            </div>
+            <div>
+              <label class="_label-sm">สถานีรถไฟถัดไป</label>
+              <select :disabled="isPreview" name="generalSurvey.nearby.stationAfter" :value="railSurvey.generalSurvey.nearby.stationAfter" @change="handleEmit($event.target)" id="stationAfter" :class="v$.generalSurvey.nearby.stationAfter.$error ? '_input_error' : '_input'">
+                <option disabled value="">กรุณาเลือกสถานีถัดไป</option>
+                <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
+              </select>
+              <p v-if="v$.generalSurvey.nearby.stationAfter.$error" class="text-sm text-red-600">{{ v$.generalSurvey.nearby.stationAfter.$errors[0].$message }}</p>
+            </div>
+            <!-- <div>
               <label class="_label-sm">หลักกิโลเมตร/เสาโทรเลข</label>
               <input :disabled="isPreview" :value="railSurvey.generalSurvey.kilometers" name="generalSurvey.kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.generalSurvey.kilometers.$error ? '_input_error' : '_input' " required>
               <p v-if="v$.generalSurvey.kilometers.$error" class="text-sm text-red-600">{{ v$.generalSurvey.kilometers.$errors[0].$message }}</p>
             </div>
+            <div> -->
+          </div>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-2">
+            <div>
+              <label class="_label-sm">พิกัด ละติจูด</label>
+              <input :disabled="isPreview" :value="railSurvey.generalSurvey.coordinates.latitude" type="text" name="generalSurvey.coordinates.latitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.latitude.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.generalSurvey.coordinates.latitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.latitude.$errors[0].$message }}</p>
+            </div>
+            <div>
+              <label class="_label-sm">พิกัด ลองติจูด</label>
+              <input :disabled="isPreview" :value="railSurvey.generalSurvey.coordinates.longitude" type="text" name="generalSurvey.coordinates.longitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.longitude.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.generalSurvey.coordinates.longitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.longitude.$errors[0].$message }}</p>
+            </div>
             <div>
               <label class="_label-sm">มาตรฐานและเกรด</label>
-              <select :disabled="isPreview" name="generalSurvey.railType" :value="railSurvey.generalSurvey.railType" @change="handleEmit($event.target)" id="railType" :class="v$.generalSurvey.railType.$error ? '_input_error' : '_input'">
-                <option disabled value="">กรุณาเลือกประเภทของเกจ</option>
+              <select :disabled="isPreview" name="generalSurvey.railType.type" :value="railSurvey.generalSurvey.railType.type" @change="handleEmit($event.target)" id="railType" :class="v$.generalSurvey.railType.$error ? '_input_error' : '_input'">
+                <option disabled value="">กรุณาเลือกประเภทของเกรด</option>
                 <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
               </select>
-              <p v-if="v$.generalSurvey.railType.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.$errors[0].$message }}</p>
+              <p v-if="v$.generalSurvey.railType.type.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.type.$errors[0].$message }}</p>
+            </div>
+            <div>
+              <label class="_label-sm">น้ำหนักเกรด (Pound)</label>
+              <input :disabled="isPreview" :value="railSurvey.generalSurvey.railType.weight" type="text" name="generalSurvey.railType.weight" @input="handleEmit($event.target)" :class="v$.generalSurvey.railType.weight.$error ? '_input_error' : '_input' " placeholder="ปอนด์" required>
+              <p v-if="v$.generalSurvey.railType.weight.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.weight.$errors[0].$message }}</p>
             </div>
           </div>
-          <div class="grid sm:grid-cols-2 gap-x-2 gap-y-4">
-            <div class="grid md:grid-cols-2 gap-x-2 gap-y-4">
-              <div>
-                <label class="_label-sm">พิกัด ละติจูด</label>
-                <input :disabled="isPreview" :value="railSurvey.generalSurvey.coordinates.latitude" type="text" name="generalSurvey.coordinates.latitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.latitude.$error ? '_input_error' : '_input' " required>
-                <p v-if="v$.generalSurvey.coordinates.latitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.latitude.$errors[0].$message }}</p>
-              </div>
-              <div>
-                <label class="_label-sm">พิกัด ลองติจูด</label>
-                <input :disabled="isPreview" :value="railSurvey.generalSurvey.coordinates.longitude" type="text" name="generalSurvey.coordinates.longitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.longitude.$error ? '_input_error' : '_input' " required>
-                <p v-if="v$.generalSurvey.coordinates.longitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.longitude.$errors[0].$message }}</p>
-              </div>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-2">
+            <div>
+              <label class="_label-sm">หลักกิโลเมตร</label>
+              <input :disabled="isPreview" :value="railSurvey.generalSurvey.kilometers" name="generalSurvey.kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.generalSurvey.kilometers.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.generalSurvey.kilometers.$error" class="text-sm text-red-600">{{ v$.generalSurvey.kilometers.$errors[0].$message }}</p>
             </div>
-            <div class="grid md:grid-cols-2 gap-x-2 gap-y-4">
-              <div>
-                <label class="_label-sm">สถานีรถไฟก่อนหน้า</label>
-                <select :disabled="isPreview" name="generalSurvey.nearby.stationBefore" :value="railSurvey.generalSurvey.nearby.stationBefore" @change="handleEmit($event.target)" id="stationBefore" :class="v$.generalSurvey.nearby.stationBefore.$error ? '_input_error' : '_input'">
-                  <option disabled value="">กรุณาเลือกสถานีก่อนหน้า</option>
-                  <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
-                </select>
-                <p v-if="v$.generalSurvey.nearby.stationBefore.$error" class="text-sm text-red-600">{{ v$.generalSurvey.nearby.stationBefore.$errors[0].$message }}</p>
-              </div>
-              <div>
-                <label class="_label-sm">สถานีรถไฟถัดไป</label>
-                <select :disabled="isPreview" name="generalSurvey.nearby.stationAfter" :value="railSurvey.generalSurvey.nearby.stationAfter" @change="handleEmit($event.target)" id="stationAfter" :class="v$.generalSurvey.nearby.stationAfter.$error ? '_input_error' : '_input'">
-                  <option disabled value="">กรุณาเลือกสถานีถัดไป</option>
-                  <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
-                </select>
-                <p v-if="v$.generalSurvey.nearby.stationAfter.$error" class="text-sm text-red-600">{{ v$.generalSurvey.nearby.stationAfter.$errors[0].$message }}</p>
-              </div>
+            <div>
+              <label class="_label-sm">เสาโทรเลขก่อนหน้า</label>
+              <input :disabled="isPreview" :value="railSurvey.generalSurvey.telegram.telegramBefore" name="generalSurvey.telegram.telegramBefore" @input="handleEmit($event.target)" type="text" id="telegramBefore" :class="v$.generalSurvey.telegram.telegramBefore.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.generalSurvey.telegram.telegramBefore.$error" class="text-sm text-red-600">{{ v$.generalSurvey.telegram.telegramBefore.$errors[0].$message }}</p>
+            </div>
+            <div>
+              <label class="_label-sm">เสาโทรเลขถัดไป</label>
+              <input :disabled="isPreview" :value="railSurvey.generalSurvey.telegram.telegramAfter" name="generalSurvey.telegram.telegramAfter" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.generalSurvey.telegram.telegramAfter.$error ? '_input_error' : '_input' " required>
+              <p v-if="v$.generalSurvey.telegram.telegramAfter.$error" class="text-sm text-red-600">{{ v$.generalSurvey.telegram.telegramAfter.$errors[0].$message }}</p>
             </div>
           </div>
           <div>
@@ -533,7 +530,7 @@ const compDisableMaintenanceMethod = computed(() => {
             </div>
             <p v-if="v$.maintenanceRate.maintenanceRecord.hasMaintenanceRecord.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.maintenanceRecord.hasMaintenanceRecord.$errors[0].$message }}</p>
           </div>
-          <div v-if="railSurvey.maintenanceRate.maintenanceRecord.hasMaintenanceRecord" class="grid md:grid-cols-2 gap-x-2 gap-y-4">
+          <div v-if="railSurvey.maintenanceRate.maintenanceRecord.hasMaintenanceRecord" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             <div>
               <label class="_label-sm">การซ่อมบำรุงครั้งล่าสุด</label>
               <select :disabled="isPreview" name="maintenanceRate.maintenanceRecord.lastMaintenanceTimes" :value="railSurvey.maintenanceRate.maintenanceRecord.lastMaintenanceTimes" @change="handleEmit($event.target)" id="lastMaintenanceTimes" :class="v$.maintenanceRate.maintenanceRecord.lastMaintenanceTimes.$error ? '_input_error' : '_input'">
@@ -563,12 +560,13 @@ const compDisableMaintenanceMethod = computed(() => {
     </Accordion>
     <div class="mt-4 flex justify-center">
       <div class="border border-solid p-0" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
-        <div class="flex justify-center">
+        <div v-if="!isPreview" class="flex justify-center">
           <button @click="undo" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-x rounded-bl-md text-sm px-5 py-1">Undo</button>
           <button @click="clear" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r text-sm px-5 py-1">Clear</button>
           <button @click="emit('onSubmit')" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r rounded-br-md text-sm px-5 py-1">Submit</button>
         </div>
         <VueSignaturePad width="400px" height="120px" :options="{ onBegin, onEnd }" ref="signaturePad" />
+        <!-- <img :src="railSurvey.signature" alt=""> -->
         <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
       </div>
     </div>

@@ -8,11 +8,11 @@ module.exports = defineConfig({
     appleMobileWebAppCapable: 'yes',
     appleMobileWebAppStatusBarStyle: 'black',
     iconPaths: {
-      // maskicon: null,
-      // favicon32: "img/icons/32.png",
-      // favicon16: "img/icons/16.png",
-      // appleTouchIcon: 'img/icons/16.png',
-      msTileImage: 'img/icons/16.png'
+      favicon32: 'img/icons/32.png',
+      favicon16: 'img/icons/16.png',
+      appleTouchIcon: 'img/icons/152.png',
+      maskIcon: null,
+      msTileImage: 'img/icons/32.png'
     },
     manifestOptions: {
       icons: [
