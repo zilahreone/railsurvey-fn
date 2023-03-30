@@ -20,11 +20,11 @@ const page = ref(1)
 onMounted (() => {
   getSurveyList2()
   getCount()
-  if(navigator.onLine){
-  console.log('online');
- } else {
-  console.log('offline');
- }
+//   if(navigator.onLine){
+//   console.log('online');
+//  } else {
+//   console.log('offline');
+//  }
 })
 
 const getSurveyList2 = (p) => {

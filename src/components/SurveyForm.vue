@@ -233,10 +233,16 @@ const handleEmit = (target) => {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: target.value }))
   }
   if (['coordinates', 'nearby', 'maintenanceRecord', 'railType' , 'telegram'].includes(arr[1])) {
-    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: ['coordinates', 'railType'].includes(arr[1]) ? parseFloat(target.value) : target.value }) }) }))
+    let val = null
+    if (['latitude', 'longitude', 'weight'].includes(arr[2])) {
+      val = parseFloat(target.value)
+    } else {
+      val = target.value
+    }
+    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: val }) }) }))
   } else if (['zone'].includes(arr[1])) {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value, nearby: handleSelectZone(target.value) }) }))
-  } else if (['kilometers', 'railType', 'uploadImages'].includes(arr[1])) {
+  } else if (['kilometers'].includes(arr[1])) {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value }) }))
   }
 }
@@ -371,7 +377,7 @@ const compDisableMaintenanceMethod = computed(() => {
             </div>
             <div>
               <label class="_label-sm">มาตรฐานและเกรด</label>
-              <select :disabled="isPreview" name="generalSurvey.railType.type" :value="railSurvey.generalSurvey.railType.type" @change="handleEmit($event.target)" id="railType" :class="v$.generalSurvey.railType.$error ? '_input_error' : '_input'">
+              <select :disabled="isPreview" name="generalSurvey.railType.type" :value="railSurvey.generalSurvey.railType.type" @change="handleEmit($event.target)" id="railType" :class="v$.generalSurvey.railType.type.$error ? '_input_error' : '_input'">
                 <option disabled value="">กรุณาเลือกประเภทของเกรด</option>
                 <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
               </select>

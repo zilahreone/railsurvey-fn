@@ -100,11 +100,19 @@ const rules = computed(() => {
       rule[key1] = {}
       if (key1 === 'generalSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
+          rule[key1][key2] = {}
           if (['coordinates', 'nearby', 'railType', 'telegram'].includes(key2)) {
-            rule[key1][key2] = {}
-            if (['coordinates', 'railType'].includes(key2)) {
+            if (key2 === 'coordinates') {
               Object.keys(railForm[key1][key2]).forEach((key3) => {
                 rule[key1][key2][key3] = { required, decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0)  }
+              })
+            } else if (key2 === 'railType') {
+              Object.keys(railForm[key1][key2]).forEach((key3) => {
+                if (key3 === 'weight') {
+                  rule[key1][key2][key3] = { decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0) }
+                } else {
+                  rule[key1][key2][key3] = { required }
+                }
               })
             } else {
               Object.keys(railForm[key1][key2]).forEach((key3) => {

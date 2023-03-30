@@ -41,7 +41,21 @@ module.exports = defineConfig({
     workboxPluginMode: 'GenerateSW',
     workboxOptions: {
       navigateFallback: 'index.html',
-      skipWaiting: true
+      skipWaiting: true,
+      clientsClaim: true,
+      runtimeCaching: [{
+        urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/api`),
+        handler: 'NetworkFirst',
+        method: 'POST',
+        options: {
+          backgroundSync: {
+            name: 'my-queue-asier',
+            options: {
+              maxRetentionTime: 60 * 60
+            }
+          }
+        }
+      }]
     }
     // workboxOptions: {
     //   runtimeCaching: [{
@@ -59,40 +73,4 @@ module.exports = defineConfig({
     //   }]
     // }
   }
-  // pwa: {
-  //   name: 'Rail Survey',
-  //   themeColor: '#FFBF9B',
-  //   msTileColor: '#000000',
-  //   appleMobileWebAppCapable: 'no',
-  //   appleMobileWebAppStatusBarStyle: 'black',
-  //   iconPaths: {
-  //     favicon32: 'img/icons/32.png',
-  //     favicon16: 'img/icons/16.png',
-  //     appleTouchIcon: 'img/icons/152.png',
-  //     maskIcon: null,
-  //     msTileImage: 'img/icons/32.png'
-  //   },
-  //   manifestOptions: {
-  //     name: 'Rail Survey',
-  //     short_name: 'Rail Survey',
-  //     start_url: "./",
-  //     display: "standalone",
-  //     theme_color: "#FFBF9B",
-  //     icons: [
-  //       {
-  //         src: "./img/icons/playstore.png",
-  //         sizes: "512x512",
-  //         type: "image/png",
-  //         purpose: "maskable",
-  //       },
-  //     ],
-  //   },
-  //   // workboxPluginMode: 'GenerateSW',
-  //   workboxPluginMode: 'InjectManifest',
-  //   workboxOptions: {
-  //     // navigateFallback: 'index.html',
-  //     // skipWaiting: true,
-  //     swSrc: './src/service-worker.js'
-  //   }
-  // }
 })

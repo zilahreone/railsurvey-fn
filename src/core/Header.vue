@@ -1,8 +1,9 @@
 <script setup>
 import { ref, onMounted, inject } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useStore } from 'vuex'
+import Cookies from 'js-cookie';
 // const myGlobalVariable = inject('myGlobalVariable')
 // import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 onMounted(() => {
@@ -15,11 +16,15 @@ const navigation = [
   { name: 'Projects', href: '#', current: false },
   { name: 'Calendar', href: '#', current: false },
 ]
-
 const store = useStore()
+const route = useRoute()
 const router = useRouter()
-
 const isActiveProfile = ref(false)
+const handleLogout = () => {
+  Cookies.remove('isAuthenticated')
+  router.go(0)
+}
+
 </script>
 <template>
   <nav class="bg-white px-2 py-2 dark:bg-gray-900">
@@ -30,7 +35,7 @@ const isActiveProfile = ref(false)
       <router-link to="/" >
         <img src="@/assets/rmt-logo.png" class="h-6 mr-3 sm:h-9" alt="Railway Logo" />
       </router-link>
-      <div v-if="!!store.state.profile.username" class="static flex items-center md:order-2">
+      <div v-if="Cookies.get('isAuthenticated')" class="static flex items-center md:order-2">
         <!-- Dropdown menu -->
         <Menu as="div" class="relative ml-3">
           <div>
@@ -45,12 +50,12 @@ const isActiveProfile = ref(false)
           <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
             <MenuItems class="divide-y divide-gray-200 absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
               <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                <!-- <div>{{ store.state.profile.fname }} {{ store.state.profile.lname }}</div>
-                <div class="font-medium truncate">{{ store.state.profile.username }}</div> -->
-                <div class="font-medium truncate">{{ !!store.state.profile.username ? store.state.profile.username : 'anonymous' }}</div>
+                <!-- <div class="font-medium truncate">{{ store.state.profile.username }}</div> -->
+                <div class="truncate">{{ Cookies.get('isAuthenticated') ? Cookies.get('isAuthenticated').charAt(0).toUpperCase() + Cookies.get('isAuthenticated').slice(1) : 'anonymous' }}</div>
               </div>
               <div>
-                <a @click="store.dispatch('logout')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
+                <!-- <a @click="store.dispatch('logout')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a> -->
+                <a @click="handleLogout()" class="block cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
               </div>
               <!-- <MenuItem v-slot="{ active }">
                 <a href="#" :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']">Your Profile</a>

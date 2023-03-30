@@ -3,6 +3,8 @@ import HomeView from '../views/HomeView.vue'
 import Login from '../views/Login.vue'
 import SurveyForm from '../views/SurveyForm.vue'
 import SurveyFormDetail from '../views/SurveyFormDetail.vue'
+import Cookies from 'js-cookie';
+
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes: [
@@ -59,7 +61,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   // If the user is not logged in, redirect to /login
-  const isLoggedIn = !!localStorage.getItem('login');
+  const isLoggedIn = !!Cookies.get('isAuthenticated')
   if (!isLoggedIn && to.name !== 'login') {
     return next({ path: '/login' });
   } else {

@@ -30,6 +30,7 @@ const emit = defineEmits(['update:modelValue', 'onUploadImages'])
 const showUploadBtn = ref(false)
 const disableUploadBtn = ref(false)
 const uploadStatus = ref(null)
+const files = ref(null)
 
 // METHOD
 const handleUploadImages = (event) => {
@@ -66,28 +67,30 @@ const handleRemoveImage = (index) => {
   images.splice(index, 1)
   emit('update:modelValue', images)
   document.getElementById(props.id).value = ''
-  console.log(images.length);
   if (images.length === 0) showUploadBtn.value = false
 }
-const uploadImages = () => {
-  console.log('upload');
-  // uploadStatus.value = 'pending'
+const uploadImages = (event) => {
+  uploadStatus.value = 'pending'
   let formData = new FormData()
-  // const files = uploadImg.files
-  // Array.from(files).forEach((file, index) => {
-  //   console.log(file);
-  //   formData.append('file', file)
-  // })
-  // api.uploadFils('/api/uploads', formData, null).then((resp) => {
-  //   if (resp.status === 201) {
-  //     resp.json().then((json) => {
-  //       console.log(json)
-  //     })
-  //     uploadStatus.value = 'success'
-  //   }
-  // }).catch((err) => {
-  //   uploadStatus.value = 'error'
-  // })
+  const files = eval(props.id).files
+  Array.from(files).forEach((file, index) => {
+    // console.log(file);
+    formData.append('file', file)
+  })
+  api.uploadFils('/api/uploads', formData, null).then((resp) => {
+    if (resp.status === 201) {
+      resp.json().then((json) => {
+        // console.log(json)
+      })
+      uploadStatus.value = 'success'
+    }
+  }).catch((err) => {
+    if (navigator.onLine) {
+      uploadStatus.value = 'error'
+    } else {
+      uploadStatus.value = 'offline'
+    }
+  })
 }
 // COMPUTED
 const compCSSUploadBtn = computed(() => {
@@ -96,14 +99,22 @@ const compCSSUploadBtn = computed(() => {
     return '_button-disable'
   } else {
     if (uploadStatus.value === 'success') {
-    } else if (uploadStatus.value === 'success') {
       return '_button-success'
     } else if (uploadStatus.value === 'error') {
       return '_button-error'
+    } else if (uploadStatus.value === 'offline') {
+      return '_button-warning'
     } else {
       return '_button'
     }
   }
+})
+const compUploadStatus = computed(() => {
+  return uploadStatus.value === 'pending' ? 'Uploading'
+  : uploadStatus.value === 'success' ? 'Done'
+  : uploadStatus.value === 'error' ? 'Upload Fail'
+  : uploadStatus.value === 'offline' ? 'Upload Queue'
+  : 'Upload'
 })
 </script>
 <template>
@@ -120,7 +131,7 @@ const compCSSUploadBtn = computed(() => {
           <div v-for="(image, index) in modelValue" :key="index" class="flex flex-col gap-1">
             <div>
               <img :src="image.originalPath" :alt="image.originalname" class="object-contain h-56">
-              <button v-if="!isPreview" @click="handleRemoveImage(index)" class="bg-red-500 hover:bg-red-600 w-full p-2 rounded-b-md text-white text-sm">Remove</button>
+              <button v-if="!isPreview && !uploadStatus" @click="handleRemoveImage(index)" class="bg-red-500 hover:bg-red-600 w-full p-2 text-white text-sm">Remove</button>
               <p v-if="errors.$error && errors.$errors.filter(err => err.$validator === '$each').length > 0" class="text-sm text-red-600">{{ errors.$errors[0].$message[index].join('')}}</p>
             </div>
           </div>
@@ -128,7 +139,7 @@ const compCSSUploadBtn = computed(() => {
         <p v-if="errors.$error && errors.$errors.filter(err => err.$validator !== '$each').length > 0" class="text-sm text-red-600">{{ errors.$errors.filter(err => err.$validator !== '$each')[0].$message}}</p>
       </div>
       <div v-if="showUploadBtn">
-        <button :disabled="['pending', 'success'].includes(uploadStatus)" type="button"
+        <button :disabled="['pending', 'success', 'offline'].includes(uploadStatus)" type="button"
           @click="uploadImages()"
           :class="['text-center inline-flex items-center mr-2', compCSSUploadBtn]"
         >
@@ -142,7 +153,7 @@ const compCSSUploadBtn = computed(() => {
           <svg v-if="uploadStatus === 'success'"  class="inline w-4 h-4 mr-3" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
-          {{ uploadStatus === 'pending' ? 'Uploading' : uploadStatus === 'success' ? 'Done' : uploadStatus === 'error' ? 'Upload Fail' : 'Upload' }}
+          {{ compUploadStatus }}
         </button>
       </div>
     </slot>
