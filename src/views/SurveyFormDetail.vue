@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
-import { required, helpers, requiredIf, minValue, maxValue, requiredUnless, minLength, decimal, maxLength } from '@vuelidate/validators'
+import { required, helpers, requiredIf, minValue, maxValue, requiredUnless, minLength, decimal, maxLength, integer } from '@vuelidate/validators'
 import { useRouter, useRoute } from 'vue-router'
 import SurveyForm from '@/components/SurveyForm'
 import PageNotFound from '@/views/PageNotFound'
@@ -9,7 +9,7 @@ import { useStore } from 'vuex'
 import api from '@/services'
 import moment from 'moment'
 import Modal from '@/components/Modal.vue'
-import Banner from '@/components/Banner.vue'
+import Cookies from 'js-cookie';
 
 const props = defineProps({
   isNew: {
@@ -77,7 +77,8 @@ const railForm = {
     },
     maintenanceMethod: []
   },
-  signature: null
+  signature: null,
+  createdBy: Cookies.get('isAuthenticated')
 }
 const surveyForm = ref()
 const modalActive = ref(false)
@@ -121,17 +122,30 @@ const rules = computed(() => {
             }
           } else if (key2 === 'areaCondition') {
             rule[key1][key2] = { required, minLength: minLength(1) }
+          } else if (key2 === 'kilometers') {
+            rule[key1][key2] = { required, integer, minValue: minValue(0) }
           } else {
             rule[key1][key2] = { required }
           }
         })
       } else if (key1 === 'railDamageSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
+          // CHECK LENGTH OF UPLOADIMAGES
           if (key2 === 'uploadImages') {
             rule[key1][key2] = {
+              // requiredif: requiredIf(() => {
+              //   return railSurvey[key1][key2].filter(upload => upload.isUploaded).length > 0
+              // })
               $each: helpers.forEach(uploadImage),
               maxLength: maxLength(3)
             }
+            // railSurvey[key1][key2].forEach(element => {
+            //   if (!element.isUploaded) {
+
+            //   }
+            // })
+            // if (railSurvey[key1][key2].length > 0) {
+            // }
           } else {
             rule[key1][key2] = { required, minLength: minLength(1) }
           }
@@ -149,7 +163,8 @@ const rules = computed(() => {
             })
           } else if (key2 === 'uploadImages') {
             rule[key1][key2] = {
-              $each: helpers.forEach(uploadImage)
+              $each: helpers.forEach(uploadImage),
+              maxLength: maxLength(3)
             }
           } else {  
             rule[key1][key2] = { required }
@@ -224,19 +239,80 @@ const handleSubmit = async () => {
 const submitForm = () => {
   if (props.isNew) {
     console.log('is New');
-    // api.post(`/api/rail-survey`, Object.assign(railSurvey, {generalSurvey: Object.assign(railSurvey.generalSurvey, { date: new Date(railSurvey.generalSurvey.date).toISOString() } )}) , null).then((resp) => {
-    api.post(`/api/rail-survey`, compSubmitForm.value, null).then((resp) => {
-      if (resp.status === 201) {
-        console.log('create success ;)')
-        // router.push('/survey-list')
-      } else {
-      }
-    }).catch(() => {
-      navigator.serviceWorker.ready.then(registration => {
-        // console.log(registration)
-        registration.sync.register('some-unique-tag')
-      }).catch(console.log())
+    console.log(surveyForm.value.test());
+    const railFiles = eval('railDamageSurvey').files
+    const trackFiles = eval('trackDamageSurvey').files
+    // let formDataRail = new FormData()
+    // let formDataTrack = new FormData()
+    let formData = new FormData()
+    Array.from(railFiles).forEach((file, index) => {
+      // console.log(file);
+      formData.append('file', file)
+      // formDataRail.append('file', file)
     })
+    Array.from(trackFiles).forEach((file, index) => {
+      // console.log(file);
+      formData.append('file', file)
+      // formDataRail.append('file', file)
+    })
+    api.uploadFils('/api/uploads', formData, null).then((resp) => {
+      console.log('201');
+      if (resp.status === 201) {
+        resp.json().then((json) => {
+          console.log(json)
+          json.forEach(image => {
+            railSurvey.railDamageSurvey.uploadImages.forEach((upload, index) => {
+              if (upload.originalname === image.originalname) {
+                railSurvey.railDamageSurvey.uploadImages[index].filename = image.filename
+                railSurvey.railDamageSurvey.uploadImages[index].destination = image.path
+              }
+            })
+            railSurvey.trackDamageSurvey.uploadImages.forEach((upload, index) => {
+              if (upload.originalname === image.originalname) {
+                railSurvey.trackDamageSurvey.uploadImages[index].filename = image.filename
+                railSurvey.trackDamageSurvey.uploadImages[index].destination = image.path
+              }
+            })
+          })
+          api.post(`/api/rail-survey`, compSubmitForm.value, null).then((resp) => {
+            if (resp.status === 201) {
+              console.log('create success ;)')
+              // router.push('/survey-list')
+            } else {
+            }
+          }).catch(() => {
+            // navigator.serviceWorker.ready.then(registration => {
+            //   // console.log(registration)
+            //   registration.sync.register('some-unique-tag')
+            // }).catch(console.log())
+          })
+        })
+      }
+    }).catch((err) => {
+      console.log(err);
+      // if (navigator.onLine) {
+      //   uploadStatus.value = 'error'
+      // } else {
+      //   uploadStatus.value = 'offline'
+      // }
+    })
+    // console.log(railFiles)
+    // console.log(trackFiles)
+    // Promise.all()
+    // api.uploadFils('/api/uploads', formData, null)
+    // api.post(`/api/rail-survey`, Object.assign(railSurvey, {generalSurvey: Object.assign(railSurvey.generalSurvey, { date: new Date(railSurvey.generalSurvey.date).toISOString() } )}) , null).then((resp) => {
+    // api.post(`/api/rail-survey`, compSubmitForm.value, null).then((resp) => {
+    //   if (resp.status === 201) {
+    //     console.log('create success ;)')
+    //     // router.push('/survey-list')
+    //   } else {
+    //   }
+    // }).catch(() => {
+    //   // navigator.serviceWorker.ready.then(registration => {
+    //   //   // console.log(registration)
+    //   //   registration.sync.register('some-unique-tag')
+    //   // }).catch(console.log())
+    // })
   } else {
     api.put(`/api/rail-survey/${railSurvey.id}`, compSubmitForm.value, null).then((resp) => {
       if (resp.status === 200) {
@@ -290,6 +366,7 @@ const test = (val) => {
 
 </script>
 <template>
+  <!-- {{ v$.railDamageSurvey.$errors }} -->
   <!-- <div v-if="isReady">
   </div>
   <div v-else>
@@ -297,6 +374,7 @@ const test = (val) => {
   </div> -->
   <SurveyForm :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
   <button @click="modalActive = true">modalActive</button>
+  <button @click="submitForm()">Submit</button>
   <Modal content v-model="modalActive">
     <template #content>
       <SurveyForm is-preview v-model="railSurvey" ref="surveyForm" :validate="v$"></SurveyForm>
@@ -306,7 +384,7 @@ const test = (val) => {
       <button @click="modalActive = false" data-modal-hide="extralarge-modal" type="button" class="_button-error">แก้ไขแบบฟอร์ม</button>
     </template>
   </Modal>
-  <Modal create v-model="isConfirm"></Modal>
+  <Modal create v-model="isConfirm" @confirm="submitForm()"></Modal>
   <!-- <div class="container flex justify-center mt-4">
     <button type="button" class="_button" @click="handleSubmit()">Submit</button>
   </div> -->

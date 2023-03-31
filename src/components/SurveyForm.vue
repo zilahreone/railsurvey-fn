@@ -199,7 +199,8 @@ const scrollToError = () => {
   window.scrollTo(0, general.value.offsetTop)
 }
 defineExpose({
-  scrollToError
+  scrollToError,
+  test:() => 'test'
 })
 const onBegin = () => {
   // console.log('=== Begin ===');
@@ -242,8 +243,9 @@ const handleEmit = (target) => {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: Object.assign(railSurvey[arr[0]][arr[1]], { [arr[2]]: val }) }) }))
   } else if (['zone'].includes(arr[1])) {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value, nearby: handleSelectZone(target.value) }) }))
-  } else if (['kilometers'].includes(arr[1])) {
-    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value }) }))
+  }
+  else if (['kilometers'].includes(arr[1])) {
+    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: parseFloat(target.value) }) }))
   }
 }
 
@@ -478,7 +480,7 @@ const compDisableMaintenanceMethod = computed(() => {
           </div>
           <div v-if="railSurvey.trackDamageSurvey.ballastCondition.isPerfect && railSurvey.trackDamageSurvey.ballastCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Ballast ที่ผิดปกติ</label>
-            <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+            <div class="grid sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.ballastCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.condition" name="ballastConditionFail" :items="variable.ballast" :disables="compDisableBallast"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.ballastCondition.condition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.condition.$errors[0].$message }}</p>
@@ -492,7 +494,7 @@ const compDisableMaintenanceMethod = computed(() => {
           </div>
           <div v-if="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect && railSurvey.trackDamageSurvey.sleeperCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Sleeper ที่ผิดปกติ</label>
-            <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+            <div class="grid sm:grid-cols-3 lg:grid-cols-4 gap-2">
               <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.sleeperCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.condition" name="sleeperConditionFail" :items="variable.sleeper" :disables="compDisableSleeper"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.condition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.condition.$errors[0].$message }}</p>
