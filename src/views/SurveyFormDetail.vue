@@ -84,6 +84,7 @@ const surveyForm = ref()
 const modalActive = ref(false)
 const isConfirm = ref(false)
 let railSurvey = reactive(railForm)
+const isFetch = ref(false)
 
 // COMPUTED
 const rules = computed(() => {
@@ -102,30 +103,30 @@ const rules = computed(() => {
       if (key1 === 'generalSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
           rule[key1][key2] = {}
-          if (['coordinates', 'nearby', 'railType', 'telegram'].includes(key2)) {
-            if (key2 === 'coordinates') {
-              Object.keys(railForm[key1][key2]).forEach((key3) => {
-                rule[key1][key2][key3] = { required, decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0)  }
-              })
-            } else if (key2 === 'railType') {
-              Object.keys(railForm[key1][key2]).forEach((key3) => {
-                if (key3 === 'weight') {
-                  rule[key1][key2][key3] = { decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0) }
-                } else {
+          if (key2 !== 'kilometers') {
+            if (['coordinates', 'nearby', 'railType', 'telegram'].includes(key2)) {
+              if (key2 === 'coordinates') {
+                Object.keys(railForm[key1][key2]).forEach((key3) => {
+                  rule[key1][key2][key3] = { required, decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0)  }
+                })
+              } else if (key2 === 'railType') {
+                Object.keys(railForm[key1][key2]).forEach((key3) => {
+                  if (key3 === 'weight') {
+                    rule[key1][key2][key3] = { decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0) }
+                  } else {
+                    rule[key1][key2][key3] = { required }
+                  }
+                })
+              } else {
+                Object.keys(railForm[key1][key2]).forEach((key3) => {
                   rule[key1][key2][key3] = { required }
-                }
-              })
+                })
+              }
+            } else if (key2 === 'areaCondition') {
+              rule[key1][key2] = { required, minLength: minLength(1) }
             } else {
-              Object.keys(railForm[key1][key2]).forEach((key3) => {
-                rule[key1][key2][key3] = { required }
-              })
+              rule[key1][key2] = { required }
             }
-          } else if (key2 === 'areaCondition') {
-            rule[key1][key2] = { required, minLength: minLength(1) }
-          } else if (key2 === 'kilometers') {
-            rule[key1][key2] = { required, integer, minValue: minValue(0) }
-          } else {
-            rule[key1][key2] = { required }
           }
         })
       } else if (key1 === 'railDamageSurvey') {
@@ -242,18 +243,12 @@ const submitForm = () => {
     console.log(surveyForm.value.test());
     const railFiles = eval('railDamageSurvey').files
     const trackFiles = eval('trackDamageSurvey').files
-    // let formDataRail = new FormData()
-    // let formDataTrack = new FormData()
     let formData = new FormData()
     Array.from(railFiles).forEach((file, index) => {
-      // console.log(file);
       formData.append('file', file)
-      // formDataRail.append('file', file)
     })
     Array.from(trackFiles).forEach((file, index) => {
-      // console.log(file);
       formData.append('file', file)
-      // formDataRail.append('file', file)
     })
     api.uploadFils('/api/uploads', formData, null).then((resp) => {
       console.log('201');
@@ -277,7 +272,7 @@ const submitForm = () => {
           api.post(`/api/rail-survey`, compSubmitForm.value, null).then((resp) => {
             if (resp.status === 201) {
               console.log('create success ;)')
-              // router.push('/survey-list')
+              router.push('/survey-list')
             } else {
             }
           }).catch(() => {
@@ -330,16 +325,16 @@ const submitForm = () => {
 }
 
 onMounted(() => {
-  railSurvey.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm')
-  navigator.geolocation.getCurrentPosition((position)=> {
-    const p = position.coords;
-    railSurvey.generalSurvey.coordinates.latitude = p.latitude
-    railSurvey.generalSurvey.coordinates.longitude = p.longitude
-    // console.log(p.latitude, p.longitude);
-  })
-
-  if (!props.isNew) {
-    // getSurveyID(route.params.id)
+  if (props.isNew) {
+    isFetch.value = true
+    railSurvey.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm')
+    navigator.geolocation.getCurrentPosition((position)=> {
+      const p = position.coords;
+      railSurvey.generalSurvey.coordinates.latitude = p.latitude
+      railSurvey.generalSurvey.coordinates.longitude = p.longitude
+    })
+  } else {
+    getSurveyID(route.params.id)
   }
   // console.log(moment(new Date()).format('YYYY-MM-DDTHH:mm'));
   // console.log(new Date('2018-06-14T20:00'));
@@ -348,20 +343,56 @@ onMounted(() => {
 
 const getSurveyID = (id) => {
   api.get(`/api/rail-survey/${id}`, store.state.token).then((resp) => {
-    console.log(resp.status);
     if (resp.status === 200) {
       // isReady.value = true
       resp.json().then((json) => {
+        let rs = JSON.parse(JSON.stringify(json))
+        Object.keys(rs.trackDamageSurvey).forEach((td) => {
+          if (['ballastCondition', 'sleeperCondition', 'trackGeometryCondition'].includes(td)) {
+            if (rs.trackDamageSurvey[td].length > 0) {
+              rs.trackDamageSurvey[td] = {
+                isPerfect: 'imperfect',
+                condition: rs.trackDamageSurvey[td]
+              }
+            } else {
+              rs.trackDamageSurvey[td] = {
+                isPerfect: 'perfect',
+                condition: []
+              }
+            }
+          } else if (td === 'uploadImages') {
+            rs.trackDamageSurvey[td].forEach((image, index) => {
+              // console.log(image.destination);
+              rs.trackDamageSurvey[td][index].originalPath = `${process.env.VUE_APP_BACK_END_URL}/${image.destination}`
+            })
+            // rs.trackDamageSurvey[td].originalPath = `${process.env.VUE_APP_BACK_END_URL}${rs.trackDamageSurvey[td].destination}`
+          }
+          rs.railDamageSurvey.uploadImages.forEach((image, index) => {
+            rs.railDamageSurvey.uploadImages[index].originalPath = `${process.env.VUE_APP_BACK_END_URL}/${image.destination}`
+          })
+        })
+        rs.generalSurvey.date = moment(rs.generalSurvey.date).format('YYYY-MM-DDTHH:mm')
+        // console.log(rs);
+        Object.assign(railSurvey, rs)
+        isFetch.value = true
+        // Object.assign(railSurvey, {
+        //   generalSurvey: json.generalSurvey,
+        //   // railDamageSurvey: json.railDamageSurvey,
+        //   // trackDamageSurvey: json.trackDamageSurvey,
+        //   // maintenanceRate: json.maintenanceRate,
+        //   signature: json.signature,
+        // })
+        // Object.keys().forEach((key) => {
+        //   if () 
+        // })
         // survey = json
-        Object.assign(railSurvey, json, { date: new Date(json.date).toISOString().substring(0, 10), lastMaintenanceDate: new Date(json.lastMaintenanceDate).toISOString().substring(0, 10) })
+        // Object.assign(railSurvey, json, { date: new Date(json.date).toISOString().substring(0, 10), lastMaintenanceDate: new Date(json.lastMaintenanceDate).toISOString().substring(0, 10) })
+        // Object.assign(railSurvey, json)
       })
     } else if (resp.status === 404) {
       // router.replace('/page-not-found')
     }
   })
-}
-const test = (val) => {
-  console.log(val);
 }
 
 </script>
@@ -372,16 +403,16 @@ const test = (val) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
-  <button @click="modalActive = true">modalActive</button>
-  <button @click="submitForm()">Submit</button>
+  <SurveyForm v-if="isFetch" :created="!isNew" :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
+  <!-- <button @click="modalActive = true">modalActive</button>
+  <button @click="submitForm()">Submit</button> -->
   <Modal content v-model="modalActive">
     <template #content>
       <SurveyForm is-preview v-model="railSurvey" ref="surveyForm" :validate="v$"></SurveyForm>
     </template>
     <template #footer>
-      <button @click="isConfirm = true" data-modal-hide="extralarge-modal" type="button" class="_button">ส่งแบบฟอร์ม</button>
       <button @click="modalActive = false" data-modal-hide="extralarge-modal" type="button" class="_button-error">แก้ไขแบบฟอร์ม</button>
+      <button @click="isConfirm = true" data-modal-hide="extralarge-modal" type="button" class="_button">ส่งแบบฟอร์ม</button>
     </template>
   </Modal>
   <Modal create v-model="isConfirm" @confirm="submitForm()"></Modal>

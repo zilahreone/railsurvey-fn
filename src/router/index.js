@@ -65,6 +65,7 @@ router.beforeEach((to, from, next) => {
   if (!isLoggedIn && to.name !== 'login') {
     return next({ path: '/login' });
   } else {
+    Cookies.set('isAuthenticated', Cookies.get('isAuthenticated'), { expires: 1 })
     return next();
     // return next({ path: '/' })
   }

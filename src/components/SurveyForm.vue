@@ -28,6 +28,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  created: {
+    type: Boolean,
+    default: false
+  },
   isNew: {
     type: Boolean,
     default: false
@@ -97,10 +101,13 @@ const isActiveMA = ref(true)
 const general = ref(null)
 
 onMounted(() => {
+  // signaturePad.value.fromDataURL(railSurvey.signature)
   // signaturePad.value.signatureData = railSurvey.signature
   // const { isEmpty, data } = signaturePad.value.saveSignature()
   if (props.isPreview) {
     signaturePad.value.lockSignaturePad()
+    if (railSurvey.signature) signaturePad.value.fromDataURL(railSurvey.signature)
+  } else {
     if (railSurvey.signature) signaturePad.value.fromDataURL(railSurvey.signature)
   }
 })
@@ -359,12 +366,6 @@ const compDisableMaintenanceMethod = computed(() => {
               </select>
               <p v-if="v$.generalSurvey.nearby.stationAfter.$error" class="text-sm text-red-600">{{ v$.generalSurvey.nearby.stationAfter.$errors[0].$message }}</p>
             </div>
-            <!-- <div>
-              <label class="_label-sm">หลักกิโลเมตร/เสาโทรเลข</label>
-              <input :disabled="isPreview" :value="railSurvey.generalSurvey.kilometers" name="generalSurvey.kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.generalSurvey.kilometers.$error ? '_input_error' : '_input' " required>
-              <p v-if="v$.generalSurvey.kilometers.$error" class="text-sm text-red-600">{{ v$.generalSurvey.kilometers.$errors[0].$message }}</p>
-            </div>
-            <div> -->
           </div>
           <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-2">
             <div>
@@ -394,8 +395,8 @@ const compDisableMaintenanceMethod = computed(() => {
           <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-2">
             <div>
               <label class="_label-sm">หลักกิโลเมตร</label>
-              <input :disabled="isPreview" :value="railSurvey.generalSurvey.kilometers" name="generalSurvey.kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.generalSurvey.kilometers.$error ? '_input_error' : '_input' " required>
-              <p v-if="v$.generalSurvey.kilometers.$error" class="text-sm text-red-600">{{ v$.generalSurvey.kilometers.$errors[0].$message }}</p>
+              <input :disabled="isPreview" :value="railSurvey.generalSurvey.kilometers" name="generalSurvey.kilometers" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" class="_input">
+              <!-- <p v-if="v$.generalSurvey.kilometers.$error" class="text-sm text-red-600">{{ v$.generalSurvey.kilometers.$errors[0].$message }}</p> -->
             </div>
             <div>
               <label class="_label-sm">เสาโทรเลขก่อนหน้า</label>
@@ -425,7 +426,7 @@ const compDisableMaintenanceMethod = computed(() => {
         <div class="flex flex-col gap-4">
           <div>
             <!-- {{ v$.railDamageSurvey.uploadImages }} -->
-            <UploadFiles :is-preview="isPreview" v-model="railSurvey.railDamageSurvey.uploadImages" id="railDamageSurvey" :errors="v$.railDamageSurvey.uploadImages"></UploadFiles>
+            <UploadFiles :is-preview="isPreview || created" v-model="railSurvey.railDamageSurvey.uploadImages" id="railDamageSurvey" :errors="v$.railDamageSurvey.uploadImages"></UploadFiles>
           </div>
           <div>
             <label class="_label-lg">ความเสียหายของราง (Situation)</label>
@@ -456,7 +457,7 @@ const compDisableMaintenanceMethod = computed(() => {
       <template #body>
         <div class="flex flex-col gap-4">
           <div>
-            <UploadFiles :is-preview="isPreview" v-model="railSurvey.trackDamageSurvey.uploadImages" id="trackDamageSurvey" :errors="v$.trackDamageSurvey.uploadImages"></UploadFiles>
+            <UploadFiles :is-preview="isPreview || created" v-model="railSurvey.trackDamageSurvey.uploadImages" id="trackDamageSurvey" :errors="v$.trackDamageSurvey.uploadImages"></UploadFiles>
           </div>
           <div>
             <label class="_label-lg">Track Geometry</label>

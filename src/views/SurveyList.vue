@@ -114,9 +114,9 @@ const compSurveyList = computed(() => {
     return {
       createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss'),
       id: sl.id,
-      date: sl.date,
-      zone: variable.zone.filter((z) => z.value === sl.zone)[0],
-      createdBy: sl.createdBy.username
+      date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
+      zone: variable.zone.filter((z) => z.value === sl.generalSurvey.zone)[0].key,
+      createdBy: sl.createdBy
     }
   })
 })
