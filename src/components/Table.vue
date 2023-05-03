@@ -1,5 +1,4 @@
 <script setup>
-import IndexedDB from '@/IndexedDB';
 import { onMounted, ref } from 'vue';
 
 const props = defineProps({

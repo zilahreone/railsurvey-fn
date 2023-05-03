@@ -25,6 +25,13 @@ onMounted (() => {
 //  } else {
 //   console.log('offline');
 //  }
+  navigator.serviceWorker.ready.then((registration) => {
+    registration.sync.getTags().then((tags) => {
+      console.log(tags);
+      if (tags.includes("sync-messages"))
+        console.log("Messages sync already requested");
+    });
+  });
 })
 
 const getSurveyList2 = (p) => {
@@ -51,25 +58,26 @@ const getCount = () => {
   })
 }
 
-const getSurveyList = () => {
-  // IndexDB.getAllContacts('railway-survey', 1, function (items) {
-  //   console.log(items);
-  //   list.value = items
-  // })
-  Promise.resolve()
-    .then(() => IndexDB.getAllContacts2('railway-survey', 1))
-    .then((arr) => {
-      list.value = arr;
-    })
-    .catch((err) => console.error(err))
-}
+// const getSurveyList = () => {
+//   // IndexDB.getAllContacts('railway-survey', 1, function (items) {
+//   //   console.log(items);
+//   //   list.value = items
+//   // })
+//   Promise.resolve()
+//     .then(() => IndexDB.getAllContacts2('railway-survey', 1))
+//     .then((arr) => {
+//       list.value = arr;
+//     })
+//     .catch((err) => console.error(err))
+// }
 
 const handleClickDelete = (index, id) => {
   hadleDelete(id)
 }
 
 const hadleDelete = (id) => {
-  api.delete(`/api/rail-survey/${id}`, store.state.token).then((resp) => {
+  api.delete(`/api/rail-survey/${id}`, null).then((resp) => {
+    console.log(resp.status)
     if (resp.status === 200) {
       // resp.json().then((json) => {
       //   surveyList.value = json
@@ -115,7 +123,7 @@ const compSurveyList = computed(() => {
       createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss'),
       id: sl.id,
       date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
-      zone: variable.zone.filter((z) => z.value === sl.generalSurvey.zone)[0].key,
+      zone: variable.zone.filter((z) => z.value === sl.generalSurvey.zone)[0]?.key,
       createdBy: sl.createdBy
     }
   })

@@ -39,7 +39,7 @@ const handleLogin =() => {
     class="min-h-screen flex items-center justify-center bg-gray-500 py-12 px-4 sm:px-6 lg:px-8 bg-no-repeat bg-cover relative"
     :style="{ 'background-image': 'url(' + require('@/assets/bg-login.jpg') + ')' }">
     <div class="absolute bg-black opacity-60 inset-0 z-0"></div>
-    <div class="max-w-md w-full space-y-8 p-10 bg-white rounded-xl z-10">
+    <div class="max-w-md w-full space-y-0 px-10 pt-10 bg-white rounded-xl z-10">
       <div class="text-center">
         <h2 class=" text-3xl font-bold text-gray-900">
           Rail Survey
@@ -103,6 +103,12 @@ const handleLogin =() => {
   				<span>Don't have an account?</span>
   				<a href="#" class="text-blue-700 hover:text-blue-700no-underline hover:underline cursor-pointer transition ease-in duration-300">Sign up</a>
     			</p> -->
+      </div>
+      <div class="pt-10 pb-2 flex justify-center gap-2">
+        <img class="h-8" src="@/assets/logo-srt.png" alt="image description">
+        <img class="h-8" src="@/assets/logo-mtec.png" alt="image description">
+        <img class="h-8" src="@/assets/logo-nectec.png" alt="image description">
+        <img class="h-8" src="@/assets/logo-nstda.png" alt="image description">
       </div>
   </div>
 </div></template>

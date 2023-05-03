@@ -16,8 +16,9 @@ import UploadFiles from '@/components/UploadFiles.vue'
 import variable from '@/assets/variable.json'
 import api from '@/services'
 import { nullableTypeAnnotation } from '@babel/types'
-import IndexDB from '@/IndexedDB'
+// import IndexDB from '@/IndexedDB'
 import { Buffer } from 'buffer'
+import Dropdown from './Dropdown.vue'
 
 const store = useStore()
 const router = useRouter()
@@ -130,6 +131,16 @@ const getAPI = () => {
       ta.value = json
     })
   })
+}
+
+const handleGetLatLong = () => {
+  navigator.geolocation.getCurrentPosition((position) => {
+    const p = position.coords;
+    handleEmit({ name: 'generalSurvey.coordinates.latitude', value: p.latitude })
+    handleEmit({ name: 'generalSurvey.coordinates.longitude', value: p.longitude })
+  }, (err) => {
+    console.error(err);
+  }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 })
 }
 
 const handleSelectZone = (value) => {
@@ -346,7 +357,7 @@ const compDisableMaintenanceMethod = computed(() => {
               <label class="_label-sm">เขตการเดินรถ</label>
               <select :disabled="isPreview" name="generalSurvey.zone" :value="railSurvey.generalSurvey.zone" @change="handleEmit($event.target)" id="zone" :class="v$.generalSurvey.zone.$error ? '_input_error' : '_input'">
                 <option disabled value="">กรุณาเลือกเขตการเดินรถ</option>
-                <option v-for="(zone, index) in variable.zone" :value="zone.value" :key="index">{{ zone.key }}</option>
+                <option v-for="(zone, index) in variable.zones" :value="zone.value" :key="index">{{ zone.key }}</option>
               </select>
               <p v-if="v$.generalSurvey.zone.$error" class="text-sm text-red-600">{{ v$.generalSurvey.zone.$errors[0].$message }}</p>
             </div>
@@ -378,17 +389,20 @@ const compDisableMaintenanceMethod = computed(() => {
               <input :disabled="isPreview" :value="railSurvey.generalSurvey.coordinates.longitude" type="text" name="generalSurvey.coordinates.longitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.longitude.$error ? '_input_error' : '_input' " required>
               <p v-if="v$.generalSurvey.coordinates.longitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.longitude.$errors[0].$message }}</p>
             </div>
+            <button class="_button" @click="handleGetLatLong()">GET GPS</button>
             <div>
-              <label class="_label-sm">มาตรฐานและเกรด</label>
-              <select :disabled="isPreview" name="generalSurvey.railType.type" :value="railSurvey.generalSurvey.railType.type" @change="handleEmit($event.target)" id="railType" :class="v$.generalSurvey.railType.type.$error ? '_input_error' : '_input'">
+              <label class="_label-sm">มาตรฐานของราง</label>
+              <!-- <select :disabled="isPreview" name="generalSurvey.railType.type" :value="railSurvey.generalSurvey.railType.type" @change="handleEmit($event.target)" id="railType" :class="v$.generalSurvey.railType.type.$error ? '_input_error' : '_input'">
                 <option disabled value="">กรุณาเลือกประเภทของเกรด</option>
                 <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
-              </select>
+              </select> -->
+              <Dropdown :items="variable.guageType" placeholder="กรุณาเลือกประเภทของเกรด" v-model="railSurvey.generalSurvey.railType.type"></Dropdown>
               <p v-if="v$.generalSurvey.railType.type.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.type.$errors[0].$message }}</p>
             </div>
             <div>
-              <label class="_label-sm">น้ำหนักเกรด (Pound)</label>
-              <input :disabled="isPreview" :value="railSurvey.generalSurvey.railType.weight" type="text" name="generalSurvey.railType.weight" @input="handleEmit($event.target)" :class="v$.generalSurvey.railType.weight.$error ? '_input_error' : '_input' " placeholder="ปอนด์" required>
+              <label class="_label-sm">น้ำหนัก (ปอนด์)</label>
+              <!-- <input :disabled="isPreview" :value="railSurvey.generalSurvey.railType.weight" type="text" name="generalSurvey.railType.weight" @input="handleEmit($event.target)" :class="v$.generalSurvey.railType.weight.$error ? '_input_error' : '_input' " placeholder="ปอนด์" required> -->
+              <Dropdown :items="variable.weight" type="number" placeholder="ปอนด์" v-model="railSurvey.generalSurvey.railType.weight"></Dropdown>
               <p v-if="v$.generalSurvey.railType.weight.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.weight.$errors[0].$message }}</p>
             </div>
           </div>
@@ -412,7 +426,7 @@ const compDisableMaintenanceMethod = computed(() => {
           <div>
             <label class="_label-sm">ลักษณะพื้นที่ที่เกิดความเสียหาย (Type of failure area)</label>
             <div class="grid sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.generalSurvey.areaCondition.$error" v-model="railSurvey.generalSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties" :disables="compDisableAreaCondition"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" is-specify :error="v$.generalSurvey.areaCondition.$error" v-model="railSurvey.generalSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties" :disables="compDisableAreaCondition"></SelectBtn>
             </div>
             <p v-if="v$.generalSurvey.areaCondition.$error" class="text-sm text-red-600">{{ v$.generalSurvey.areaCondition.$errors[0].$message }}</p>
           </div>
@@ -426,26 +440,28 @@ const compDisableMaintenanceMethod = computed(() => {
         <div class="flex flex-col gap-4">
           <div>
             <!-- {{ v$.railDamageSurvey.uploadImages }} -->
-            <UploadFiles :is-preview="isPreview || created" v-model="railSurvey.railDamageSurvey.uploadImages" id="railDamageSurvey" :errors="v$.railDamageSurvey.uploadImages"></UploadFiles>
+            <UploadFiles :is-preview="isPreview || created" v-model="railSurvey.railDamageSurvey.uploadImages" id="railDamageSurvey" :errors="v$.railDamageSurvey.uploadImages">
+              <template #header>เพิ่มรูปภาพความเสียหายของราง (ไม่เกิน 3 รูป)</template>
+            </UploadFiles>
           </div>
           <div>
             <label class="_label-lg">ความเสียหายของราง (Situation)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" @onEvent="handleFilterLocation('situation')" name="situation" :items="variable.situation" :disables="compDisableSituation"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" @onEvent="handleFilterLocation('situation')" name="situation" :items="variable.situation"></SelectBtn>
             </div>
             <p v-if="v$.railDamageSurvey.situation.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.situation.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง (Location)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :disables="compDisablesLocation" :error="v$.railDamageSurvey.location.$error" v-model="railSurvey.railDamageSurvey.location" @onEvent="handleFilterdefectPattern()" name="location" :items="variable.location"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.railDamageSurvey.location.$error" v-model="railSurvey.railDamageSurvey.location" @onEvent="handleFilterdefectPattern()" name="location" :items="variable.location"></SelectBtn>
             </div>
             <p v-if="v$.railDamageSurvey.location.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.location.$errors[0].$message }}</p>
           </div>
           <div>
             <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น (Pattern, nature) </label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :disables="compDisablesDefectPattern" :error="v$.railDamageSurvey.defectPattern.$error" v-model="railSurvey.railDamageSurvey.defectPattern" name="defectPattern" :items="variable.defectPattern"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.railDamageSurvey.defectPattern.$error" v-model="railSurvey.railDamageSurvey.defectPattern" name="defectPattern" :items="variable.defectPattern"></SelectBtn>
             </div>
           </div>
         </div>
@@ -457,7 +473,9 @@ const compDisableMaintenanceMethod = computed(() => {
       <template #body>
         <div class="flex flex-col gap-4">
           <div>
-            <UploadFiles :is-preview="isPreview || created" v-model="railSurvey.trackDamageSurvey.uploadImages" id="trackDamageSurvey" :errors="v$.trackDamageSurvey.uploadImages"></UploadFiles>
+            <UploadFiles :is-preview="isPreview || created" v-model="railSurvey.trackDamageSurvey.uploadImages" id="trackDamageSurvey" :errors="v$.trackDamageSurvey.uploadImages">
+              <template #header>เพิ่มรูปภาพความเสียหายของทาง (ไม่เกิน 3 รูป)</template>
+            </UploadFiles>
           </div>
           <div>
             <label class="_label-lg">Track Geometry</label>
@@ -475,28 +493,42 @@ const compDisableMaintenanceMethod = computed(() => {
           <div>
             <label class="_label-lg">หินโรยทาง (Ballast)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.ballastCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.isPerfect" name="ballastCondition" :items="variable.integrity" :disables="compDisablePerfect"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="radio" is-specify :error="v$.trackDamageSurvey.ballastCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.isPerfect" name="ballastCondition" :items="variable.ballast" :disables="compDisablePerfect"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.ballastCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.isPerfect.$errors[0].$message }}</p>
           </div>
           <div v-if="railSurvey.trackDamageSurvey.ballastCondition.isPerfect && railSurvey.trackDamageSurvey.ballastCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Ballast ที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.ballastCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.condition" name="ballastConditionFail" :items="variable.ballast" :disables="compDisableBallast"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.ballastCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.condition" name="ballastConditionFail" :items="variable.ballastCondition" :disables="compDisableBallast"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.ballastCondition.condition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.condition.$errors[0].$message }}</p>
           </div>
           <div>
+            <label class="_label-lg">หินโรยทาง: วาระการอัดหิน (Ballast)</label>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.ballastCompaction.$error" v-model="railSurvey.trackDamageSurvey.ballastCompaction" name="ballastCompaction" :items="variable.ballastCompaction"></SelectBtn>
+            </div>
+            <p v-if="v$.trackDamageSurvey.ballastCompaction.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCompaction.$errors[0].$message }}</p>
+          </div>
+          <div>
+            <label class="_label-lg">หมอนรองทาง: ชนิดของหมอน (Sleeper)</label>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.sleeperType.$error" v-model="railSurvey.trackDamageSurvey.sleeperType" name="sleeperType" :items="variable.sleeperType"></SelectBtn>
+            </div>
+            <p v-if="v$.trackDamageSurvey.sleeperType.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperType.$errors[0].$message }}</p>
+          </div>
+          <div>
             <label class="_label-lg">หมอนรองทาง (Sleeper)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect" name="sleeperCondition" :items="variable.integrity" :disables="compDisablePerfect"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect" name="sleeperCondition" :items="variable.sleeperCondition"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.isPerfect.$errors[0].$message }}</p>
           </div>
           <div v-if="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect && railSurvey.trackDamageSurvey.sleeperCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบ Sleeper ที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-3 lg:grid-cols-4 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.sleeperCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.condition" name="sleeperConditionFail" :items="variable.sleeper" :disables="compDisableSleeper"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox"  :error="v$.trackDamageSurvey.sleeperCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.condition" name="sleeperConditionFail" :items="variable.sleeper" :disables="compDisableSleeper"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.condition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.condition.$errors[0].$message }}</p>
           </div>
@@ -558,11 +590,12 @@ const compDisableMaintenanceMethod = computed(() => {
             </div>
           </div>
           <div>
-            <label class="_label-lg">คำแนะนำวิธีการซ่อมบำรุง</label>
-            <div class="grid sm:grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-2">
+            <label class="_label-lg">ข้อคิดเห็น/คำแนะนำ/หมายเหตุ</label>
+            <textarea id="comment" rows="4" class="block p-2 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder=""></textarea>
+            <!-- <div class="grid sm:grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-2">
               <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.maintenanceRate.maintenanceMethod.$error" v-model="railSurvey.maintenanceRate.maintenanceMethod" name="maintenanceMethod" :items="variable.maintenanceMethod" :disables="compDisableMaintenanceMethod"></SelectBtn>
             </div>
-            <p v-if="v$.maintenanceRate.maintenanceMethod.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.maintenanceMethod.$errors[0].$message }}</p>
+            <p v-if="v$.maintenanceRate.maintenanceMethod.$error" class="text-sm text-red-600">{{ v$.maintenanceRate.maintenanceMethod.$errors[0].$message }}</p> -->
           </div>
         </div>
       </template>

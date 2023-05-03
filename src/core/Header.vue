@@ -51,7 +51,7 @@ const handleLogout = () => {
             <MenuItems class="divide-y divide-gray-200 absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
               <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
                 <!-- <div class="font-medium truncate">{{ store.state.profile.username }}</div> -->
-                <div class="truncate">{{ Cookies.get('isAuthenticated') ? Cookies.get('isAuthenticated').charAt(0).toUpperCase() + Cookies.get('isAuthenticated').slice(1) : 'anonymous' }}</div>
+                <div class="truncate">{{ Cookies.get('isAuthenticated') ? Cookies.get('isAuthenticated') : 'anonymous' }}</div>
               </div>
               <div>
                 <!-- <a @click="store.dispatch('logout')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a> -->

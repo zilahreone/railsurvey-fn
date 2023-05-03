@@ -1,4 +1,30 @@
 {
+  "zones": [
+    {
+      "key": "สายเหนือ",
+      "value": "north"
+    },
+    {
+      "key": "สายตะวันออกเฉียงเหนือ",
+      "value": "northEast"
+    },
+    {
+      "key": "สายเหนือ",
+      "value": "north"
+    },
+    {
+      "key": "สายใต้",
+      "value": "south"
+    },
+    {
+      "key": "สายตะวันออก",
+      "value": "east"
+    },
+    {
+      "key": "สายแม่กลอง",
+      "value": "maeklong"
+    }
+  ],
   "zone": [
     {
         "key": "ศิลาอาสน์ (Sila At)",
@@ -171,7 +197,33 @@
       "value": "900a"
     }
   ],
+  "weight": [
+    {
+      "key": "100",
+      "value": 100
+    },
+    {
+      "key": "80",
+      "value": 80
+    },
+    {
+      "key": "70",
+      "value": 70
+    },
+    {
+      "key": "60",
+      "value": 60
+    }
+  ],
   "damageAreaPrperties": [
+    {
+      "key": "ทางปกติ (Normal)",
+      "value": "normal"
+    },
+    {
+      "key": "ทางหลีก",
+      "value": "dodge"
+    },
     {
       "key": "พื้นที่ลาดชัน (Slope)",
       "value": "slope"
@@ -202,6 +254,11 @@
       "key": "รางปกติ (Plain Rail)",
       "img": "positionDamage/Picture2.png",
       "value": "plainRail"
+    },
+    {
+      "key": "รูประกับ ()",
+      "img": null,
+      "value": ""
     },
     {
       "key": "ปลายราง (Rail End)",
@@ -449,8 +506,22 @@
   ],
   "ballast": [
     {
-      "key": "พร่อง (Lack)",
-      "value": "lack"
+      "key": "สมบูรณ์หรือเต็มมาตรฐาน",
+      "value": "perfect"
+    },
+    {
+      "key": "ไม่สมบูรณ์",
+      "value": "imperfect"
+    }
+  ],
+  "ballastCondition": [
+    {
+      "key": "พร่อง (Lack Level 1)",
+      "value": "lackLev1"
+    },
+    {
+      "key": "พร่องระดับ 2 (Lack Level 2)",
+      "value": "lackLev2"
     },
     {
       "key": "มีลักษณะกลม (Round)",
@@ -459,6 +530,20 @@
     {
       "key": "หินฟอกขาว",
       "value": "bleachedStone"
+    }
+  ],
+  "ballastCompaction": [
+    {
+      "key": "นานๆครั้ง",
+      "value": "seldom"
+    },
+    {
+      "key": "ปานกลาง",
+      "value": "sometimes"
+    },
+    {
+      "key": "บ่อย",
+      "value": "ofter"
     }
   ],
   "sleeper": [
@@ -473,6 +558,30 @@
     {
       "key": "ประกับยึดรางหลวม (Clamp: Untight/lost)",
       "value": "clampUntight/lost"
+    }
+  ],
+  "sleeperCondition": [
+    {
+      "key": "ดี",
+      "value": "good"
+    },
+    {
+      "key": "พอใช้",
+      "value": "sometimes"
+    },
+    {
+      "key": "ชำรุด",
+      "value": "dilapidated"
+    }
+  ],
+  "sleeperType": [
+    {
+      "key": "ไม้",
+      "value": "wood"
+    },
+    {
+      "key": "คอนกรีต",
+      "value": "concrete"
     }
   ],
   "maintenanceRecord": [
@@ -549,23 +658,23 @@
   ],
   "damagesLevel": [
     {
-      "key": "ไม่รุนแรงและรอซ่อมบำรุงในวาระ",
+      "key": "ระดับ 1 ไม่รุนแรงและรอซ่อมบำรุงในวาระ",
       "value": "level1"
     },
     {
-      "key": "ควรเร่งซ่อม",
+      "key": "ระดับ 2 ควรเร่งซ่อม",
       "value": "level2"
     },
     {
-      "key": "รุนแรงและควรซ่อมอย่างเร่งด่วน",
+      "key": "ระดับ 3 รุนแรงและควรซ่อมอย่างเร่งด่วน",
       "value": "level3"
     },
     {
-      "key": "รุนแรงและเกิดความเสียหายต่อทรัพย์สิน",
+      "key": "ระดับ 4 รุนแรงและเกิดความเสียหายต่อทรัพย์สิน",
       "value": "level4"
     },
     {
-      "key": "รุนแรงและเกิดความเสียหายต่อชีวิตและทรัพย์สิน",
+      "key": "ระดับ 5 รุนแรงและเกิดความเสียหายต่อชีวิตและทรัพย์สิน",
       "value": "level5"
     }
   ],

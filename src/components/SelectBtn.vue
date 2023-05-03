@@ -57,25 +57,42 @@ const specify = ref(null)
 const emit = defineEmits(['update:modelValue', 'onEvent'])
 const handleEmit = (val) => {
   let out = null
-  // if (props.isSpecify) {
-  //   out = !!val
-  // }
   if (props.type === 'radio') {
     out = val
   } else if (props.type === 'checkbox') {
     if (Array.isArray(props.modelValue)) {
       out = [...props.modelValue]
+      // const asd = props.modelValue.filter(model => props.items.indexOf(item => item.value === model))
+      // console.log(asd);
       const index = out.indexOf(val)
       if (index < 0) {
         out.push(val)
       } else {
         out.splice(index, 1)
       }
-      // out.filter(o => !props.disables.includes(o))
     }
   }
   emit('update:modelValue', out)
   emit('onEvent', out)
+}
+const handleSpecifyEmit = (val) => {
+  console.log(val);
+  let out = null
+  if (props.type === 'radio') {
+    out = val
+  } else {
+    if (Array.isArray(props.modelValue)) {
+      const asd = props.items.filter(item => props.modelValue.indexOf(item.value) > -1).map(filter => filter.value)
+      // const index = asd.indexOf(val)
+      // if (index < 0) {
+      //   out = [...asd, val]
+      // } else {
+      //   out.splice(index, 1)
+      // }
+      out = [...asd, val]
+    }
+  }
+  emit('update:modelValue', out)
 }
 const isChecked = (val) => {
   if (props.type === 'checkbox') {
@@ -84,6 +101,9 @@ const isChecked = (val) => {
   return props.modelValue === val
 }
 const isCheckedSpecify = (val) => {
+  if (props.type === 'checkbox') {
+    return props.modelValue?.includes(val)
+  }
   // return props.modelValue !== null && props.modelValue === val && props.items.filter(item => item.value === val).length === 0
   return props.modelValue !== null && props.modelValue === val && props.items.filter(item => item.value === val).length === 0
 }
@@ -112,7 +132,7 @@ const compDisableBtn = computed(() => {
     </label>
   </div>
   <div v-if="isSpecify" :class="`flex items-center pl-2 border ${isPreview ? 'bg-gray-100' : ''} ${error ? 'border-red-600' : 'border-gray-200'} rounded dark:border-gray-700`">
-    <input :disabled="isPreview" :id="`${name}-${type}-input`" :type="type" :name="name" :checked="isCheckedSpecify(specify)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-    <input :disabled="isPreview" v-model="specify" @input="handleEmit($event.target.value)" @focus="handleEmit($event.target.value)" type="text" placeholder="อื่นๆ โปรดระบุ" :class="`${isPreview ? '_input' : '_input-disable'} w-full my-2 mx-2`" required>
+    <input :disabled="isPreview" :id="`${name}-${type}-input`" :type="type" :name="name" :checked="isCheckedSpecify(specify)" @input="handleEmit(specify)" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+    <input :disabled="isPreview" v-model="specify" @input="handleSpecifyEmit($event.target.value)" @focus="handleSpecifyEmit($event.target.value)" type="text" placeholder="อื่นๆ โปรดระบุ" :class="`${isPreview ? '_input' : '_input-disable'} w-full my-2 mx-2`" required>
   </div>
 </template>

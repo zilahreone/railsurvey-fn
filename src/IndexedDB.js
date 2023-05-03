@@ -1,39 +1,47 @@
+const handleCheckIndexedSupport = () => {
+  if (!window.indexedDB) {
+    console.warn(`Your browser doesn't support IndexedDB`)
+    return false
+  }
+  return true
+}
 export default {
-
-  insertData(db_name, version, data) {
-    const request = indexedDB.open(db_name, version)
-
-    request.onerror = (event) => {
-      console.error(`Database error: ${event.target.errorCode}`)
-    };
-
-    request.onsuccess = async (event) => {
-      console.log('success');
-      // add implementation here
-      const db = event.target.result;
-
-      const getId = await this.getContactById(db, data.id)
-      // console.log(getId);
-      if (!getId) {
+  insertData(db_name, version = 1, data) {
+    if (!window.indexedDB) {
+      console.warn(`Your browser doesn't support IndexedDB`)
+    } else {
+      const request = indexedDB.open(db_name, version)
+      request.onerror = (event) => {
+        console.error(`Database error: ${event.target.errorCode}`)
+      };
+  
+      request.onsuccess = async (event) => {
+        console.log('success');
+        // add implementation here
+        const db = event.target.result;
         this.insertContact(db, data)
+  
+        // const getId = await this.getContactById(db, data.id)
+        // // console.log(getId);
+        // if (!getId) {
+        // }
       }
-    }
-
-    // create the Contacts object store and indexes
-    request.onupgradeneeded = (event) => {
-      console.log('upgrade');
-      let db = event.target.result;
-
-      // create the Contacts object store 
-      // with auto-increment id
-      let objectStore = db.createObjectStore('Rail-Survey', {
-        // autoIncrement: true
-        keyPath: 'id'
-      })
-      let index = objectStore.createIndex('id', 'id', { unique: true })
-
-      // create an index on the email property
-      // objectStore.createIndex("hours", "hours", { unique: false });
+  
+      // create the Contacts object store and indexes
+      request.onupgradeneeded = (event) => {
+        console.log('upgrade');
+        let db = event.target.result;
+  
+        // create the Contacts object store 
+        // with auto-increment id
+        let objectStore = db.createObjectStore('Rail-Survey', {
+          autoIncrement: true
+          // keyPath: 'id'
+        })
+        let index = objectStore.createIndex('email', 'email', {
+          unique: true
+        })
+      }
     }
   },
 
@@ -80,12 +88,12 @@ export default {
           resolve(event.target.result)
         }
       }
-  
+
       query.onerror = (event) => {
         // console.log(event.target.errorCode)
         reject(event.target.errorCode)
       }
-  
+
       txn.oncomplete = function () {
         db.close()
       }
@@ -96,21 +104,21 @@ export default {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(db_name, version)
       let arr = []
-  
+
       request.onerror = (event) => {
         console.error(`Database error: ${event.
           target.errorCode}`)
         reject(event.target.errorCode)
       };
-  
+
       request.onsuccess = (event) => {
         // add implementation here
         const db = event.target.result;
-  
+
         // this.insertContact(db, data)
         const txn = db.transaction('Rail-Survey', "readonly");
         const objectStore = txn.objectStore('Rail-Survey');
-  
+
         objectStore.openCursor().onsuccess = (event) => {
           let cursor = event.target.result;
           // console.log(cursor.value);
@@ -181,16 +189,16 @@ export default {
       const request = db.transaction('Rail-Survey')
         .objectStore('Rail-Survey')
         .getAll();
-  
+
       request.onsuccess = () => {
         const students = request.result;
-  
+
         console.log('Got all the students');
         // console.table(students)
-  
+
         return students;
       }
-  
+
       request.onerror = (err) => {
         console.error(`Error to get all students: ${err}`)
       }

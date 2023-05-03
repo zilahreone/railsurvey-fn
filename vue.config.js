@@ -15,11 +15,11 @@ module.exports = defineConfig({
       msTileImage: './img/icons/16.png'
     },
     manifestOptions: {
-      // name: 'App Name',
-      // short_name: 'Short Name',
-      // start_url: './',
-      // display: 'standalone',
-      // theme_color: '#000000',
+      name: 'Rail Survey',
+      short_name: 'Rail Survey',
+      start_url: './',
+      display: 'standalone',
+      theme_color: '#000000',
       icons: [
         {
           src: './img/icons/16.png',
@@ -53,39 +53,30 @@ module.exports = defineConfig({
         }
       ]
     },
-    workboxPluginMode: 'GenerateSW',
+    workboxPluginMode: 'InjectManifest',
+    // workboxPluginMode: 'GenerateSW',
     workboxOptions: {
-      navigateFallback: 'index.html',
-      skipWaiting: true,
-      clientsClaim: true,
-      runtimeCaching: [{
-        urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/api`),
-        handler: 'NetworkFirst',
-        method: 'POST',
-        options: {
-          backgroundSync: {
-            name: 'my-queue-asier',
-            options: {
-              maxRetentionTime: 60 * 60
-            }
-          }
-        }
-      }]
+      swSrc: './src/sw.js'
     }
     // workboxOptions: {
-    //   runtimeCaching: [{
-    //     urlPattern: new RegExp('https://randomuser.me/api'),
-    //     handler: 'networkOnly',
-    //     options: {
-    //       //background sync. conf
-    //       backgroundSync: {
-    //         name: 'my-queue-asier',
-    //         options: {
-    //           maxRetentionTime: 60 * 60,
+    //   navigateFallback: 'index.html',
+    //   skipWaiting: true,
+    //   clientsClaim: true,
+    //   runtimeCaching: [
+    //     {
+    //       urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/api`),
+    //       handler: 'NetworkFirst',
+    //       // method: 'POST',
+    //       options: {
+    //         backgroundSync: {
+    //           name: 'my-queue-asier',
+    //           options: {
+    //             maxRetentionTime: 60 * 60
+    //           }
     //         }
     //       }
     //     }
-    //   }]
+    //   ]
     // }
   }
 })

@@ -36,27 +36,36 @@ const files = ref(null)
 const handleUploadImages = (event) => {
   const files = eval(event.target.id).files
   let images = [...props.modelValue]
-  // console.log(files.length, images.length);
+  // console.log(files);
   // let images = []
+  // let list = new DataTransfer();
   Array.from(files).forEach((file, index) => {
+    const fileName = `${Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('')}.${file.name.split('\.').pop()}`
     if (['image/jpeg', 'image/pjpeg', 'image/png', 'image/apng'].includes(file.type)) {
       if (images.filter(image =>
-        image.originalname === file.name
-        && image.size === file.size
-        && image.mimetype === file.type).length === 0) {
-        // console.log(file)
+      image.originalname === file.name
+      && image.size === file.size
+      && image.mimetype === file.type).length === 0) {
+        console.log(file)
+        const file_ = new File([file], fileName, { type: file.type })
+        // list.items.add(file_)
         images.push({
           originalname: file.name,
           originalPath: URL.createObjectURL(file),
           mimetype: file.type,
           destination: null,
-          filename: null,
-          size: file.size
-          // isUploaded :false
+          filename: fileName,
+          size: file.size,
+          file: file_
         })
+      } else {
+        document.getElementById(props.id).value = ''
       }
     }
   })
+  // let myFileList = list.files;
+  // console.log(myFileList);
+
   // if (files.length <= props.count) {
   // }
   emit('update:modelValue', images)
@@ -67,41 +76,41 @@ const handleRemoveImage = (index) => {
   let images = [...props.modelValue]
   images.splice(index, 1)
   emit('update:modelValue', images)
-  document.getElementById(props.id).value = ''
+  // document.getElementById(props.id).value = ''
   if (images.length === 0) showUploadBtn.value = false
 }
-const uploadImages = (event) => {
-  let images = [...props.modelValue]
-  uploadStatus.value = 'pending'
-  let formData = new FormData()
-  const files = eval(props.id).files
-  Array.from(files).forEach((file, index) => {
-    // console.log(file);
-    formData.append('file', file)
-  })
-  api.uploadFils('/api/uploads', formData, null).then((resp) => {
-    console.log('201');
-    if (resp.status === 201) {
-      resp.json().then((json) => {
-        console.log(json)
-        // json.forEach((image, index) => {
-        //   if (images[index].originalname === image.originalname) {
-        //     images[index].isUploaded = true
-        //   }
-        // })
-      })
-      uploadStatus.value = 'success'
-      emit('update:modelValue', images)
-    }
-  }).catch((err) => {
-    console.log(err);
-    if (navigator.onLine) {
-      uploadStatus.value = 'error'
-    } else {
-      uploadStatus.value = 'offline'
-    }
-  })
-}
+// const uploadImages = (event) => {
+//   let images = [...props.modelValue]
+//   uploadStatus.value = 'pending'
+//   let formData = new FormData()
+//   const files = eval(props.id).files
+//   Array.from(files).forEach((file, index) => {
+//     // console.log(file);
+//     formData.append('file', file)
+//   })
+//   api.uploadFils('/api/uploads', formData, null).then((resp) => {
+//     console.log('201');
+//     if (resp.status === 201) {
+//       resp.json().then((json) => {
+//         console.log(json)
+//         // json.forEach((image, index) => {
+//         //   if (images[index].originalname === image.originalname) {
+//         //     images[index].isUploaded = true
+//         //   }
+//         // })
+//       })
+//       uploadStatus.value = 'success'
+//       emit('update:modelValue', images)
+//     }
+//   }).catch((err) => {
+//     console.log(err);
+//     if (navigator.onLine) {
+//       uploadStatus.value = 'error'
+//     } else {
+//       uploadStatus.value = 'offline'
+//     }
+//   })
+// }
 // COMPUTED
 const compCSSUploadBtn = computed(() => {
   // console.log(props.error.filter(err => Object.keys(err).filter(obj => err[obj].length > 0)).length > 0)
@@ -130,7 +139,9 @@ const compUploadStatus = computed(() => {
 <template>
   <div class="flex flex-col gap-2">
     <div>
-      <label class="_label-lg">เพิ่มรูปภาพ (บริเวณสำรวจความเสียหาย)</label>
+      <label class="_label-lg">เ
+        <slot name="header"></slot>
+      </label>
       <input v-if="!isPreview" :disabled="isPreview" @change="handleUploadImages($event)" title="เลือกรูปภาพ" :name="id" accept="image/x-png,image/gif,image/jpeg" :id="id" type="file" multiple=""
         class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
       >

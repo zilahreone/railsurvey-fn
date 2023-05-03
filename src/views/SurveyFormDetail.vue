@@ -61,6 +61,8 @@ const railForm = {
       isPerfect: null,
       condition: []
     },
+    ballastCompaction: null,
+    sleeperType: null,
     sleeperCondition: {
       isPerfect: null,
       condition: []
@@ -85,6 +87,7 @@ const modalActive = ref(false)
 const isConfirm = ref(false)
 let railSurvey = reactive(railForm)
 const isFetch = ref(false)
+const isPreview = ref(false)
 
 // COMPUTED
 const rules = computed(() => {
@@ -196,9 +199,13 @@ const rules = computed(() => {
   return rule
 })
 const v$ = useVuelidate(rules, railSurvey, { $autoDirty: true })
+
 const compSubmitForm = computed(() => {
   let rtnRail = JSON.parse(JSON.stringify(railSurvey))
   Object.keys(rtnRail.trackDamageSurvey).forEach(key => {
+    // if ('uploadImages' === key) {
+    //   rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.filename)
+    // }
     if (['trackGeometryCondition', 'ballastCondition', 'sleeperCondition'].includes(key)) {
       if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
         rtnRail.trackDamageSurvey[key] = ['perfect']
@@ -207,6 +214,8 @@ const compSubmitForm = computed(() => {
       }
     }
   })
+  // rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename)
+  rtnRail.createdBy = Cookies.get('isAuthenticated')
   return rtnRail
 })
 
@@ -218,6 +227,14 @@ const handleSubmit = async () => {
   } else {
     // surveyForm.value.scrollToError()
   }
+  // let list = new DataTransfer()
+  // const a = [...railSurvey.railDamageSurvey.uploadImages, ...railSurvey.trackDamageSurvey.uploadImages]
+  // a.forEach(images => {
+  //   console.log(images.file);
+  //   const file_ = new File([images.file], images.filename, { type: images.type })
+  //   list.items.add(file_)
+  // })
+  // console.log(list.files)
   // const { isEmpty, data } = signaturePad.value.saveSignature()
   // railSurvey.signature = data
   // IndexDB.insertData('railway-survey', 1, { fname: 'wissarut', lname: 'sangjong' })
@@ -239,85 +256,42 @@ const handleSubmit = async () => {
 }
 const submitForm = () => {
   if (props.isNew) {
-    console.log('is New');
-    console.log(surveyForm.value.test());
-    const railFiles = eval('railDamageSurvey').files
-    const trackFiles = eval('trackDamageSurvey').files
     let formData = new FormData()
-    Array.from(railFiles).forEach((file, index) => {
-      formData.append('file', file)
-    })
-    Array.from(trackFiles).forEach((file, index) => {
-      formData.append('file', file)
-    })
-    api.uploadFils('/api/uploads', formData, null).then((resp) => {
-      console.log('201');
-      if (resp.status === 201) {
-        resp.json().then((json) => {
-          console.log(json)
-          json.forEach(image => {
-            railSurvey.railDamageSurvey.uploadImages.forEach((upload, index) => {
-              if (upload.originalname === image.originalname) {
-                railSurvey.railDamageSurvey.uploadImages[index].filename = image.filename
-                railSurvey.railDamageSurvey.uploadImages[index].destination = image.path
-              }
-            })
-            railSurvey.trackDamageSurvey.uploadImages.forEach((upload, index) => {
-              if (upload.originalname === image.originalname) {
-                railSurvey.trackDamageSurvey.uploadImages[index].filename = image.filename
-                railSurvey.trackDamageSurvey.uploadImages[index].destination = image.path
-              }
-            })
-          })
-          api.post(`/api/rail-survey`, compSubmitForm.value, null).then((resp) => {
-            if (resp.status === 201) {
-              console.log('create success ;)')
-              router.push('/survey-list')
-            } else {
-            }
-          }).catch(() => {
-            // navigator.serviceWorker.ready.then(registration => {
-            //   // console.log(registration)
-            //   registration.sync.register('some-unique-tag')
-            // }).catch(console.log())
-          })
-        })
-      }
+    if (railSurvey.railDamageSurvey.uploadImages.length > 0 || railSurvey.trackDamageSurvey.uploadImages.length > 0) {
+      // let list = new DataTransfer()
+      const uploadImages = [...railSurvey.railDamageSurvey.uploadImages, ...railSurvey.trackDamageSurvey.uploadImages]
+      uploadImages.forEach(images => {
+        // console.log(images.file);
+        // const file_ = new File([images.file], images.filename, { type: images.type })
+        // list.items.add(file_)
+        formData.append('file', images.file)
+      })
+      // console.log(list.files)
+    }
+    formData.append('form', JSON.stringify(compSubmitForm.value))
+    // api.uploadFils('/api/uploads', formData, null).then((resp) => {
+    api.uploadFils('/api/rail-survey', formData, null).then((resp) => {
+      // console.log('201');
+      resp.json().then((json) => {
+        console.log(json)
+      })
     }).catch((err) => {
-      console.log(err);
-      // if (navigator.onLine) {
-      //   uploadStatus.value = 'error'
-      // } else {
-      //   uploadStatus.value = 'offline'
-      // }
+      navigator.serviceWorker.ready.then(registration => {
+        console.log('registration')
+        registration.sync.register('some-unique-tag')
+      }).catch(console.log())
     })
-    // console.log(railFiles)
-    // console.log(trackFiles)
-    // Promise.all()
-    // api.uploadFils('/api/uploads', formData, null)
-    // api.post(`/api/rail-survey`, Object.assign(railSurvey, {generalSurvey: Object.assign(railSurvey.generalSurvey, { date: new Date(railSurvey.generalSurvey.date).toISOString() } )}) , null).then((resp) => {
-    // api.post(`/api/rail-survey`, compSubmitForm.value, null).then((resp) => {
-    //   if (resp.status === 201) {
-    //     console.log('create success ;)')
-    //     // router.push('/survey-list')
-    //   } else {
-    //   }
-    // }).catch(() => {
-    //   // navigator.serviceWorker.ready.then(registration => {
-    //   //   // console.log(registration)
-    //   //   registration.sync.register('some-unique-tag')
-    //   // }).catch(console.log())
-    // })
   } else {
+    // API PUT
     api.put(`/api/rail-survey/${railSurvey.id}`, compSubmitForm.value, null).then((resp) => {
       if (resp.status === 200) {
         console.log('update success ;)')
-        router.push('/survey-list')
+        // router.push('/survey-list')
       } else {
       }
     }).catch(() => {
       navigator.serviceWorker.ready.then(registration => {
-        // console.log(registration)
+        console.log('registration')
         registration.sync.register('some-unique-tag')
       }).catch(console.log())
     })
@@ -328,12 +302,15 @@ onMounted(() => {
   if (props.isNew) {
     isFetch.value = true
     railSurvey.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm')
-    navigator.geolocation.getCurrentPosition((position)=> {
+    navigator.geolocation.getCurrentPosition((position) => {
       const p = position.coords;
       railSurvey.generalSurvey.coordinates.latitude = p.latitude
       railSurvey.generalSurvey.coordinates.longitude = p.longitude
-    })
+    }, (err) => {
+      console.error(err);
+    }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 })
   } else {
+    isPreview.value = true
     getSurveyID(route.params.id)
   }
   // console.log(moment(new Date()).format('YYYY-MM-DDTHH:mm'));
@@ -346,6 +323,7 @@ const getSurveyID = (id) => {
     if (resp.status === 200) {
       // isReady.value = true
       resp.json().then((json) => {
+        console.log(json);
         let rs = JSON.parse(JSON.stringify(json))
         Object.keys(rs.trackDamageSurvey).forEach((td) => {
           if (['ballastCondition', 'sleeperCondition', 'trackGeometryCondition'].includes(td)) {
@@ -403,7 +381,7 @@ const getSurveyID = (id) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm v-if="isFetch" :created="!isNew" :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
+  <SurveyForm v-if="isFetch" :is-preview="isPreview" :created="!isNew" :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
   <!-- <button @click="modalActive = true">modalActive</button>
   <button @click="submitForm()">Submit</button> -->
   <Modal content v-model="modalActive">

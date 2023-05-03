@@ -17,7 +17,14 @@ const app = createApp(App)
 //   // site using the default scope.
 //   navigator.serviceWorker.register('./service-worker.js').then(
 //     (registration) => {
-//       console.log("Service worker registration succeeded:", registration);
+//       // console.log("Service worker registration succeeded:", registration);
+//       if (registration.installing) {
+//         console.log("Service worker installing");
+//       } else if (registration.waiting) {
+//         console.log("Service worker installed");
+//       } else if (registration.active) {
+//         console.log("Service worker active");
+//       }
 //     },
 //     (error) => {
 //       console.error(`Service worker registration failed: ${error}`);
@@ -26,11 +33,13 @@ const app = createApp(App)
 // } else {
 //   console.error("Service workers are not supported.");
 // }
+IndexedDB.insertData('name', 1, {})
 // CHECK SUPPORT INDEXED_DB
-if (!self.indexedDB) {
-  console.warn(`Your browser doesn't support IndexedDB`)
-  store.commit('setSupportIndexedDB', false)
-}
+// if (!self.indexedDB) {
+//   console.warn(`Your browser doesn't support IndexedDB`)
+//   store.commit('setSupportIndexedDB', false)
+// }
+// navigator.serviceWorker.getRegistrations().then(function(registrations) { for(let registration of registrations) { registration.unregister() } })
 // api.get('/', null).then((resp) => {
 //   if (resp.status === 200) {
 //     resp.json().then((json) => {
@@ -101,15 +110,9 @@ if (!self.indexedDB) {
 //   });
 // }
 //////////////////
-const local = localStorage
 // localStorage.clear()
 // console.log(local.key(0))
 app.use(router)
 app.use(store)
 app.component('VueSignaturePad', VueSignaturePad)
-// if (localStorage.getItem('Authenticate')) {
-//   app.mount('#app')
-// } else {
-//   app.mount('#login')
-// }
 app.mount('#app')
