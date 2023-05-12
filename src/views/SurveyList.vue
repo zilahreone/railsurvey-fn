@@ -5,7 +5,7 @@ import variable from '@/assets/variable.json'
 import { useStore } from 'vuex'
 import { onMounted, ref, computed } from 'vue'
 import api from '@/services'
-import IndexDB from '@/IndexedDB'
+// import IndexDB from '@/IndexedDB'
 import moment from 'moment'
 import tz from 'moment-timezone'
 import TailTable from '@/components/TailTable.vue'
@@ -123,7 +123,9 @@ const compSurveyList = computed(() => {
       createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss'),
       id: sl.id,
       date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
-      zone: variable.zone.filter((z) => z.value === sl.generalSurvey.zone)[0]?.key,
+      area: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.key,
+      zone: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.zones.filter(zone => zone.value === sl.generalSurvey.zone)[0]?.key,
+      station: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.zones.filter(zone => zone.value === sl.generalSurvey.zone)[0]?.stations.filter(station => station.value === sl.generalSurvey.station)[0]?.key,
       createdBy: sl.createdBy
     }
   })
@@ -136,24 +138,33 @@ const compSurveyList = computed(() => {
     <!-- <pre>{{ surveyList }}</pre> -->
     <Table :tbody="compSurveyList">
       <template #thead>
-        <th class="py-3 px-6">วันที่สร้างฟอร์ม</th>
-        <th class="py-3 px-6">รหัสฟอร์ม</th>
+        <!-- <th class="py-3 px-6">วันที่สร้างฟอร์ม</th> -->
+        <!-- <th class="py-3 px-6">รหัสฟอร์ม</th> -->
         <th class="py-3 px-6">วันที่สำรวจ</th>
         <th class="py-3 px-6">เขตการเดินรถ</th>
+        <th class="py-3 px-6">แขวง</th>
+        <th class="py-3 px-6">สถานี</th>
         <th class="py-3 px-6">สร้างโดย</th>
       </template>
       <template #tbody="{ item, index }">
-        <td class="py-2 px-4">
+        <!-- <td class="py-2 px-4">
           {{ item.createdAt }}
-        </td>
-        <td class="py-2 px-4">
+        </td> -->
+        <!-- <td class="py-2 px-4">
           <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.id }}</router-link>
+        </td> -->
+        <td class="py-2 px-4">
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.date }}</router-link>
+          <!-- {{ item.date }} -->
         </td>
         <td class="py-2 px-4">
-          {{ item.date }}
+          {{ item.area }}
         </td>
         <td class="py-2 px-4">
           {{ item.zone }}
+        </td>
+        <td class="py-2 px-4">
+          {{ item.station }}
         </td>
         <td class="py-2 px-4">
           {{ item.createdBy }}

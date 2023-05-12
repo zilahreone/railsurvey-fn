@@ -139,7 +139,7 @@ const compUploadStatus = computed(() => {
 <template>
   <div class="flex flex-col gap-2">
     <div>
-      <label class="_label-lg">เ
+      <label class="_label-lg">
         <slot name="header"></slot>
       </label>
       <input v-if="!isPreview" :disabled="isPreview" @change="handleUploadImages($event)" title="เลือกรูปภาพ" :name="id" accept="image/x-png,image/gif,image/jpeg" :id="id" type="file" multiple=""

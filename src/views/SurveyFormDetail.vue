@@ -25,7 +25,9 @@ const route = useRoute()
 const railForm = {
   generalSurvey: {
     date: moment(new Date()).format('YYYY-MM-DDTHH:mm'),
+    area: null,
     zone: null,
+    station: null,
     coordinates: {
       latitude: null,
       longitude: null
@@ -49,7 +51,8 @@ const railForm = {
     uploadImages: [],
     situation: [],
     location: [],
-    defectPattern: []
+    defectPattern: [],
+    surfaceDefectPattern: []
   },
   trackDamageSurvey: {
     uploadImages: [],
@@ -77,7 +80,8 @@ const railForm = {
       lastMaintenanceTimes: null,
       yearlyMaintenanceTimes: null,
     },
-    maintenanceMethod: []
+    comment: null,
+    // maintenanceMethod: []
   },
   signature: null,
   createdBy: Cookies.get('isAuthenticated')
@@ -120,6 +124,10 @@ const rules = computed(() => {
                     rule[key1][key2][key3] = { required }
                   }
                 })
+              } else if (key2 === 'telegram') {
+                Object.keys(railForm[key1][key2]).forEach((key3) => {
+                  rule[key1][key2][key3] = { required, custom: helpers.withMessage('Value must be pattern Number/Number', (value) => new RegExp('^[0-9]+\/[0-9]+$', 'g').test(value)) }
+                })
               } else {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {
                   rule[key1][key2][key3] = { required }
@@ -150,6 +158,8 @@ const rules = computed(() => {
             // })
             // if (railSurvey[key1][key2].length > 0) {
             // }
+          } else if (key2 === 'surfaceDefectPattern') {
+            rule[key1][key2] = { surfaceDefectPattern: requiredIf(() => railSurvey[key1]['defectPattern'].includes('surfaceDefect')) }
           } else {
             rule[key1][key2] = { required, minLength: minLength(1) }
           }
@@ -160,7 +170,7 @@ const rules = computed(() => {
             rule[key1][key2] = {}
             Object.keys(railForm[key1][key2]).forEach((key3) => {
               if (key3 === 'condition') {
-                rule[key1][key2][key3] = { isPerfect: requiredIf(() => railSurvey[key1][key2]['isPerfect'] === 'imperfect'), minLength: minLength(1) }
+                rule[key1][key2][key3] = { isPerfect: requiredIf(() => railSurvey[key1][key2]['isPerfect'] === 'imperfect' || railSurvey[key1][key2]['isPerfect'] === 'dilapidated'), minLength: minLength(1) }
               } else {
                 rule[key1][key2][key3] = { required }
               }
@@ -203,18 +213,25 @@ const v$ = useVuelidate(rules, railSurvey, { $autoDirty: true })
 const compSubmitForm = computed(() => {
   let rtnRail = JSON.parse(JSON.stringify(railSurvey))
   Object.keys(rtnRail.trackDamageSurvey).forEach(key => {
-    // if ('uploadImages' === key) {
-    //   rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.filename)
-    // }
     if (['trackGeometryCondition', 'ballastCondition', 'sleeperCondition'].includes(key)) {
-      if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
-        rtnRail.trackDamageSurvey[key] = ['perfect']
+      if (key === 'sleeperCondition') {
+        if (rtnRail.trackDamageSurvey[key].isPerfect === 'dilapidated') {
+          rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+        } else {
+          rtnRail.trackDamageSurvey[key] = [rtnRail.trackDamageSurvey[key].isPerfect]
+        }
       } else {
-        rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+        if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
+          rtnRail.trackDamageSurvey[key] = ['perfect']
+        } else {
+          rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+        }
       }
+    } else if (['uploadImages'].includes(key)) {
+      rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.filename)
     }
   })
-  // rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename)
+  rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename)
   rtnRail.createdBy = Cookies.get('isAuthenticated')
   return rtnRail
 })
@@ -276,10 +293,10 @@ const submitForm = () => {
         console.log(json)
       })
     }).catch((err) => {
-      navigator.serviceWorker.ready.then(registration => {
-        console.log('registration')
-        registration.sync.register('some-unique-tag')
-      }).catch(console.log())
+      // navigator.serviceWorker.ready.then(registration => {
+      //   console.log('registration')
+      //   registration.sync.register('some-unique-tag')
+      // }).catch(console.log())
     })
   } else {
     // API PUT
@@ -290,12 +307,13 @@ const submitForm = () => {
       } else {
       }
     }).catch(() => {
-      navigator.serviceWorker.ready.then(registration => {
-        console.log('registration')
-        registration.sync.register('some-unique-tag')
-      }).catch(console.log())
-    })
-  }
+      // navigator.serviceWorker.ready.then(registration => {
+        //   console.log('registration')
+        //   registration.sync.register('some-unique-tag')
+        // }).catch(console.log())
+      })
+    }
+    router.push('/survey-list')
 }
 
 onMounted(() => {
@@ -325,6 +343,8 @@ const getSurveyID = (id) => {
       resp.json().then((json) => {
         console.log(json);
         let rs = JSON.parse(JSON.stringify(json))
+        let railUploadImages = []
+        let trackUploadImages = []
         Object.keys(rs.trackDamageSurvey).forEach((td) => {
           if (['ballastCondition', 'sleeperCondition', 'trackGeometryCondition'].includes(td)) {
             if (rs.trackDamageSurvey[td].length > 0) {
@@ -340,15 +360,25 @@ const getSurveyID = (id) => {
             }
           } else if (td === 'uploadImages') {
             rs.trackDamageSurvey[td].forEach((image, index) => {
+              trackUploadImages.push({
+                originalname: image,
+                originalPath: `${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${image}`
+              })
               // console.log(image.destination);
-              rs.trackDamageSurvey[td][index].originalPath = `${process.env.VUE_APP_BACK_END_URL}/${image.destination}`
+              // rs.trackDamageSurvey[td][index].originalPath = `${process.env.VUE_APP_BACK_END_URL}/${image.destination}`
             })
             // rs.trackDamageSurvey[td].originalPath = `${process.env.VUE_APP_BACK_END_URL}${rs.trackDamageSurvey[td].destination}`
           }
-          rs.railDamageSurvey.uploadImages.forEach((image, index) => {
-            rs.railDamageSurvey.uploadImages[index].originalPath = `${process.env.VUE_APP_BACK_END_URL}/${image.destination}`
+        })
+        rs.trackDamageSurvey.uploadImages = trackUploadImages
+        rs.railDamageSurvey.uploadImages.forEach((image, index) => {
+          // rs.railDamageSurvey.uploadImages[index].originalPath = `${process.env.VUE_APP_BACK_END_URL}/${image.destination}`
+          railUploadImages.push({
+            originalname: image,
+            originalPath: `${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${image}`
           })
         })
+        rs.railDamageSurvey.uploadImages = railUploadImages
         rs.generalSurvey.date = moment(rs.generalSurvey.date).format('YYYY-MM-DDTHH:mm')
         // console.log(rs);
         Object.assign(railSurvey, rs)
@@ -381,7 +411,7 @@ const getSurveyID = (id) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm v-if="isFetch" :is-preview="isPreview" :created="!isNew" :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
+  <SurveyForm v-if="!modalActive && isFetch" :created="!isNew" :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
   <!-- <button @click="modalActive = true">modalActive</button>
   <button @click="submitForm()">Submit</button> -->
   <Modal content v-model="modalActive">

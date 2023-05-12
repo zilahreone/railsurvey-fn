@@ -6,7 +6,7 @@ console.log(process.env.NODE_ENV)
 // production
 if (process.env.NODE_ENV === 'production') {
   // sw.js
-  register(`${process.env.BASE_URL}sw.js`, {
+  register(`${process.env.BASE_URL}service-worker.js`, {
     ready () {
       console.log(
         'App is being served from cache by a service worker.\n' +

@@ -53,30 +53,35 @@ module.exports = defineConfig({
         }
       ]
     },
-    workboxPluginMode: 'InjectManifest',
-    // workboxPluginMode: 'GenerateSW',
-    workboxOptions: {
-      swSrc: './src/sw.js'
-    }
+    // workboxPluginMode: 'InjectManifest',
     // workboxOptions: {
-    //   navigateFallback: 'index.html',
-    //   skipWaiting: true,
-    //   clientsClaim: true,
-    //   runtimeCaching: [
-    //     {
-    //       urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/api`),
-    //       handler: 'NetworkFirst',
-    //       // method: 'POST',
-    //       options: {
-    //         backgroundSync: {
-    //           name: 'my-queue-asier',
-    //           options: {
-    //             maxRetentionTime: 60 * 60
-    //           }
-    //         }
-    //       }
-    //     }
-    //   ]
+    //   swSrc: './src/sw.js'
     // }
+    workboxPluginMode: 'GenerateSW',
+    workboxOptions: {
+      navigateFallback: 'index.html',
+      skipWaiting: true,
+      clientsClaim: true,
+      runtimeCaching: [
+        {
+          urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/api`),
+          handler: 'NetworkFirst',
+          method: 'POST',
+          options: {
+            backgroundSync: {
+              name: 'my-queue-asier',
+              options: {
+                maxRetentionTime: 60 * 60
+              }
+            }
+          }
+        },
+        {
+          urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/api`),
+          handler: 'NetworkFirst',
+          method: 'GET'
+        }
+      ]
+    }
   }
 })
