@@ -1,6 +1,6 @@
 <script setup>
 import Table from '@/components/Table.vue'
-import variable from '@/assets/variable.json'
+import variable from '@/variable.json'
 // import store from '@/store'
 import { useStore } from 'vuex'
 import { onMounted, ref, computed } from 'vue'
@@ -25,13 +25,13 @@ onMounted (() => {
 //  } else {
 //   console.log('offline');
 //  }
-  navigator.serviceWorker.ready.then((registration) => {
-    registration.sync.getTags().then((tags) => {
-      console.log(tags);
-      if (tags.includes("sync-messages"))
-        console.log("Messages sync already requested");
-    });
-  });
+  // navigator.serviceWorker.ready.then((registration) => {
+  //   registration.sync.getTags().then((tags) => {
+  //     console.log(tags);
+  //     if (tags.includes("sync-messages"))
+  //       console.log("Messages sync already requested");
+  //   });
+  // });
 })
 
 const getSurveyList2 = (p) => {
@@ -145,8 +145,10 @@ const compSurveyList = computed(() => {
         <th class="py-3 px-6">แขวง</th>
         <th class="py-3 px-6">สถานี</th>
         <th class="py-3 px-6">สร้างโดย</th>
+        <th class="py-3 px-6">แก้ไขเมื่อ</th>
       </template>
       <template #tbody="{ item, index }">
+        <!-- {{ item.createdAt }} -->
         <!-- <td class="py-2 px-4">
           {{ item.createdAt }}
         </td> -->
@@ -168,6 +170,9 @@ const compSurveyList = computed(() => {
         </td>
         <td class="py-2 px-4">
           {{ item.createdBy }}
+        </td>
+        <td class="py-2 px-4">
+          {{ item.createdAt }}
         </td>
         <!-- <td class="py-2 px-4">
           <button type="button" @click="handleClickDelete(index, item.id)">

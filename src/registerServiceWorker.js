@@ -2,7 +2,7 @@
 
 import { register } from 'register-service-worker'
 
-console.log(process.env.NODE_ENV)
+// console.log(process.env.NODE_ENV)
 // production
 if (process.env.NODE_ENV === 'production') {
   // sw.js

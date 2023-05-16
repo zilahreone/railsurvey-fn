@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory, isNavigationFailure, NavigationFailureType } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import Login from '../views/Login.vue'
-import SurveyForm from '../views/SurveyForm.vue'
-import SurveyFormDetail from '../views/SurveyFormDetail.vue'
+import SurveyFormView from '../views/SurveyFormView.vue'
+import SurveyFormDetail from '../views/SurveyFormDetail_.vue'
 import Cookies from 'js-cookie';
 
 const router = createRouter({
@@ -25,8 +25,9 @@ const router = createRouter({
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       // component: () => import(/* webpackChunkName: "about" */ '../views/SurveyForm.vue')
-      component: SurveyFormDetail,
-      props: { isNew: true }
+      component: SurveyFormView,
+      // component: SurveyFormDetail,
+      // props: { isNew: true }
     },
     {
       path: '/form/:id',
@@ -36,7 +37,7 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       // component: () => import(/* webpackChunkName: "about" */ '../views/SurveyForm.vue')
       component: SurveyFormDetail,
-      props: { isNew: false }
+      // props: { isNew: false }
     },
     {
       path: '/survey-list',

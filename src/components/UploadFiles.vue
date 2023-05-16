@@ -46,7 +46,7 @@ const handleUploadImages = (event) => {
       image.originalname === file.name
       && image.size === file.size
       && image.mimetype === file.type).length === 0) {
-        console.log(file)
+        // console.log(file)
         const file_ = new File([file], fileName, { type: file.type })
         // list.items.add(file_)
         images.push({

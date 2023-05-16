@@ -16,7 +16,7 @@ export default {
       };
   
       request.onsuccess = async (event) => {
-        console.log('success');
+        // console.log('success');
         // add implementation here
         const db = event.target.result;
         this.insertContact(db, data)
@@ -56,7 +56,7 @@ export default {
 
     // handle success case
     query.onsuccess = function (event) {
-      console.log(event)
+      // console.log(event)
     }
 
     // handle the error case

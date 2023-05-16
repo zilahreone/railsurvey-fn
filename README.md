@@ -39,3 +39,29 @@ module.exports = {
   theme: {}
 }
 ```
+### Build Docker
+inobox.azurecr.io/rail-survey
+inobox.azurecr.io/rail-survey-backend
+```
+docker images
+docker image rm <docker_id>
+```
+
+current directory rail-survey
+```
+docker build -t inobox.azurecr.io/rail-survey:dev .
+```
+
+current directory garden
+```
+docker build -t inobox.azurecr.io/rail-survey-backend:dev .
+```
+
+next step
+```
+docker login inobox.azurecr.io
+user: inobox
+password: ve+4Txs07CLovaOTrIcTFv=z+9jla44p
+docker push inobox.azurecr.io/rail-survey:dev
+docker push inobox.azurecr.io/rail-survey-backend:dev
+```

@@ -255,7 +255,7 @@ const handleUploadImages = () => {
   Array.from(files).forEach((file, index) => {
     formData.append('file', file)
   })
-  api.uploadFils('/api/uploads', formData, null).then((resp) => {
+  api.uploadFiles('/api/uploads', formData, null).then((resp) => {
     uploadStatus.value = 'pending'
     if (resp.status === 201) {
       resp.json().then((json) => {

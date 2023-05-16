@@ -400,11 +400,6 @@
       "value": "plainRail"
     },
     {
-      "key": "รูประกับ ()",
-      "img": null,
-      "value": ""
-    },
-    {
       "key": "ปลายราง (Rail End)",
       "img": "positionDamage/Picture2.png",
       "value": "railEnd"
@@ -690,20 +685,6 @@
   ],
   "sleeper": [
     {
-      "key": "แตกหัก (Fracture)",
-      "value": "fracture"
-    },
-    {
-      "key": "ให้ตัวได้ (Untight)",
-      "value": "untight"
-    },
-    {
-      "key": "ประกับยึดรางหลวม (Clamp: Untight/lost)",
-      "value": "clampUntight/lost"
-    }
-  ],
-  "sleeperCondition": [
-    {
       "key": "ดี",
       "value": "good"
     },
@@ -714,6 +695,20 @@
     {
       "key": "ชำรุด",
       "value": "dilapidated"
+    }
+  ],
+  "sleeperCondition": [
+    {
+      "key": "แตกหัก (Fracture)",
+      "value": "fracture"
+    },
+    {
+      "key": "ให้ตัวได้ (Untight)",
+      "value": "untight"
+    },
+    {
+      "key": "ประกับยึดรางหลวม (Clamp: Untight/lost)",
+      "value": "clampUntight/lost"
     }
   ],
   "sleeperType": [

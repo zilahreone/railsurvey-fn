@@ -22,11 +22,23 @@ export default {
     }
     return fetch(baseURL + endpoint, { method: 'POST', headers, body: JSON.stringify(body) })
   },
-  uploadFils (endpoint, body, token = null) {
+  uploadFiles (endpoint, body, token = null) {
     if (token) {
       headers['Authorization'] = 'Bearer ' + token
     }
     return fetch(baseURL + endpoint, { method: 'POST', body: body })
+  },
+  postUploadFiles (endpoint, body, token = null) {
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token
+    }
+    return fetch(baseURL + endpoint, { method: 'POST', body: body })
+  },
+  putUploadFiles (endpoint, body = {}, token = null) {
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token
+    }
+    return fetch(baseURL + endpoint, { method: 'PUT', body: body })
   },
   put (endpoint, body = {}, token = null) {
     let headers = {

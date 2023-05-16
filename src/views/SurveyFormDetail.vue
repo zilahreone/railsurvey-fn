@@ -89,9 +89,37 @@ const railForm = {
 const surveyForm = ref()
 const modalActive = ref(false)
 const isConfirm = ref(false)
-let railSurvey = reactive(railForm)
+const railSurvey = reactive(railForm)
 const isFetch = ref(false)
 const isPreview = ref(false)
+
+onMounted(() => {
+  if (props.isNew) {
+    isFetch.value = true
+    railSurvey.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm')
+    navigator.geolocation.getCurrentPosition((position) => {
+      const p = position.coords;
+      railSurvey.generalSurvey.coordinates.latitude = p.latitude
+      railSurvey.generalSurvey.coordinates.longitude = p.longitude
+    }, (err) => {
+      console.error(err);
+    }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 })
+  } else {
+    isPreview.value = true
+    getSurveyID(route.params.id)
+  }
+  // console.log(moment(new Date()).format('YYYY-MM-DDTHH:mm'));
+  // console.log(new Date('2018-06-14T20:00'));
+  // console.log(new Date('2018-06-14T20:00').toISOString());
+})
+
+watch(() => props.isNew, (f, s) => {
+  if (s) {}
+  console.log(f, s);
+  // if (newConfig) {
+  //   console.log('new');
+  // }
+}, { deep: true })
 
 // COMPUTED
 const rules = computed(() => {
@@ -287,7 +315,7 @@ const submitForm = () => {
     }
     formData.append('form', JSON.stringify(compSubmitForm.value))
     // api.uploadFils('/api/uploads', formData, null).then((resp) => {
-    api.uploadFils('/api/rail-survey', formData, null).then((resp) => {
+    api.postUploadFiles('/api/rail-survey', formData, null).then((resp) => {
       // console.log('201');
       resp.json().then((json) => {
         console.log(json)
@@ -300,7 +328,7 @@ const submitForm = () => {
     })
   } else {
     // API PUT
-    api.put(`/api/rail-survey/${railSurvey.id}`, compSubmitForm.value, null).then((resp) => {
+    api.putUploadFiles(`/api/rail-survey/${railSurvey.id}`, compSubmitForm.value, null).then((resp) => {
       if (resp.status === 200) {
         console.log('update success ;)')
         // router.push('/survey-list')
@@ -308,40 +336,20 @@ const submitForm = () => {
       }
     }).catch(() => {
       // navigator.serviceWorker.ready.then(registration => {
-        //   console.log('registration')
-        //   registration.sync.register('some-unique-tag')
-        // }).catch(console.log())
-      })
-    }
-    router.push('/survey-list')
-}
-
-onMounted(() => {
-  if (props.isNew) {
-    isFetch.value = true
-    railSurvey.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm')
-    navigator.geolocation.getCurrentPosition((position) => {
-      const p = position.coords;
-      railSurvey.generalSurvey.coordinates.latitude = p.latitude
-      railSurvey.generalSurvey.coordinates.longitude = p.longitude
-    }, (err) => {
-      console.error(err);
-    }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 })
-  } else {
-    isPreview.value = true
-    getSurveyID(route.params.id)
+      //   console.log('registration')
+      //   registration.sync.register('some-unique-tag')
+      // }).catch(console.log())
+    })
   }
-  // console.log(moment(new Date()).format('YYYY-MM-DDTHH:mm'));
-  // console.log(new Date('2018-06-14T20:00'));
-  // console.log(new Date('2018-06-14T20:00').toISOString());
-})
+  router.push('/survey-list')
+}
 
 const getSurveyID = (id) => {
   api.get(`/api/rail-survey/${id}`, store.state.token).then((resp) => {
     if (resp.status === 200) {
       // isReady.value = true
       resp.json().then((json) => {
-        console.log(json);
+        // console.log(json);
         let rs = JSON.parse(JSON.stringify(json))
         let railUploadImages = []
         let trackUploadImages = []
@@ -411,7 +419,7 @@ const getSurveyID = (id) => {
   <div v-else>
     <PageNotFound></PageNotFound>
   </div> -->
-  <SurveyForm v-if="!modalActive && isFetch" :created="!isNew" :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @onSubmit="handleSubmit()"></SurveyForm>
+  <SurveyForm v-if="!modalActive && isFetch" :created="!isNew" :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey" :validate="v$" @on-submit="handleSubmit()"></SurveyForm>
   <!-- <button @click="modalActive = true">modalActive</button>
   <button @click="submitForm()">Submit</button> -->
   <Modal content v-model="modalActive">

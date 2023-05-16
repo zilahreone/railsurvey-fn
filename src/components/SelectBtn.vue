@@ -76,7 +76,7 @@ const handleEmit = (val) => {
   emit('onEvent', out)
 }
 const handleSpecifyEmit = (val) => {
-  console.log(val);
+  // console.log(val);
   let out = null
   if (props.type === 'radio') {
     out = val

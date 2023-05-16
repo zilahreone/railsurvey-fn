@@ -13,7 +13,7 @@ import RadioImageBtn from '@/components/RadioImageBtn.vue'
 import Accordion from '@/components/Accordion.vue'
 import UploadFiles from '@/components/UploadFiles.vue'
 // import { Loader } from '@googlemaps/js-api-loader'
-import variable from '@/assets/variable.json'
+import variable from '@/variable.json'
 import api from '@/services'
 import { nullableTypeAnnotation } from '@babel/types'
 // import IndexDB from '@/IndexedDB'
@@ -34,50 +34,9 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  isNew: {
-    type: Boolean,
-    default: false
-  },
   modelValue: {
     type: [Object, null],
-    default: {
-      // date: new Date().toISOString().substring(0, 10),
-      // zone: null,
-      // coordinates: {
-      //   latitude: null,
-      //   longitude: null
-      // },
-      // kilometers: null,
-      // nearby: {
-      //   stationBefore: null,
-      //   stationAfter: null
-      // },
-      // railType: null,
-      // areaCondition: [],
-      // defectSituation: {
-      //   railAreaDefect: [],
-      //   railPositionDefect: [],
-      // },
-      // defectPattern: null,
-      // surfaceDefect: null,
-      // railCondition: null,
-      // trackGeometryCondition: null,
-      // // defectTrackGeometry: null,
-      // ballastCondition: [],
-      // sleeperCondition: [],
-      // trackFoundationCondition: null,
-      // uploadImage: null,
-      // severity: null,
-      // isAnalyzeDamage: null,
-      // hasMaintenanceRecord: null,
-      // lastMaintenanceDate: null,
-      // yearlyMaintenanceTimes: null,
-      // maintenanceMethod: [],
-      // note: null,
-      // signature: null
-      // createdAt: null,
-      // createdBy: null
-    }
+    default: {}
   },
   validate: {
     type: Object,
@@ -470,11 +429,11 @@ const compStationItems = computed(() => {
             </div>
             <div>
               <label class="_label-sm">เขตการเดินรถ</label>
-              <select :disabled="isPreview" name="generalSurvey.area" :value="railSurvey.generalSurvey.area" @change="handleEmit($event.target)" id="area" :class="v$.generalSurvey.zone.$error ? '_input_error' : '_input'">
+              <select :disabled="isPreview" name="generalSurvey.area" :value="railSurvey.generalSurvey.area" @change="handleEmit($event.target)" id="area" :class="v$.generalSurvey.area.$error ? '_input_error' : '_input'">
                 <option disabled value="">กรุณาเลือกเขตการเดินรถ</option>
                 <option v-for="(area, index) in variable.areas" :value="area.value" :key="index">{{ area.key }}</option>
               </select>
-              <p v-if="v$.generalSurvey.zone.$error" class="text-sm text-red-600">{{ v$.generalSurvey.zone.$errors[0].$message }}</p>
+              <p v-if="v$.generalSurvey.area.$error" class="text-sm text-red-600">{{ v$.generalSurvey.area.$errors[0].$message }}</p>
             </div>
             <div>
               <label class="_label-sm">แขวง</label>
@@ -490,7 +449,7 @@ const compStationItems = computed(() => {
                 <option disabled value="">กรุณาเลือกสถานี</option>
                 <option v-for="(station, index) in compStationItems" :value="station.value" :key="index">{{ station.key }}</option>
               </select>
-              <p v-if="v$.generalSurvey.zone.$error" class="text-sm text-red-600">{{ v$.generalSurvey.zone.$errors[0].$message }}</p>
+              <p v-if="v$.generalSurvey.station.$error" class="text-sm text-red-600">{{ v$.generalSurvey.station.$errors[0].$message }}</p>
             </div>
           </div>
           <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-2">
@@ -586,7 +545,7 @@ const compStationItems = computed(() => {
           <div>
             <label class="_label-lg">ความเสียหายของราง (Situation)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" @onEvent="handleFilterLocation('situation')" name="situation" :items="variable.situation" :disables="compDisableSituation"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" is-specify :error="v$.railDamageSurvey.situation.$error" v-model="railSurvey.railDamageSurvey.situation" @onEvent="handleFilterLocation('situation')" name="situation" :items="variable.situation" :disables="compDisableSituation"></SelectBtn>
             </div>
             <p v-if="v$.railDamageSurvey.situation.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.situation.$errors[0].$message }}</p>
           </div>
@@ -683,14 +642,14 @@ const compStationItems = computed(() => {
           <div>
             <label class="_label-lg">หมอนรองทาง (Sleeper)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect" name="sleeperCondition" :items="variable.sleeperCondition" :disables="compDisableSleeperCondition"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="radio" :error="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect" name="sleeperCondition" :items="variable.sleeper" :disables="compDisableSleeper"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.isPerfect.$errors[0].$message }}</p>
           </div>
           <div v-if="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect && railSurvey.trackDamageSurvey.sleeperCondition.isPerfect === 'dilapidated'">
             <label class="_label-lg">รูปแบบ Sleeper ที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-3 lg:grid-cols-4 gap-2">
-              <SelectBtn :is-preview="isPreview" type="checkbox"  :error="v$.trackDamageSurvey.sleeperCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.condition" name="sleeperConditionFail" :items="variable.sleeper" :disables="compDisableSleeper"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox"  :error="v$.trackDamageSurvey.sleeperCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.condition" name="sleeperConditionFail" :items="variable.sleeperCondition" :disables="compDisableSleeperCondition"></SelectBtn>
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.condition.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.condition.$errors[0].$message }}</p>
           </div>
