@@ -5,7 +5,7 @@ import variable from '@/variable.json'
 import { useStore } from 'vuex'
 import { onMounted, ref, computed } from 'vue'
 import api from '@/services'
-// import IndexDB from '@/IndexedDB'
+import IndexDB from '@/IndexedDB'
 import moment from 'moment'
 import tz from 'moment-timezone'
 import TailTable from '@/components/TailTable.vue'
@@ -18,20 +18,13 @@ const perPage = ref(20)
 const page = ref(1)
 
 onMounted (() => {
-  getSurveyList2()
   getCount()
+  getSurveyList2()
 //   if(navigator.onLine){
 //   console.log('online');
 //  } else {
 //   console.log('offline');
 //  }
-  // navigator.serviceWorker.ready.then((registration) => {
-  //   registration.sync.getTags().then((tags) => {
-  //     console.log(tags);
-  //     if (tags.includes("sync-messages"))
-  //       console.log("Messages sync already requested");
-  //   });
-  // });
 })
 
 const getSurveyList2 = (p) => {
@@ -58,26 +51,25 @@ const getCount = () => {
   })
 }
 
-// const getSurveyList = () => {
-//   // IndexDB.getAllContacts('railway-survey', 1, function (items) {
-//   //   console.log(items);
-//   //   list.value = items
-//   // })
-//   Promise.resolve()
-//     .then(() => IndexDB.getAllContacts2('railway-survey', 1))
-//     .then((arr) => {
-//       list.value = arr;
-//     })
-//     .catch((err) => console.error(err))
-// }
+const getSurveyList = () => {
+  // IndexDB.getAllContacts('railway-survey', 1, function (items) {
+  //   console.log(items);
+  //   list.value = items
+  // })
+  Promise.resolve()
+    .then(() => IndexDB.getAllContacts2('railway-survey', 1))
+    .then((arr) => {
+      list.value = arr;
+    })
+    .catch((err) => console.error(err))
+}
 
 const handleClickDelete = (index, id) => {
   hadleDelete(id)
 }
 
 const hadleDelete = (id) => {
-  api.delete(`/api/rail-survey/${id}`, null).then((resp) => {
-    console.log(resp.status)
+  api.delete(`/api/rail-survey/${id}`, store.state.token).then((resp) => {
     if (resp.status === 200) {
       // resp.json().then((json) => {
       //   surveyList.value = json
@@ -123,10 +115,12 @@ const compSurveyList = computed(() => {
       createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss'),
       id: sl.id,
       date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
-      area: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.key,
-      zone: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.zones.filter(zone => zone.value === sl.generalSurvey.zone)[0]?.key,
-      station: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.zones.filter(zone => zone.value === sl.generalSurvey.zone)[0]?.stations.filter(station => station.value === sl.generalSurvey.station)[0]?.key,
-      createdBy: sl.createdBy
+      zone: variable.zone.filter((z) => z.value === sl.generalSurvey.zone)[0]?.key,
+      zoneBe: variable.zone.filter((z) => z.value === sl.generalSurvey.nearby.stationBefore)[0]?.key,
+      zoneAf: variable.zone.filter((z) => z.value === sl.generalSurvey.nearby.stationAfter)[0]?.key,
+      kilometers: sl.generalSurvey.kilometers ? sl.generalSurvey.kilometers : '-',
+      createdBy: sl.createdBy,
+      createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss')
     }
   })
 })
@@ -138,35 +132,33 @@ const compSurveyList = computed(() => {
     <!-- <pre>{{ surveyList }}</pre> -->
     <Table :tbody="compSurveyList">
       <template #thead>
+        <th class="py-3 px-6">วันที่สำรวจ</th>
         <!-- <th class="py-3 px-6">วันที่สร้างฟอร์ม</th> -->
         <!-- <th class="py-3 px-6">รหัสฟอร์ม</th> -->
-        <th class="py-3 px-6">วันที่สำรวจ</th>
         <th class="py-3 px-6">เขตการเดินรถ</th>
-        <th class="py-3 px-6">แขวง</th>
-        <th class="py-3 px-6">สถานี</th>
+        <!-- <th class="py-3 px-6">สถานีก่อนหน้า</th>
+        <th class="py-3 px-6">สถานีถัดไป</th> -->
+        <th class="py-3 px-6">หลักกิโลเมตร</th>
         <th class="py-3 px-6">สร้างโดย</th>
         <th class="py-3 px-6">แก้ไขเมื่อ</th>
       </template>
       <template #tbody="{ item, index }">
-        <!-- {{ item.createdAt }} -->
-        <!-- <td class="py-2 px-4">
-          {{ item.createdAt }}
-        </td> -->
-        <!-- <td class="py-2 px-4">
-          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.id }}</router-link>
-        </td> -->
         <td class="py-2 px-4">
           <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.date }}</router-link>
-          <!-- {{ item.date }} -->
         </td>
-        <td class="py-2 px-4">
-          {{ item.area }}
-        </td>
+        <!-- <td class="py-2 px-4">
+        </td> -->
         <td class="py-2 px-4">
           {{ item.zone }}
         </td>
+        <!-- <td class="py-2 px-4">
+          {{ item.zoneBe }}
+        </td>
         <td class="py-2 px-4">
-          {{ item.station }}
+          {{ item.zoneAf }}
+        </td> -->
+        <td class="py-2 px-4">
+          {{ item.kilometers }}
         </td>
         <td class="py-2 px-4">
           {{ item.createdBy }}
@@ -174,11 +166,11 @@ const compSurveyList = computed(() => {
         <td class="py-2 px-4">
           {{ item.createdAt }}
         </td>
-        <!-- <td class="py-2 px-4">
+        <td class="py-2 px-4">
           <button type="button" @click="handleClickDelete(index, item.id)">
             <svg class="w-6 h-6 text-red-500 hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
           </button>
-        </td> -->
+        </td>
       </template>
     </Table>
     <TailTable :count="count" :page="page" :per-page="perPage" @page="getSurveyList2($event)"></TailTable>

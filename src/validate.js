@@ -33,7 +33,8 @@ export default function (railForm, railSurvey) {
                 })
               } else if (key2 === 'telegram') {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {
-                  rule[key1][key2][key3] = { required, custom: helpers.withMessage('Value must be pattern Number/Number', (value) => new RegExp('^[0-9]+\/[0-9]+$', 'g').test(value)) }
+                  // rule[key1][key2][key3] = { required, custom: helpers.withMessage('Value must be pattern Number/Number', (value) => new RegExp('^[0-9]+\/[0-9]+$', 'g').test(value)) }
+                  rule[key1][key2][key3] = { required }
                 })
               } else {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {

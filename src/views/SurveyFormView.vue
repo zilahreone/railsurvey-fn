@@ -1,6 +1,6 @@
 <script setup>
 import validate from '@/validate'
-import form from '@/template_form.json'
+import form from '@/template_form_.json'
 import { computed, onMounted, reactive, ref } from 'vue'
 import useVuelidate from '@vuelidate/core'
 import moment from 'moment'
@@ -70,18 +70,23 @@ const compSubmitForm = computed(() => {
   rtnRail.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')
   Object.keys(rtnRail.trackDamageSurvey).forEach(key => {
     if (['trackGeometryCondition', 'ballastCondition', 'sleeperCondition'].includes(key)) {
-      if (key === 'sleeperCondition') {
-        if (rtnRail.trackDamageSurvey[key].isPerfect === 'dilapidated') {
-          rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
-        } else {
-          rtnRail.trackDamageSurvey[key] = [rtnRail.trackDamageSurvey[key].isPerfect]
-        }
+      // if (key === 'sleeperCondition') {
+      //   if (rtnRail.trackDamageSurvey[key].isPerfect === 'dilapidated') {
+      //     rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+      //   } else {
+      //     rtnRail.trackDamageSurvey[key] = [rtnRail.trackDamageSurvey[key].isPerfect]
+      //   }
+      // } else {
+      //   if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
+      //     rtnRail.trackDamageSurvey[key] = ['perfect']
+      //   } else {
+      //     rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+      //   }
+      // }
+      if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
+        rtnRail.trackDamageSurvey[key] = ['perfect']
       } else {
-        if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
-          rtnRail.trackDamageSurvey[key] = ['perfect']
-        } else {
-          rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
-        }
+        rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
       }
     } else if (['uploadImages'].includes(key)) {
       rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.filename)

@@ -1,0 +1,58 @@
+{
+  "generalSurvey": {
+    "date": null,
+    "zone": null,
+    "coordinates": {
+      "latitude": null,
+      "longitude": null
+    },
+    "kilometers": null,
+    "telegram": {
+      "telegramBefore": null,
+      "telegramAfter": null
+    },
+    "nearby": {
+      "stationBefore": null,
+      "stationAfter": null
+    },
+    "railType": {
+      "type": null,
+      "weight": null
+    },
+    "areaCondition": []
+  },
+  "railDamageSurvey": {
+    "uploadImages": [],
+    "situation": [],
+    "location": [],
+    "defectPattern": []
+  },
+  "trackDamageSurvey": {
+    "uploadImages": [],
+    "trackGeometryCondition": {
+      "isPerfect": null,
+      "condition": []
+    },
+    "ballastCondition": {
+      "isPerfect": null,
+      "condition": []
+    },
+    "sleeperCondition": {
+      "isPerfect": null,
+      "condition": []
+    },
+    "trackFoundationCondition": null
+  },
+  "maintenanceRate": {
+    "severity": null,
+    "isAnalyzeDamage": null,
+    "maintenanceMethod": [],
+    "maintenanceRecord": {
+      "hasMaintenanceRecord": null,
+      "lastMaintenanceTimes": null,
+      "yearlyMaintenanceTimes": null
+    }
+  },
+  "signature": null,
+  "createdBy": null
+}

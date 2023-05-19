@@ -1,4 +1,316 @@
 {
+  "areas": [
+    {
+      "key": "สายเหนือ",
+      "value": "north",
+      "zones": [
+        {
+          "key": "แขวงบำรุงทางเด่นชัย",
+          "value": "denChai",
+          "stations": [
+            {
+              "key": "ปางต้นผึ้ง (Pang Ton Phung)",
+              "value": "pangTonPhung"
+            },
+            {
+              "key": "เขาพลึง (Khao Phlung)",
+              "value": "khaoPhlung"
+            },
+            {
+              "key": "ห้วยไร่ (Huai Rai)",
+              "value": "huaiRai"
+            },
+            {
+              "key": "ไร่เกล็ดดาว (Rai Kred Dao)",
+              "value": "raiKredDao"
+            },
+            {
+              "key": "แม่พวก (Mae Phuak)",
+              "value": "maePhuak"
+            },
+            {
+              "key": "เด่นชัย (Den Chai)",
+              "value": "denChai"
+            },
+            {
+              "key": "ปากปาน (Pak Pan)",
+              "value": "pakPan"
+            },
+            {
+              "key": "แก่งหลวง (Kaeng Luang)",
+              "value": "kaengLuang"
+            },
+            {
+              "key": "ห้วยแม่ต้า (Huai Mae Ta)",
+              "value": "huaiMaeTa"
+            },
+            {
+              "key": "บ้านปิน (Ban Pin)",
+              "value": "banPin"
+            },
+            {
+              "key": "ผาคัน (Pha Khan)",
+              "value": "phaKhan"
+            },
+            {
+              "key": "ผาคอ (Pha Kho)",
+              "value": "phaKho"
+            }
+          ]
+        },
+        {
+          "key": "แขวงบำรุงทางลำปาง",
+          "value": "lampang",
+          "stations": [
+            {
+              "key": "ปางป๋วย (Pang Puai)",
+              "value": "pangPuai"
+            },
+            {
+              "key": "แม่จาง (Mae Chang)",
+              "value": "maeChang"
+            },
+            {
+              "key": "แม่เมาะ (Mae Mo)",
+              "value": "maeMo"
+            },
+            {
+              "key": "ห้วยรากไม้ (Huai Rak Mai)",
+              "value": "huaiRakMai"
+            },
+            {
+              "key": "ศาลาผาลาด (Sala Pha Lat)",
+              "value": "salaPhaLat"
+            },
+            {
+              "key": "แม่ทะ (Mae Tha)",
+              "value": "maeTha"
+            },
+            {
+              "key": "หนองวัวเฒ่า (Nong Wua Thao)",
+              "value": "nongWuaThao"
+            },
+            {
+              "key": "นครลำปาง (Nakhon Lampang)",
+              "value": "nakhonLampang"
+            },
+            {
+              "key": "ห้างฉัตร (Hang Chat)",
+              "value": "hangChat"
+            },
+            {
+              "key": "ปางม่วง (Pang Muang)",
+              "value": "pangMuang"
+            },
+            {
+              "key": "ห้วยเรียน (Huai Rian)",
+              "value": "huaiRian"
+            }
+          ]
+        },
+        {
+          "key": "แขวงบำรุงทางลำพูน",
+          "value": "lamPhun",
+          "stations": [
+            {
+              "key": "แม่ตานน้อย (Mae Tan Noi)",
+              "value": "maeTanNoi"
+            },
+            {
+              "key": "ขุนตาน (Khun Tan)",
+              "value": "khunTan"
+            },
+            {
+              "key": "ทาชมภู (Tha Chomphu)",
+              "value": "thaChomphu"
+            },
+            {
+              "key": "ศาลาแม่ทา (Sala Mae Tha)",
+              "value": "salaMaeTha"
+            },
+            {
+              "key": "หนองหล่ม (Nong Lom)",
+              "value": "nongLom"
+            },
+            {
+              "key": "ลำพูน (Lam Phun)",
+              "value": "lamPhun"
+            },
+            {
+              "key": "ป่าเส้า (Pa Sao)",
+              "value": "paSao"
+            },
+            {
+              "key": "สารภี (Saraphi)",
+              "value": "saraphi"
+            },
+            {
+              "key": "เชียงใหม่ (Chiang Mai)",
+              "value": "chiangMai"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "สายตะวันออกเฉียงเหนือ",
+      "value": "northEast"
+    },
+    {
+      "key": "สายใต้",
+      "value": "south"
+    },
+    {
+      "key": "สายตะวันออก",
+      "value": "east"
+    },
+    {
+      "key": "สายแม่กลอง",
+      "value": "maeklong"
+    }
+  ],
+  "station": [
+    {
+      "key": "ศิลาอาสน์ (Sila At)",
+      "value": "silaAt"
+    },
+    {
+      "key": "ท่าเสา (Tha Sao)",
+      "value": "thaSao"
+    },
+    {
+      "key": "บ้านด่าน (Ban Dan)",
+      "value": "banDan"
+    },
+    {
+      "key": "ปางต้นผึ้ง (Pang Ton Phung)",
+      "value": "pangTonPhung"
+    },
+    {
+      "key": "เขาพลึง (Khao Phlung)",
+      "value": "khaoPhlung"
+    },
+    {
+      "key": "ห้วยไร่ (Huai Rai)",
+      "value": "huaiRai"
+    },
+    {
+      "key": "ไร่เกล็ดดาว (Rai Kred Dao)",
+      "value": "raiKredDao"
+    },
+    {
+      "key": "แม่พวก (Mae Phuak)",
+      "value": "maePhuak"
+    },
+    {
+      "key": "เด่นชัย (Den Chai)",
+      "value": "denChai"
+    },
+    {
+      "key": "ปากปาน (Pak Pan)",
+      "value": "pakPan"
+    },
+    {
+      "key": "แก่งหลวง (Kaeng Luang)",
+      "value": "kaengLuang"
+    },
+    {
+      "key": "ห้วยแม่ต้า (Huai Mae Ta)",
+      "value": "huaiMaeTa"
+    },
+    {
+      "key": "บ้านปิน (Ban Pin)",
+      "value": "banPin"
+    },
+    {
+      "key": "ผาคัน (Pha Khan)",
+      "value": "phaKhan"
+    },
+    {
+      "key": "ผาคอ (Pha Kho)",
+      "value": "phaKho"
+    },
+    {
+      "key": "ปางป๋วย (Pang Puai)",
+      "value": "pangPuai"
+    },
+    {
+      "key": "แม่จาง (Mae Chang)",
+      "value": "maeChang"
+    },
+    {
+      "key": "แม่เมาะ (Mae Mo)",
+      "value": "maeMo"
+    },
+    {
+      "key": "ห้วยรากไม้ (Huai Rak Mai)",
+      "value": "huaiRakMai"
+    },
+    {
+      "key": "ศาลาผาลาด (Sala Pha Lat)",
+      "value": "salaPhaLat"
+    },
+    {
+      "key": "แม่ทะ (Mae Tha)",
+      "value": "maeTha"
+    },
+    {
+      "key": "หนองวัวเฒ่า (Nong Wua Thao)",
+      "value": "nongWuaThao"
+    },
+    {
+      "key": "นครลำปาง (Nakhon Lampang)",
+      "value": "nakhonLampang"
+    },
+    {
+      "key": "ห้างฉัตร (Hang Chat)",
+      "value": "hangChat"
+    },
+    {
+      "key": "ปางม่วง (Pang Muang)",
+      "value": "pangMuang"
+    },
+    {
+      "key": "ห้วยเรียน (Huai Rian)",
+      "value": "huaiRian"
+    },
+    {
+      "key": "แม่ตานน้อย (Mae Tan Noi)",
+      "value": "maeTanNoi"
+    },
+    {
+      "key": "ขุนตาน (Khun Tan)",
+      "value": "khunTan"
+    },
+    {
+      "key": "ทาชมภู (Tha Chomphu)",
+      "value": "thaChomphu"
+    },
+    {
+      "key": "ศาลาแม่ทา (Sala Mae Tha)",
+      "value": "salaMaeTha"
+    },
+    {
+      "key": "หนองหล่ม (Nong Lom)",
+      "value": "nongLom"
+    },
+    {
+      "key": "ลำพูน (Lam Phun)",
+      "value": "lamPhun"
+    },
+    {
+      "key": "ป่าเส้า (Pa Sao)",
+      "value": "paSao"
+    },
+    {
+      "key": "สารภี (Saraphi)",
+      "value": "saraphi"
+    },
+    {
+      "key": "เชียงใหม่ (Chiang Mai)",
+      "value": "chiangMai"
+    }
+  ],
   "guageType": [
     {
       "key": "R200",
@@ -173,41 +485,6 @@
     {
       "key": "เป็นแผล/เสียรูป เสียเนื้อโลหะ/เพียงบางส่วน (Surface Defect)",
       "value": "surfaceDefect"
-    },
-    {
-      "key": "Crushed Head",
-      "img": "scar/Picture1.jpg",
-      "value": "crushedHead"
-    },
-    {
-      "key": "Head Checking",
-      "img": "scar/Picture2.jpg",
-      "value": "headChecking"
-    },
-    {
-      "key": "Spalling",
-      "img": "scar/Picture3.jpg",
-      "value": "spalling"
-    },
-    {
-      "key": "Side Wear",
-      "img": "scar/Picture4.jpg",
-      "value": "sideWear"
-    },
-    {
-      "key": "Shelling",
-      "img": "scar/Picture5.jpg",
-      "value": "shelling"
-      
-    },
-    {
-      "key": "Burned Rail",
-      "img": "scar/Picture6.jpg",
-      "value": "burnedRail"
-    },
-    {
-      "key": "รูปแบบอื่นๆ",
-      "value": "other"
     }
   ],
   "surfaceDefect": [
@@ -363,8 +640,22 @@
   ],
   "ballast": [
     {
-      "key": "พร่อง (Lack)",
-      "value": "lack"
+      "key": "สมบูรณ์หรือเต็มมาตรฐาน",
+      "value": "perfect"
+    },
+    {
+      "key": "ไม่สมบูรณ์",
+      "value": "imperfect"
+    }
+  ],
+  "ballastCondition": [
+    {
+      "key": "พร่อง (Lack Level 1)",
+      "value": "lackLev1"
+    },
+    {
+      "key": "พร่องระดับ 2 (Lack Level 2)",
+      "value": "lackLev2"
     },
     {
       "key": "มีลักษณะกลม (Round)",
@@ -375,18 +666,32 @@
       "value": "bleachedStone"
     }
   ],
+  "ballastCompaction": [
+    {
+      "key": "นานๆครั้ง",
+      "value": "seldom"
+    },
+    {
+      "key": "ปานกลาง",
+      "value": "sometimes"
+    },
+    {
+      "key": "บ่อย",
+      "value": "ofter"
+    }
+  ],
   "sleeper": [
     {
-      "key": "แตกหัก (Fracture)",
-      "value": "fracture"
+      "key": "ดี",
+      "value": "good"
     },
     {
-      "key": "ให้ตัวได้ (Untight)",
-      "value": "untight"
+      "key": "พอใช้",
+      "value": "sometimes"
     },
     {
-      "key": "ประกับยึดรางหลวม (Clamp: Untight/lost)",
-      "value": "clampUntight/lost"
+      "key": "ชำรุด",
+      "value": "dilapidated"
     }
   ],
   "sleeperCondition": [
@@ -401,6 +706,16 @@
     {
       "key": "ประกับยึดรางหลวม (Clamp: Untight/lost)",
       "value": "clampUntight/lost"
+    }
+  ],
+  "sleeperType": [
+    {
+      "key": "ไม้",
+      "value": "wood"
+    },
+    {
+      "key": "คอนกรีต",
+      "value": "concrete"
     }
   ],
   "maintenanceRecord": [

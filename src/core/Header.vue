@@ -37,7 +37,7 @@ const handleLogout = () => {
       </router-link>
       <div v-if="Cookies.get('isAuthenticated')" class="static flex items-center md:order-2">
         <!-- Dropdown menu -->
-        <Menu as="div" class="relative ml-3 md:hidden">
+        <Menu as="div" class="relative ml-3">
           <div>
             <MenuButton class="lex text-sm text-gray-600">
               <span class="sr-only">Open user menu</span>
@@ -72,14 +72,11 @@ const handleLogout = () => {
         <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="mobile-menu-2">
           <ul
             class="flex flex-col p-4 mt-4 border border-gray-400 rounded-lg bg-gray-0 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-            <li v-for="(nav, index) in navigation" :key="index">
+            <!-- <li v-for="(nav, index) in navigation" :key="index">
               <router-link v-slot="{ href, route, navigate, isActive, isExactActive }" :to="{ path: nav.href }">
                 <div :class="`${isActive ? 'text-blue-500 font-medium'  : 'text-gray-dark font-medium'} text-base hover:text-blue-500`">{{ nav.name }}</div>
               </router-link>
-              <!-- <a href="#"
-                class="block py-2 pl-3 pr-4 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white"
-                aria-current="page">Home</a> -->
-            </li>
+            </li> -->
             <!-- <li>
               <a href="#"
                 class="block py-2 pl-3 pr-4 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Contact</a>

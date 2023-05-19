@@ -105,10 +105,10 @@ const handleLogin =() => {
     			</p> -->
       </div>
       <div class="pt-10 pb-2 flex justify-center gap-2">
-        <img class="h-8" src="@/assets/logo-srt.png" alt="image description">
+        <!-- <img class="h-8" src="@/assets/logo-srt.png" alt="image description">
         <img class="h-8" src="@/assets/logo-mtec.png" alt="image description">
         <img class="h-8" src="@/assets/logo-nectec.png" alt="image description">
-        <img class="h-8" src="@/assets/logo-nstda.png" alt="image description">
+        <img class="h-8" src="@/assets/logo-nstda.png" alt="image description"> -->
       </div>
   </div>
 </div></template>
