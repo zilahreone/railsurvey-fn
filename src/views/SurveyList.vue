@@ -149,7 +149,7 @@ const compSurveyList = computed(() => {
         <!-- <td class="py-2 px-4">
         </td> -->
         <td class="py-2 px-4">
-          {{ item.zone }}
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.zone }}</router-link>
         </td>
         <!-- <td class="py-2 px-4">
           {{ item.zoneBe }}
@@ -158,19 +158,19 @@ const compSurveyList = computed(() => {
           {{ item.zoneAf }}
         </td> -->
         <td class="py-2 px-4">
-          {{ item.kilometers }}
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.kilometers }}</router-link>
         </td>
         <td class="py-2 px-4">
-          {{ item.createdBy }}
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.createdBy }}</router-link>
         </td>
         <td class="py-2 px-4">
-          {{ item.createdAt }}
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.createdAt }}</router-link>
         </td>
-        <td class="py-2 px-4">
+        <!-- <td class="py-2 px-4">
           <button type="button" @click="handleClickDelete(index, item.id)">
             <svg class="w-6 h-6 text-red-500 hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
           </button>
-        </td>
+        </td> -->
       </template>
     </Table>
     <TailTable :count="count" :page="page" :per-page="perPage" @page="getSurveyList2($event)"></TailTable>

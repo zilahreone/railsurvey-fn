@@ -15,7 +15,7 @@ const isFetch = ref(false)
 const clone = JSON.parse(JSON.stringify(form))
 const isConfirm = ref(false)
 const modalActive = ref(false)
-const railSurvey = reactive(clone)
+let railSurvey = reactive(clone)
 const v$ = useVuelidate(validate(form, railSurvey), railSurvey, { $autoDirty: true })
 
 onMounted(() => {
@@ -113,3 +113,11 @@ const compSubmitForm = computed(() => {
   </Modal>
   <Modal create v-model="isConfirm" @confirm="submitForm()"></Modal>
 </template>
+<style>
+#parent {
+  /* width: 100%;
+  height: 100%; */
+  /* position: fixed; */
+  overflow:scroll;
+}
+</style>

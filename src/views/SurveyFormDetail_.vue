@@ -22,13 +22,12 @@ const isFetch = ref(false)
 const clone = JSON.parse(JSON.stringify(form))
 const isConfirm = ref(false)
 const modalActive = ref(false)
-const railSurvey = reactive(clone)
+let railSurvey = reactive(clone)
 const v$ = useVuelidate(validate(form, railSurvey), railSurvey, { $autoDirty: true })
 
 onMounted(() => {
   getSurveyID(route.params.id)
   // console.log('start');
-  isFetch.value = true
 })
 const getSurveyID = (id) => {
   let rs = {}
@@ -39,7 +38,7 @@ const getSurveyID = (id) => {
     if (resp.status === 200) {
       resp.json()
       .then((json) => {
-        console.log(json);
+        // console.log(json);
         rs = JSON.parse(JSON.stringify(json))
         // resolve(json)
         Object.keys(json.trackDamageSurvey).forEach((td) => {
@@ -89,6 +88,7 @@ const getSurveyID = (id) => {
         // console.log(railUploadImages);
         rs.generalSurvey.date = moment(rs.generalSurvey.date).format('YYYY-MM-DDTHH:mm')
         Object.assign(railSurvey, rs)
+        isFetch.value = true
       })
     }
   })
@@ -181,3 +181,11 @@ const compSubmitForm = computed(() => {
   </Modal>
   <Modal create v-model="isConfirm" @confirm="submitForm()"></Modal>
 </template>
+<style>
+#parent {
+  /* width: 100%;
+  height: 100%; */
+  /* position: fixed; */
+  overflow:scroll;
+}
+</style>
