@@ -1,6 +1,6 @@
 <script setup>
 import validate from '@/validate'
-import form from '@/template_form_.json'
+import form from '@/template_form.json'
 import { computed, onMounted, reactive, ref } from 'vue'
 import useVuelidate from '@vuelidate/core'
 import moment from 'moment-timezone'

@@ -10,8 +10,8 @@ const title =  process.env.VUE_APP_FOOTER_TITLE
     </span>
   </div> -->
   <footer>
-    <div class="mt-8 flex justify-center border-t">
-      <span class="mt-4 mb-8 block text-sm text-gray-500 sm:text-center dark:text-gray-400">© {{ d }} {{ title }}. All Rights Reserved.
+    <div class="mt-8 flex justify-center border-t bg-[#952124]">
+      <span class="mt-4 mb-8 block text-sm sm:text-center text-white dark:text-gray-400">© {{ d }} {{ title }}. All Rights Reserved.
       </span>
     </div>
   </footer>

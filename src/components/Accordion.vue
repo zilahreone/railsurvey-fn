@@ -17,7 +17,7 @@ const emit = defineEmits(['update:modelValue'])
 <template>
   <div>
     <h2 id="accordion-example-heading-1">
-      <button @click="emit('update:modelValue', !modelValue)" type="button" :class="`flex items-center justify-between w-full p-2.5 font-bold text-base text-left border border-${head ? 'b' : 't'}-0 border-gray-200 bg-purple ${head ? 'rounded-t-xl' : ''} bg-gray-${modelValue ? '300' : '200'} dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-800`" aria-expanded="true" aria-controls="accordion-example-body-1">
+      <button @click="emit('update:modelValue', !modelValue)" type="button" :class="`flex items-center justify-between w-full p-2.5 font-bold text-base text-left border-${head ? 'b' : 't'}-0 border-gray-200 ${head ? 'rounded-t-xl' : ''} ${modelValue ? 'bg-[#ffc451]' : 'bg-[#E6AA26]'} dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-[#E6AA26] dark:hover:bg-gray-800`" aria-expanded="true" aria-controls="accordion-example-body-1">
         <span>
           <slot name="header"></slot>
         </span>
