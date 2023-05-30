@@ -3,7 +3,7 @@ import validate from '@/validate'
 import form from '@/template_form_.json'
 import { computed, onMounted, reactive, ref } from 'vue'
 import useVuelidate from '@vuelidate/core'
-import moment from 'moment'
+import moment from 'moment-timezone'
 import SurveyForm from '@/components/SurveyForm'
 import Modal from '@/components/Modal.vue'
 import Cookies from 'js-cookie'
@@ -55,7 +55,7 @@ const submitForm = () => {
   api.uploadFiles('/api/rail-survey', formData, null).then((resp) => {
     // console.log('201');
     resp.json().then((json) => {
-      console.log(json)
+      // console.log(json)
     })
   }).catch((err) => {
     // navigator.serviceWorker.ready.then(registration => {
@@ -67,7 +67,8 @@ const submitForm = () => {
 }
 const compSubmitForm = computed(() => {
   let rtnRail = JSON.parse(JSON.stringify(railSurvey))
-  rtnRail.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm:ss')
+  const time = moment().utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z'
+  rtnRail.generalSurvey.date = time
   Object.keys(rtnRail.trackDamageSurvey).forEach(key => {
     if (['trackGeometryCondition', 'ballastCondition', 'sleeperCondition'].includes(key)) {
       // if (key === 'sleeperCondition') {
@@ -93,6 +94,7 @@ const compSubmitForm = computed(() => {
     }
   })
   rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename)
+  rtnRail.createdAt = time
   rtnRail.createdBy = Cookies.get('isAuthenticated')
   return rtnRail
 })

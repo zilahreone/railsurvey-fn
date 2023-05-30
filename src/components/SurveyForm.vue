@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, computed, watch, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import BorderRadioBtn from '@/components/BorderRadioBtn.vue'
@@ -59,24 +59,42 @@ const isActiveMA = ref(true)
 
 const general = ref(null)
 
+// const eWidth = ref(null)
+
 onMounted(() => {
+  // eWidth.value = document.getElementById('rsize').offsetWidth
+  window.addEventListener('resize', handleResize)
   // signaturePad.value.fromDataURL(railSurvey.signature)
   // signaturePad.value.signatureData = railSurvey.signature
   // const { isEmpty, data } = signaturePad.value.saveSignature()
+  // console.log(data);
   if (props.isPreview) {
     signaturePad.value.lockSignaturePad()
     if (railSurvey.signature) signaturePad.value.fromDataURL(railSurvey.signature)
   } else {
-    if (railSurvey.signature) signaturePad.value.fromDataURL(railSurvey.signature)
+    if (railSurvey.signature) {
+      signaturePad.value.clearSignature()
+      signaturePad.value.fromDataURL(railSurvey.signature)
+      // handleEmit({ name: 'signature', value: railSurvey.signature })
+      // signaturePad.value.fromDataURL(railSurvey.signature, {width: 100, height: 100})
+    }
   }
+  // handleEmit({ name: 'signature', value: data })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
 })
 
 // METHOD
+const handleResize = () => {
+  if (railSurvey.signature) signaturePad.value.fromDataURL(railSurvey.signature)
+}
 const undo = () => {
   signaturePad.value.undoSignature()
   const { isEmpty, data } = signaturePad.value.saveSignature()
   if (isEmpty) {
-    handleEmit({ name: 'signature', value: null })
+    handleEmit({ name: 'signature', value: data })
   }
 }
 const clear = () => {
@@ -102,6 +120,7 @@ const handleSelectZone = (value) => {
 // })
 const onBegin = () => {
   // console.log('=== Begin ===');
+  // signaturePad.value.resizeCanvas()
 }
 const onEnd = () => {
   // console.log('=== End ===');
@@ -459,13 +478,15 @@ const compDisableMaintenanceMethod = computed(() => {
       </template>
     </Accordion>
     <div class="mt-4 flex justify-center">
-      <div class="border border-solid p-0" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
+      <div id="rsize" class="border border-solid p-0" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
         <div v-if="!isPreview" class="flex justify-center">
           <button @click="undo" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-x rounded-bl-md text-sm px-5 py-1">Undo</button>
           <button @click="clear" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r text-sm px-5 py-1">Clear</button>
           <button @click="emit('onSubmit')" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r rounded-br-md text-sm px-5 py-1">Submit</button>
         </div>
-        <VueSignaturePad width="400px" height="120px" :options="{ onBegin, onEnd }" ref="signaturePad" />
+        <div :style="{ width: '400px', height: '120px' }">
+          <VueSignaturePad :options="{ onBegin, onEnd }" ref="signaturePad" />
+        </div>
         <!-- <img :src="railSurvey.signature" alt=""> -->
         <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
       </div>

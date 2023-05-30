@@ -74,6 +74,8 @@ const hadleDelete = (id) => {
       // resp.json().then((json) => {
       //   surveyList.value = json
       // })
+      getCount()
+      getSurveyList2()
     }
   }).catch((err) => {
   })
@@ -112,7 +114,6 @@ const compSurveyList = computed(() => {
   // console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
   return surveyList.value.map(sl => {
     return {
-      createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss'),
       id: sl.id,
       date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
       zone: variable.zone.filter((z) => z.value === sl.generalSurvey.zone)[0]?.key,
@@ -121,6 +122,7 @@ const compSurveyList = computed(() => {
       kilometers: sl.generalSurvey.kilometers ? sl.generalSurvey.kilometers : '-',
       createdBy: sl.createdBy,
       createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss')
+      // createdAt: sl.createdAt
     }
   })
 })
