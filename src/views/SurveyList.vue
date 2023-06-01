@@ -13,7 +13,7 @@ import TailTable from '@/components/TailTable.vue'
 const store = useStore()
 
 const surveyList = ref([])
-const count = ref(null)
+const count = ref(0)
 const perPage = ref(20)
 const page = ref(1)
 

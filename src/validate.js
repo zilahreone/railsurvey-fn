@@ -21,20 +21,19 @@ export default function (railForm, railSurvey) {
             if (['coordinates', 'nearby', 'railType', 'telegram'].includes(key2)) {
               if (key2 === 'coordinates') {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {
-                  rule[key1][key2][key3] = { required, decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0) }
+                  rule[key1][key2][key3] = { decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0) }
                 })
               } else if (key2 === 'railType') {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {
                   if (key3 === 'weight') {
-                    rule[key1][key2][key3] = { decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0) }
+                    rule[key1][key2][key3] = { integer }
                   } else {
                     rule[key1][key2][key3] = { required }
                   }
                 })
               } else if (key2 === 'telegram') {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {
-                  // rule[key1][key2][key3] = { required, custom: helpers.withMessage('Value must be pattern Number/Number', (value) => new RegExp('^[0-9]+\/[0-9]+$', 'g').test(value)) }
-                  rule[key1][key2][key3] = { required }
+                  rule[key1][key2][key3] = { required, custom: helpers.withMessage('Value must be pattern Number/Number', (value) => new RegExp('^[0-9]+\/[0-9]+$', 'g').test(value)) }
                 })
               } else {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {

@@ -46,7 +46,7 @@ const install = async () => {
   </template>
   </Banner>
   <Transition>
-    <div v-if="isLoad" class="flex flex-grow">
+    <div v-if="isLoad" class="flex flex-grow -mt-4 -mb-8">
       <div class="flex items-center text-center lg:text-left px-8 md:px-12 lg:w-1/2">
         <div>
           <h2 class="text-3xl font-semibold text-gray-800 md:text-4xl">บันทึกความเสียหายของ <span
@@ -67,7 +67,7 @@ const install = async () => {
           </div>
         </div>
       </div>
-      <div class="hidden lg:block lg:w-1/2" style="clip-path:polygon(15% 0, 100% 0%, 100% 100%, 0 100%)">
+      <div class="hidden lg:block lg:w-2/3 -my-0" style="clip-path:polygon(15% 0, 100% 0%, 100% 100%, 0 100%)">
         <img class="h-full object-cover" src="@/assets/photo-1580940583249-77175ce5f75a.webp">
       </div>
     </div>

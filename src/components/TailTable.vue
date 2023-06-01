@@ -36,8 +36,8 @@ onMounted (() => {
         <!-- -space-x-px -->
     <ul class="inline-flex items-center">
       <li>
-        <button @click="emit('page', page - 1)" :disabled="page * perPage <= count"
-          :class="`block px-3 py-2 ml-0 leading-tight text-gray-500 ${page * perPage <= count ? 'bg-gray-100' : 'bg-white hover:bg-gray-100 hover:text-gray-700'} border-l border-y border-gray-300 rounded-l-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`">
+        <button @click="emit('page', page - 1)" :disabled="perPage === page * perPage"
+          :class="`block px-3 py-2 ml-0 leading-tight text-gray-500 ${perPage === page * perPage ? 'bg-gray-100' : 'bg-white hover:bg-gray-100 hover:text-gray-700'} border-l border-y border-gray-300 rounded-l-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`">
           <span class="sr-only">Previous</span>
           <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg">
@@ -48,7 +48,7 @@ onMounted (() => {
         </button>
       </li>
       <li>
-        <input @blur="emitInput(parseInt($event.target.value))" type="number" :value="page" :min="1" :max="999" class="pl-6 py-2 bg-white border text-center text-sm border-gray-300 w-20" placeholder="page" @keyup.enter="emit('page', parseInt($event.target.value))">
+        <input @blur="emitInput(parseInt($event.target.value))" :disabled="perPage === page * perPage" type="number" :value="page" :min="1" :max="Math.ceil(count / page)" class="pl-6 py-2 bg-white border text-center text-sm border-gray-300 w-20" placeholder="page" @keyup.enter="emit('page', parseInt($event.target.value))">
         <!-- <a href="#"
           class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a> -->
       </li>

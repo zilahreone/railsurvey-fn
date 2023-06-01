@@ -57,7 +57,7 @@ const compWeight = computed(() => {
 <template>
   <div>
     <div class="relative">
-      <input :disabled="isPreview" @input="emit('update:modelValue', ($event.target.value))" :value="modelValue" :type="type" :class="error ? '_input_error': '_input'" :placeholder="placeholder">
+      <input :disabled="isPreview" @input="handleEmit($event.target.value)" :value="modelValue" :type="type" :class="error ? '_input_error': '_input'" :placeholder="placeholder">
       <button :disabled="isPreview" @click="isActive = !isActive" :class="`absolute ${type === 'number' ? 'right-8' : 'right-3'} bottom-2.5 text-sm text-gray-500`">
         <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor"
           viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

@@ -214,7 +214,7 @@ const onBegin = () => {
 const onEnd = () => {
   // console.log('=== End ===');
   const { isEmpty, data } = signaturePad.value.saveSignature()
-  console.log(isEmpty)
+  // console.log(isEmpty)
   if (!isEmpty) {
     // console.log(data);
     handleEmit({ name: 'signature', value: `${data}` })
@@ -439,15 +439,16 @@ const compStationItems = computed(() => {
                 <p v-if="v$.generalSurvey.railType.weight.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.weight.$errors[0].$message }}</p>
               </div>
             </div>
-            <div class="grid grid-cols-1">
-              <label class="_label-sm">เสาโทรเลข</label>
-              <div class="flex items-center gap-y-4 gap-x-2">
+            <div class="grid sm:grid-cols-1 gap-y-4 gap-x-2">
+              <div class="flex items-stretch">
                 <div class="w-full">
+                  <label class="_label-sm">เสาโทรเลข</label>
                   <input :disabled="isPreview" :value="railSurvey.generalSurvey.telegram.telegramBefore" name="generalSurvey.telegram.telegramBefore" @input="handleEmit($event.target)" type="text" id="telegramBefore" :class="v$.generalSurvey.telegram.telegramBefore.$error ? '_input_error' : '_input' " placeholder="00/00" required>
                   <p v-if="v$.generalSurvey.telegram.telegramBefore.$error" class="text-sm text-red-600">{{ v$.generalSurvey.telegram.telegramBefore.$errors[0].$message }}</p>
                 </div>
-                <label class="_label-sm mt-2">ระหว่าง</label>
+                <label class="_label-sm mt-9 mx-2">ระหว่าง</label>
                 <div class="w-full">
+                  <label class="_label-sm">&nbsp;</label>
                   <input :disabled="isPreview" :value="railSurvey.generalSurvey.telegram.telegramAfter" name="generalSurvey.telegram.telegramAfter" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.generalSurvey.telegram.telegramAfter.$error ? '_input_error' : '_input' " placeholder="00/00" required>
                   <p v-if="v$.generalSurvey.telegram.telegramAfter.$error" class="text-sm text-red-600">{{ v$.generalSurvey.telegram.telegramAfter.$errors[0].$message }}</p>
                 </div>
@@ -488,7 +489,7 @@ const compStationItems = computed(() => {
             </div>
             <p v-if="v$.railDamageSurvey.situation.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.situation.$errors[0].$message }}</p>
           </div>
-          <!-- <div>
+          <div>
             <div class="grid sm:grid-cols-2 lg:grid-cols-2">
               <div class="flex flex-col justify-center gap-y-2">
                 <img src="@/assets/rail/rail_1.jpg" :alt="''" class="object-contain">
@@ -503,7 +504,7 @@ const compStationItems = computed(() => {
                 <VueSignaturePad ref="signaturePadRail_3"/>
               </div>
             </div>
-          </div> -->
+          </div>
           <div>
             <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง (Location)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
@@ -585,7 +586,7 @@ const compStationItems = computed(() => {
             </div>
             <p v-if="v$.trackDamageSurvey.sleeperCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.sleeperCondition.isPerfect.$errors[0].$message }}</p>
           </div>
-          <div v-if="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect && railSurvey.trackDamageSurvey.sleeperCondition.isPerfect === 'dilapidated'">
+          <div v-if="railSurvey.trackDamageSurvey.sleeperCondition.isPerfect && railSurvey.trackDamageSurvey.sleeperCondition.isPerfect === 'defective'">
             <label class="_label-lg">รูปแบบ Sleeper ที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-3 lg:grid-cols-4 gap-2">
               <SelectBtn :is-preview="isPreview" type="checkbox"  :error="v$.trackDamageSurvey.sleeperCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.sleeperCondition.condition" name="sleeperConditionFail" :items="variable.sleeperCondition" :disables="compDisableSleeperCondition"></SelectBtn>
