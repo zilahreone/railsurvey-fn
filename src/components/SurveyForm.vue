@@ -12,6 +12,7 @@ import DarkModeToggle from '@/components/DarkModeToggle.vue'
 import RadioImageBtn from '@/components/RadioImageBtn.vue'
 import Accordion from '@/components/Accordion.vue'
 import UploadFiles from '@/components/UploadFiles.vue'
+import Signature from '@/components/Signature.vue'
 // import { Loader } from '@googlemaps/js-api-loader'
 import variable from '@/variable.json'
 import api from '@/services'
@@ -20,6 +21,7 @@ import { nullableTypeAnnotation } from '@babel/types'
 import { Buffer } from 'buffer'
 import Dropdown from './Dropdown.vue'
 import InputIcon from './InputIcon.vue'
+
 
 const store = useStore()
 const router = useRouter()
@@ -475,7 +477,7 @@ const compStationItems = computed(() => {
     <Accordion v-model="isActiveRail">
       <template #header>การสำรวจความเสียหายของราง</template>
       <template #body>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
           <div>
             <!-- {{ v$.railDamageSurvey.uploadImages }} -->
             <UploadFiles :is-preview="isPreview || created" v-model="railSurvey.railDamageSurvey.uploadImages" id="railDamageSurvey" :errors="v$.railDamageSurvey.uploadImages">
@@ -490,21 +492,59 @@ const compStationItems = computed(() => {
             <p v-if="v$.railDamageSurvey.situation.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.situation.$errors[0].$message }}</p>
           </div>
           <div>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-2">
-              <div class="flex flex-col justify-center gap-y-2">
-                <img src="@/assets/rail/rail_1.jpg" :alt="''" class="object-contain">
-                <img src="@/assets/rail/rail_2.jpg" :alt="''" class="object-contain h-32">
+            <div class="flex flex-row justify-center xl:justify-start flex-wrap gap-1">
+              <div class="flex flex-col gap-1">
+                <Signature ref="rail_1" width="700px" height="350px" pen-color="#E74C3C"
+                  :style="{backgroundImage: `url(${require('@/assets/rail/rail_1.jpg')})`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'center top'
+                  }">
+                </Signature>
+                <Signature ref="rail_2" width="700px" height="350px" pen-color="#1ABC9C"
+                  :style="{backgroundImage: `url(${require('@/assets/rail/rail_2.jpg')})`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'center top'
+                  }">
+                </Signature>
               </div>
-              <div ref="getWH" :style="{
-                backgroundImage: `url(${require('@/assets/rail/rail_3.jpg')})`,
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: 'contain',
-                backgroundPosition: 'center'
-              }">
-                <VueSignaturePad ref="signaturePadRail_3"/>
+              <div class="flex">
+                <Signature ref="rail_3" width="450px" height="600px" pen-color="#3498DB"
+                  :style="{backgroundImage: `url(${require('@/assets/rail/rail_3.jpg')})`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'center top'
+                  }">
+                </Signature>
               </div>
             </div>
           </div>
+          <!-- <div>
+            <div class="flex flex-row flex-wrap gap-1">
+              <Signature ref="rail_1" width="700px" height="350px" pen-color="#E74C3C"
+                :style="{backgroundImage: `url(${require('@/assets/rail/rail_1.jpg')})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center top'
+                }">
+              </Signature>
+              <Signature ref="rail_2" width="700px" height="350px" pen-color="#1ABC9C"
+                :style="{backgroundImage: `url(${require('@/assets/rail/rail_2.jpg')})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center top'
+                }">
+              </Signature>
+              <Signature ref="rail_3" width="300px" height="350px" pen-color="#3498DB"
+                :style="{backgroundImage: `url(${require('@/assets/rail/rail_3.jpg')})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center top'
+                }">
+              </Signature>
+            </div>
+          </div> -->
           <div>
             <label class="_label-lg">ตำแหน่งที่เกิดความเสียหายของราง (Location)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
@@ -661,7 +701,14 @@ const compStationItems = computed(() => {
         </div>
       </template>
     </Accordion>
-    <div class="mt-4 flex justify-center">
+    <div class="flex flex-none justify-center pt-2" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
+      <Signature v-model="railSurvey.signature" ref="rail_3" width="400px" height="120px">
+        <template #default>
+          <label class="pb-1 text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
+        </template>
+      </Signature>
+    </div>
+    <!-- <div class="mt-4 flex justify-center">
       <div class="border border-solid p-0" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
         <div v-if="!isPreview" class="flex justify-center">
           <button @click="undo" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-x rounded-bl-md text-sm px-5 py-1">Undo</button>
@@ -669,10 +716,9 @@ const compStationItems = computed(() => {
           <button @click="emit('onSubmit')" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r rounded-br-md text-sm px-5 py-1">Submit</button>
         </div>
         <VueSignaturePad width="400px" height="120px" :options="{ onBegin, onEnd }" ref="signaturePad" />
-        <!-- <img :src="railSurvey.signature" alt=""> -->
         <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
       </div>
-    </div>
+    </div> -->
     <!-- <pre>
       {{ v$.general }}
       {{ v$.trackDamageSurvey.$error }}
