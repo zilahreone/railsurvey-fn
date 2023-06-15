@@ -9,7 +9,9 @@ import Modal from '@/components/Modal.vue'
 import Cookies from 'js-cookie'
 import api from '@/services'
 import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const router = useRouter()
 const isFetch = ref(false)
 const clone = JSON.parse(JSON.stringify(form))
@@ -19,6 +21,7 @@ let railSurvey = reactive(clone)
 const v$ = useVuelidate(validate(form, railSurvey), railSurvey, { $autoDirty: true })
 
 onMounted(() => {
+  console.log(moment().utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z');
   // v$.value.$reset()
   // isFetch.value = true
   railSurvey.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm')
@@ -36,6 +39,7 @@ onMounted(() => {
 })
 const handleSubmit = async () => {
   const isValid = await v$.value.$validate()
+  console.log(isValid)
   if (isValid) {
     railSurvey.generalSurvey.date = moment(new Date()).format('YYYY-MM-DDTHH:mm')
     modalActive.value = true
@@ -53,49 +57,56 @@ const submitForm = () => {
   formData.append('form', JSON.stringify(compSubmitForm.value))
   // api.uploadFils('/api/uploads', formData, null).then((resp) => {
   api.uploadFiles('/api/rail-survey', formData, null).then((resp) => {
-    // console.log('201');
-    resp.json().then((json) => {
-      // console.log(json)
-    })
+    console.log(resp.status)
+    if (resp.status === 201) {
+      toast.success('ส่งแบบฟอร์มสำเร็จ')
+      router.push('/survey-list')
+    }
   }).catch((err) => {
+    if(navigator.onLine){
+      toast.error('เกิดความผิดพลาดในการส่งแบบฟอร์ม')
+    } else {
+      toast('ส่งแบบฟอร์มออฟไลน์สำเร็จ')
+    }
+    router.push('/survey-list')
     // navigator.serviceWorker.ready.then(registration => {
     //   console.log('registration')
     //   registration.sync.register('some-unique-tag')
     // }).catch(console.log())
   })
-  router.push('/survey-list')
 }
 const compSubmitForm = computed(() => {
   let rtnRail = JSON.parse(JSON.stringify(railSurvey))
-  const time = moment().utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z'
-  rtnRail.generalSurvey.date = time
+  // const time = moment().utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z'
+  // rtnRail.generalSurvey.date = time
   Object.keys(rtnRail.trackDamageSurvey).forEach(key => {
     if (['trackGeometryCondition', 'ballastCondition', 'sleeperCondition'].includes(key)) {
-      // if (key === 'sleeperCondition') {
-      //   if (rtnRail.trackDamageSurvey[key].isPerfect === 'dilapidated') {
-      //     rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
-      //   } else {
-      //     rtnRail.trackDamageSurvey[key] = [rtnRail.trackDamageSurvey[key].isPerfect]
-      //   }
-      // } else {
-      //   if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
-      //     rtnRail.trackDamageSurvey[key] = ['perfect']
-      //   } else {
-      //     rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
-      //   }
-      // }
-      if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
-        rtnRail.trackDamageSurvey[key] = ['perfect']
+      if (key === 'sleeperCondition') {
+        if (rtnRail.trackDamageSurvey[key].isPerfect === 'defective') {
+          rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+        } else {
+          rtnRail.trackDamageSurvey[key] = ['perfect']
+        }
       } else {
-        rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+        if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
+          rtnRail.trackDamageSurvey[key] = ['perfect']
+        } else {
+          rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+        }
       }
+      // if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
+      //   rtnRail.trackDamageSurvey[key] = ['perfect']
+      // } else {
+      //   rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+      // }
     } else if (['uploadImages'].includes(key)) {
       rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.filename)
     }
   })
   rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename)
   rtnRail.createdAt = time
-  rtnRail.createdBy = Cookies.get('isAuthenticated')
+  // rtnRail.createdBy = Cookies.get('isAuthenticated')
+  rtnRail.createdBy = '64eea302-a74b-498a-8bd6-5e040e90166b'
   return rtnRail
 })
 </script>
@@ -116,10 +127,10 @@ const compSubmitForm = computed(() => {
   <Modal create v-model="isConfirm" @confirm="submitForm()"></Modal>
 </template>
 <style>
-#parent {
-  /* width: 100%;
-  height: 100%; */
-  /* position: fixed; */
+/* #parent {
+  width: 100%;
+  height: 100%;
+  position: fixed;
   overflow:scroll;
-}
+} */
 </style>

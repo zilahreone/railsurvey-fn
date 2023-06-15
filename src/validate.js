@@ -17,8 +17,8 @@ export default function (railForm, railSurvey) {
       if (key1 === 'generalSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
           rule[key1][key2] = {}
-          if (key2 !== 'kilometers') {
-            if (['coordinates', 'nearby', 'railType', 'telegram'].includes(key2)) {
+          if (key2 !== 'kilometer') {
+            if (['coordinates', 'nearby', 'railType', 'telegram'].includes(key2)) { 
               if (key2 === 'coordinates') {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {
                   rule[key1][key2][key3] = { decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0) }
@@ -26,7 +26,7 @@ export default function (railForm, railSurvey) {
               } else if (key2 === 'railType') {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {
                   if (key3 === 'weight') {
-                    rule[key1][key2][key3] = { integer }
+                    rule[key1][key2][key3] = { required, integer }
                   } else {
                     rule[key1][key2][key3] = { required }
                   }
@@ -77,7 +77,7 @@ export default function (railForm, railSurvey) {
             rule[key1][key2] = {}
             Object.keys(railForm[key1][key2]).forEach((key3) => {
               if (key3 === 'condition') {
-                rule[key1][key2][key3] = { isPerfect: requiredIf(() => railSurvey[key1][key2]['isPerfect'] === 'imperfect' || railSurvey[key1][key2]['isPerfect'] === 'dilapidated'), minLength: minLength(1) }
+                rule[key1][key2][key3] = { isPerfect: requiredIf(() => railSurvey[key1][key2]['isPerfect'] === 'imperfect' || railSurvey[key1][key2]['isPerfect'] === 'defective'), minLength: minLength(1) }
               } else {
                 rule[key1][key2][key3] = { required }
               }
@@ -104,7 +104,7 @@ export default function (railForm, railSurvey) {
                 }
               })
             } else if (key2 === 'maintenanceMethod') {
-              rule[key1][key2] = { required, minLength: minLength(1) }
+              // rule[key1][key2] = { required, minLength: minLength(1) }
             } else {
               rule[key1][key2] = { required }
             }

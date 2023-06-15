@@ -30,8 +30,8 @@ onMounted (() => {
 </script>
 <template>
   <nav class="flex items-center justify-between pt-4" aria-label="Table navigation">
-    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Showing <span
-        class="font-semibold text-gray-900 dark:text-white">{{ count < perPage ? `1-${count}` : `1-${perPage}` }}</span> of <span
+    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">แสดง <span
+        class="font-semibold text-gray-900 dark:text-white">{{ count < perPage ? `1-${count}` : `1-${perPage}` }}</span> จาก <span
         class="font-semibold text-gray-900 dark:text-white">{{ count }}</span></span>
         <!-- -space-x-px -->
     <ul class="inline-flex items-center">

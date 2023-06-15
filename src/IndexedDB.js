@@ -14,33 +14,33 @@ export default {
       request.onerror = (event) => {
         console.error(`Database error: ${event.target.errorCode}`)
       };
-  
+
       request.onsuccess = async (event) => {
         // console.log('success');
         // add implementation here
         const db = event.target.result;
-        this.insertContact(db, data)
-  
-        // const getId = await this.getContactById(db, data.id)
-        // // console.log(getId);
+        // this.insertContact(db, data)
+
+        const getId = await this.getContactById(db, data.id)
+        console.log(getId);
         // if (!getId) {
         // }
       }
-  
+
       // create the Contacts object store and indexes
       request.onupgradeneeded = (event) => {
         console.log('upgrade');
         let db = event.target.result;
-  
+
         // create the Contacts object store 
         // with auto-increment id
         let objectStore = db.createObjectStore('Rail-Survey', {
           autoIncrement: true
           // keyPath: 'id'
         })
-        let index = objectStore.createIndex('email', 'email', {
-          unique: true
-        })
+        // let index = objectStore.createIndex('id', 'id', {
+        //   unique: true
+        // })
       }
     }
   },
@@ -205,7 +205,57 @@ export default {
     }
 
   },
+  getAllQueue(db_name, version) {
+    const request = indexedDB.open(db_name, version)
 
+    request.onerror = (event) => {
+      console.error(`Database error: ${event.target.errorCode}`)
+    };
+
+    request.onsuccess = (event) => {
+      // console.log('success');
+      // add implementation here
+      const db = event.target.result;
+
+      // this.insertContact(db, data)
+      const request = db.transaction('requests')
+        .objectStore('requests')
+        .getAll();
+
+      request.onsuccess = () => {
+        const students = request.result;
+
+        console.log('Got all the students');
+        console.table(students)
+
+        return students;
+      }
+
+      request.onerror = (err) => {
+        console.error(`Error to get all students: ${err}`)
+      }
+    }
+
+  },
+
+  getAllStudents() {
+    const request = db.transaction('students')
+      .objectStore('students')
+      .getAll();
+
+    request.onsuccess = () => {
+      const students = request.result;
+
+      console.log('Got all the students');
+      console.table(students)
+
+      return students;
+    }
+
+    request.onerror = (err) => {
+      console.error(`Error to get all students: ${err}`)
+    }
+  },
   deleteContact(db, id) {
     // create a new transaction
     const txn = db.transaction('Rail-Survey', 'readwrite');

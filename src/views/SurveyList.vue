@@ -5,14 +5,16 @@ import variable from '@/variable.json'
 import { useStore } from 'vuex'
 import { onMounted, ref, computed } from 'vue'
 import api from '@/services'
-import IndexDB from '@/IndexedDB'
 import moment from 'moment'
 import tz from 'moment-timezone'
 import TailTable from '@/components/TailTable.vue'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const store = useStore()
 
 const surveyList = ref([])
+const indexedDBList = ref([])
 const count = ref(0)
 const perPage = ref(20)
 const page = ref(1)
@@ -20,13 +22,14 @@ const page = ref(1)
 onMounted (() => {
   getCount()
   getSurveyList2()
+  getOfflineForm()
+  // formData()
 //   if(navigator.onLine){
 //   console.log('online');
 //  } else {
 //   console.log('offline');
 //  }
 })
-
 const getSurveyList2 = (p) => {
   if (p) page.value = p
   api.get(`/api/rail-survey/?offset=${(perPage.value * page.value) - perPage.value}`, null).then((resp) => {
@@ -36,10 +39,85 @@ const getSurveyList2 = (p) => {
       })
     }
   }).catch((err) => {
+    if(navigator.onLine){
+      toast.error('เกิดความผิดพลาดกับระบบ')
+    } else {
+      toast.warning('ระบบอยู่ในสถานะออฟไลน์')
+    }
   })
   // store.state.token
 }
-
+const generateId = (length) => {
+  let result = ''
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const charactersLength = characters.length
+  let counter = 0
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength))
+    counter += 1
+  }
+  return result
+}
+const getOfflineForm = () => {
+  const dbName = 'workbox-background-sync'
+  const dbVersion = 3
+  const storeName = 'requests'
+  let items = []
+  const responseOptions = { status: 200, statusText: 'OK', headers: { 'content-type': 'application/json' } }
+  if (!window.indexedDB) {
+    console.warn(`Your browser doesn't support IndexedDB`)
+  } else {
+    indexedDB.databases().then(dbs => {
+      dbs.forEach(db => {
+        if (db.name === dbName) {
+          const dbOpen = indexedDB.open(dbName, dbVersion)
+          dbOpen.onsuccess = (event) => {
+            const db = event.target.result
+            const getAll = db.transaction(storeName).objectStore(storeName).getAll();
+            getAll.onsuccess = () => {
+              const result = getAll.result;
+              result?.forEach((request, index) => {
+                const regex = /{.*}/gm
+                const body = request.requestData?.body
+                if (body) {
+                  if (('TextDecoder' in window)) {
+                    const enc = new TextDecoder('utf-8')
+                    let parse = JSON.parse(enc.decode(body).match(regex)[0])
+                    parse = Object.assign({}, parse, { createdBy: { id: parse.createdBy }})
+                    console.log(parse);
+                    items.push(parse)
+                  }
+                }
+              })
+              caches.keys().then((cacheNames) => {
+                cacheNames.forEach(cacheName => {
+                  console.log(`cache name: ${cacheName}`);
+                  if (cacheName === 'rail-cache') {
+                    caches.open(cacheName).then((cache) => {
+                      console.log(`items: ${items}`);
+                      items.forEach((item) => {
+                        if (item.id) {
+                          cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${item.id}`, new Response(JSON.stringify(item), responseOptions))
+                        } else {
+                          const id = generateId(6)
+                          cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${id}`, new Response(JSON.stringify({id: id, ...item}), responseOptions))
+                          // cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${generateId(6)}`, new Response(JSON.stringify(item), responseOptions))
+                        }
+                      })
+                    })
+                  }
+                })
+              })
+            }
+            getAll.onerror = (err) => {
+              console.error(`Error to get all ${err}`)
+            }
+          }
+        }
+      })
+    })
+  }
+}
 const getCount = () => {
   api.get('/api/rail-survey/count', null).then((resp) => {
     if (resp.status === 200) {
@@ -50,7 +128,6 @@ const getCount = () => {
   }).catch((err) => {
   })
 }
-
 const getSurveyList = () => {
   // IndexDB.getAllContacts('railway-survey', 1, function (items) {
   //   console.log(items);
@@ -63,11 +140,9 @@ const getSurveyList = () => {
     })
     .catch((err) => console.error(err))
 }
-
 const handleClickDelete = (index, id) => {
   hadleDelete(id)
 }
-
 const hadleDelete = (id) => {
   api.delete(`/api/rail-survey/${id}`, store.state.token).then((resp) => {
     if (resp.status === 200) {
@@ -80,55 +155,27 @@ const hadleDelete = (id) => {
   }).catch((err) => {
   })
 }
-
-const handleConvertDate = (isoDateString) => {
-  return `${new Date(isoDateString).getUTCDate()}-${new Date(isoDateString).getUTCMonth()}-${new Date(isoDateString).getFullYear()}`
-}
-  // console.log(IndexDB.getAllStudents('railway-survey', 1), cb);
-  // list.value = (IndexDB.getAllStudents('railway-survey', 1))
-  // console.log();
-  // const asd = IndexDB.getAllContacts('railway-survey', 1)
-  // IndexDB.getAllContacts('railway-survey', 1).forEach(element => {
-  //   console.log(element);
-  // });
-  // api.get('/', null).then((resp) => {
-  //   if (resp.status === 200) {
-  //   }
-  // }).catch((error) => {
-  //   console.log('offline');
-  // })
-
-const convertUTCDateToLocalDate = (isoDateString) => {
-  // var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
-  // console.log(newDate);
-  // var offset = date.getTimezoneOffset() / 60;
-  // var hours = date.getHours();
-  // newDate.setHours(hours - offset);
-  // return newDate;
-  const offset = new Date().getTimezoneOffset() / -60
-  const timestamp = new Date(isoDateString).getTime() + (offset * 60 * 1000)
-  console.log(new Date(isoDateString));
-}
-
 const compSurveyList = computed(() => {
   // console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
   return surveyList.value.map(sl => {
     return {
       id: sl.id,
-      date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
+      date: sl.generalSurvey.date,
+      // date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
       zone: variable.zone.filter((z) => z.value === sl.generalSurvey.zone)[0]?.key,
       zoneBe: variable.zone.filter((z) => z.value === sl.generalSurvey.nearby.stationBefore)[0]?.key,
       zoneAf: variable.zone.filter((z) => z.value === sl.generalSurvey.nearby.stationAfter)[0]?.key,
       kilometers: sl.generalSurvey.kilometers ? sl.generalSurvey.kilometers : '-',
       createdBy: sl.createdBy,
-      createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss')
-      // createdAt: sl.createdAt
+      // createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss')
+      createdAt: sl.createdAt
     }
   })
 })
 
 </script>
 <template>
+  {{ indexedDBList }}
   <!-- {{ surveyList.map(l => l.createdAt) }} -->
   <div class="container h-full">
     <!-- <pre>{{ surveyList }}</pre> -->
@@ -168,13 +215,14 @@ const compSurveyList = computed(() => {
         <td class="py-2 px-4">
           <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.createdAt }}</router-link>
         </td>
-        <!-- <td class="py-2 px-4">
+        <td class="py-2 px-4">
           <button type="button" @click="handleClickDelete(index, item.id)">
             <svg class="w-6 h-6 text-red-500 hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
           </button>
-        </td> -->
+        </td>
       </template>
     </Table>
     <TailTable :count="count" :page="page" :per-page="perPage" @page="getSurveyList2($event)"></TailTable>
+    <button @click="formData()">FORMDATA</button>
   </div>
 </template>

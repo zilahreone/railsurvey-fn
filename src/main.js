@@ -9,7 +9,32 @@ import api from '@/services'
 import IndexedDB from '@/IndexedDB'
 import kcJSON from '@/keycloak.json'
 import Keycloak from 'keycloak-js'
+import Toast from "vue-toastification"
+import "vue-toastification/dist/index.css"
+
 const app = createApp(App)
+const options = {
+  position: "bottom-right",
+  timeout: 3000,
+  closeOnClick: true,
+  pauseOnFocusLoss: true,
+  pauseOnHover: true,
+  draggable: true,
+  draggablePercent: 0.6,
+  showCloseButtonOnHover: true,
+  hideProgressBar: false,
+  closeButton: "button",
+  icon: true,
+  // icon: {
+  //   iconClass: "undefined",
+  //   iconChildren: "",
+  //   iconTag: "i"
+  // },
+  rtl: false,
+  transition: "Vue-Toastification__fade",
+  maxToasts: 20,
+  newestOnTop: false
+}
 
 // REGISTER SERVICEWORKER
 // if ("serviceWorker" in navigator) {
@@ -33,7 +58,7 @@ const app = createApp(App)
 // } else {
 //   console.error("Service workers are not supported.");
 // }
-IndexedDB.insertData('name', 1, {})
+// IndexedDB.insertData('name', 1, {})
 // CHECK SUPPORT INDEXED_DB
 // if (!self.indexedDB) {
 //   console.warn(`Your browser doesn't support IndexedDB`)
@@ -114,5 +139,6 @@ IndexedDB.insertData('name', 1, {})
 // console.log(local.key(0))
 app.use(router)
 app.use(store)
+app.use(Toast, options)
 app.component('VueSignaturePad', VueSignaturePad)
 app.mount('#app')

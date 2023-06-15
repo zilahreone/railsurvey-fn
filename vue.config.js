@@ -68,8 +68,9 @@ module.exports = defineConfig({
           handler: 'NetworkFirst',
           method: 'POST',
           options: {
+            cacheName: 'post-cache',
             backgroundSync: {
-              name: 'my-queue-asier',
+              name: 'rail-post-queue',
               options: {
                 maxRetentionTime: 60 * 60
               }
@@ -79,7 +80,24 @@ module.exports = defineConfig({
         {
           urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/api`),
           handler: 'NetworkFirst',
-          method: 'GET'
+          method: 'PUT',
+          options: {
+            cacheName: 'put-cache',
+            backgroundSync: {
+              name: 'rail-put-queue',
+              options: {
+                maxRetentionTime: 60 * 60
+              }
+            }
+          }
+        },
+        {
+          urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/api`),
+          handler: 'NetworkFirst',
+          method: 'GET',
+          options: {
+            cacheName: 'rail-cache'
+          }
         }
       ]
     }

@@ -11,9 +11,11 @@ import moment from 'moment-timezone'
 import Modal from '@/components/Modal.vue'
 import Cookies from 'js-cookie';
 import validate from '@/validate'
-import form from '@/template_form_.json'
+import form from '@/template_form.json'
 // import variable from '@/variable.json'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const store = useStore()
 const router = useRouter()
 const route = useRoute()
@@ -30,72 +32,61 @@ onMounted(() => {
   // console.log('start');
 })
 const getSurveyID = (id) => {
-  let rs = {}
-  let railUploadImages = []
-  let trackUploadImages = []
-  // console.log('a');
   api.get(`/api/rail-survey/${id}`, store.state.token).then((resp) => {
     if (resp.status === 200) {
-      resp.json()
-      .then((json) => {
-        // console.log(json);
-        // console.log(new Date(json.generalSurvey.date));
-        // console.log(moment(json.generalSurvey.date).format('YYYY-MM-DDTHH:mm'));
-        // console.log(moment.tz(json.generalSurvey.date, 'Asia/Bangkok').utc().format('YYYY-MM-DDTHH:mm'));
-        rs = JSON.parse(JSON.stringify(json))
-        // resolve(json)
-        Object.keys(json.trackDamageSurvey).forEach((td) => {
-          if (['ballastCondition', 'sleeperCondition', 'trackGeometryCondition'].includes(td)) {
-            json.trackDamageSurvey[td].forEach(element => {
-              if (element === 'perfect') {
-                rs.trackDamageSurvey[td] = {
-                  isPerfect: element,
+      resp.json().then((json) => {
+        Object.assign(railSurvey, json)
+        railSurvey.generalSurvey.date = moment(json.generalSurvey.date).format('YYYY-MM-DDTHH:mm')
+        Object.keys(railSurvey.trackDamageSurvey).forEach(key => {
+          if (['ballastCondition', 'sleeperCondition', 'trackGeometryCondition'].includes(key)) {
+            if (key === 'sleeperCondition') {
+              if (railSurvey.trackDamageSurvey[key].length === 1 && ['good', 'moderately'].includes(railSurvey.trackDamageSurvey[key][0])) {
+                railSurvey.trackDamageSurvey[key] = {
+                  isPerfect: railSurvey.trackDamageSurvey[key][0],
                   condition: []
                 }
               } else {
-                rs.trackDamageSurvey[td] = {
-                  isPerfect: 'imperfect',
-                  condition: json.trackDamageSurvey[td]
+                railSurvey.trackDamageSurvey[key] = {
+                  isPerfect: 'defective',
+                  condition: railSurvey.trackDamageSurvey[key]
                 }
               }
-            })
-          } else if (td === 'uploadImages') {
-            // console.log('b');
-            json.trackDamageSurvey[td].forEach((image, index) => {
-              // const image = JSON.parse(image.replace(/\|/g, ', '))
-              // console.log(image);
-              // console.log(image.replace(/\|/g, ', '))
-              // console.log('b', image.filename);
-              // if (typeof image === 'object' ) {
-              // }
-              // let blob = await fetch(`${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${image.filename}`).then(r => r.blob())
-              trackUploadImages.push({
-                originalname: typeof image === 'object' ? image.filename : image,
-                originalPath: `${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${typeof image === 'object' ? image.filename : image}`,
-                size: null
+            } else {
+              if (railSurvey.trackDamageSurvey[key].length === 1 && railSurvey.trackDamageSurvey[key][0] === 'perfect') {
+                railSurvey.trackDamageSurvey[key] = {
+                  isPerfect: 'perfect',
+                  condition: []
+                }
+              } else {
+                railSurvey.trackDamageSurvey[key] = {
+                  isPerfect: 'imperfect',
+                  condition: railSurvey.trackDamageSurvey[key]
+                }
+              }
+            }
+          } else if (key === 'uploadImages') {
+            let images = []
+            railSurvey.trackDamageSurvey[key].forEach((image, index) => {
+              images.push({
+                originalname: image,
+                originalPath: `${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${image}`
               })
             })
-            // console.log('b end');
-            rs.trackDamageSurvey.uploadImages = trackUploadImages
+            railSurvey.trackDamageSurvey[key] = images
           }
         })
-        json.railDamageSurvey.uploadImages.forEach((image, index) => {
-          // const image = JSON.parse(image.replace(/\|/g, ', '))
-          // console.log('c', image.filename);
-          // if (image.filename) {
-          // }
-          // let blob = await fetch(`${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${image.filename}`).then(r => r.blob())
-          railUploadImages.push({
-            originalname: typeof image === 'object' ? image.filename : image,
-            originalPath: `${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${typeof image === 'object' ? image.filename : image}`,
-            size: null
-          })
+        Object.keys(railSurvey.railDamageSurvey).forEach(key => {
+          if (key === 'uploadImages') {
+            let images = []
+            railSurvey.railDamageSurvey[key].forEach((image, index) => {
+              images.push({
+                originalname: image,
+                originalPath: `${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${image}`
+              })
+            })
+            railSurvey.railDamageSurvey[key] = images
+          }
         })
-        rs.railDamageSurvey.uploadImages = railUploadImages
-        // console.log(railUploadImages);
-        rs.generalSurvey.date = moment(json.generalSurvey.date).format('YYYY-MM-DDTHH:mm')
-        // rs.createdAt
-        Object.assign(railSurvey, rs)
         isFetch.value = true
       })
     }
@@ -122,11 +113,19 @@ const submitForm = () => {
   formData.append('form', JSON.stringify(compSubmitForm.value))
   // console.log(compSubmitForm.value);
   api.putUploadFiles(`/api/rail-survey/${railSurvey.id}`, formData, null).then((resp) => {
-    if (resp.status === 201) {
+    console.log(resp.status);
+    if (resp.status === 200) {
       console.log('update success ;)')
+      toast.success('ส่งแบบฟอร์มสำเร็จ')
       router.push('/survey-list')
     }
   }).catch(() => {
+    if(navigator.onLine){
+      toast.error('เกิดความผิดพลาดในการส่งแบบฟอร์ม')
+    } else {
+      toast('ส่งแบบฟอร์มออฟไลน์สำเร็จ')
+    }
+    router.push('/survey-list')
     // navigator.serviceWorker.ready.then(registration => {
     //   console.log('registration')
     //   registration.sync.register('some-unique-tag')
@@ -135,52 +134,42 @@ const submitForm = () => {
 }
 const compSubmitForm = computed(() => {
   let rtnRail = JSON.parse(JSON.stringify(railSurvey))
-  const time = moment(rtnRail.generalSurvey.date).utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z'
+  const date = moment(rtnRail.generalSurvey.date).utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z'
+  rtnRail.generalSurvey.date = date
   Object.keys(rtnRail.trackDamageSurvey).forEach(key => {
     if (['trackGeometryCondition', 'ballastCondition', 'sleeperCondition'].includes(key)) {
-      if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
-        rtnRail.trackDamageSurvey[key] = ['perfect']
+      if (key === 'sleeperCondition') {
+        if (rtnRail.trackDamageSurvey[key].isPerfect === 'defective') {
+          rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+        } else {
+          rtnRail.trackDamageSurvey[key] = [rtnRail.trackDamageSurvey[key].isPerfect]
+        }
       } else {
-        rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+        if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
+          rtnRail.trackDamageSurvey[key] = ['perfect']
+        } else {
+          rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+        }
       }
-    } else if (key === 'uploadImages') {
-      rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.filename || image.originalname)
+    } else if (['uploadImages'].includes(key)) {
+      rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.filename)
     }
   })
-
-  // Object.keys(rtnRail.trackDamageSurvey).forEach(key => {
-  //   if (['trackGeometryCondition', 'ballastCondition', 'sleeperCondition'].includes(key)) {
-  //     if (key === 'sleeperCondition') {
-  //       if (rtnRail.trackDamageSurvey[key].isPerfect === 'dilapidated') {
-  //         rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
-  //       } else {
-  //         rtnRail.trackDamageSurvey[key] = [rtnRail.trackDamageSurvey[key].isPerfect]
-  //       }
-  //     } else {
-  //       if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
-  //         rtnRail.trackDamageSurvey[key] = ['perfect']
-  //       } else {
-  //         rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
-  //       }
-  //     }
-  //   } else if (['uploadImages'].includes(key)) {
-  //     rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.originalname)
-  //   }
-  // })
-  rtnRail.generalSurvey.date = time
-  rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename || image.originalname)
-  rtnRail.createdAt = moment().utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z'
-  // rtnRail.createdBy = Cookies.get('isAuthenticated')
+  rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename)
+  rtnRail.createdBy = rtnRail.createdBy.id
+  rtnRail.modifiedBy = '64eea302-a74b-498a-8bd6-5e040e90166b'
+  delete rtnRail.modifiedAt
+  // rtnRail.createdAt = moment().utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z'
   return rtnRail
 })
 
 </script>
 <template>
-  <SurveyForm v-if="isFetch" :is-preview="modalActive" :id="modalActive ? 'parent' : ''" ref="surveyForm"
+  <SurveyForm v-if="!modalActive && isFetch" :is-preview="modalActive" :id="modalActive ? 'parent' : ''" ref="surveyForm"
     v-model="railSurvey" :validate="v$" @on-submit="handleSubmit()"></SurveyForm>
   <Modal content v-model="modalActive">
     <template #content>
-      <SurveyForm v-if="isFetch" is-preview v-model="railSurvey" ref="surveyForm" :validate="v$"></SurveyForm>
+      <SurveyForm is-preview v-model="railSurvey" ref="surveyForm" :validate="v$"></SurveyForm>
     </template>
     <template #footer>
       <button @click="modalActive = false" data-modal-hide="extralarge-modal" type="button"

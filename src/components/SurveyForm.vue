@@ -21,8 +21,9 @@ import { nullableTypeAnnotation } from '@babel/types'
 import { Buffer } from 'buffer'
 import Dropdown from './Dropdown.vue'
 import InputIcon from './InputIcon.vue'
+import { useToast } from 'vue-toastification'
 
-
+const toast = useToast()
 const store = useStore()
 const router = useRouter()
 
@@ -51,24 +52,12 @@ const emit = defineEmits(['update:modelValue', 'onSubmit'])
 const v$ = props.validate
 
 const signaturePad = ref(null)
-const getWH = ref(null)
-const signaturePadRail_1 = ref(null)
-const signaturePadRail_2 = ref(null)
-const signaturePadRail_3 = ref(null)
-const ta = ref(null)
-const isShowRailUploadBtn = ref(false)
-const isShowTrackUploadBtn = ref(false)
-const uploadStatus = ref(null)
-
 const isActiveGeneral = ref(true)
 const isActiveRail = ref(true)
 const isActiveTrack = ref(true)
 const isActiveMA = ref(true)
-
 const general = ref(null)
-
-const width = ref(null)
-const height = ref(null)
+const disableButtonSubmit = ref(false)
 onMounted(() => {
   // window.addEventListener("resize", onResize)
   // onResize()
@@ -85,104 +74,21 @@ onMounted(() => {
   // signaturePad.value.fromDataURL(railSurvey.signature)
   // signaturePad.value.signatureData = railSurvey.signature
   // const { isEmpty, data } = signaturePad.value.saveSignature()
-  if (props.isPreview) {
-    signaturePad.value.lockSignaturePad()
-    if (railSurvey.signature) signaturePad.value.fromDataURL(railSurvey.signature)
-  } else {
-    if (railSurvey.signature) signaturePad.value.fromDataURL(railSurvey.signature)
-  }
+  // if (props.isPreview) {
+  //   signaturePad.value.lockSignaturePad()
+  //   if (railSurvey.signature) signaturePad.value?.fromDataURL(railSurvey.signature)
+  // } else {
+  //   if (railSurvey.signature) signaturePad.value?.fromDataURL(railSurvey.signature)
+  // }
 })
 onUnmounted(() => {
     // window.removeEventListener('resize', onResize)
 })
 
 // METHOD
-const onResize = () => {
-  // signaturePadRail_3.value.getContext("2d").scale(ratio, ratio)
-  width.value = getWH.value.clientWidth + 'px'
-  height.value = getWH.value.clientHeight + 'px'
-  // let box = document.querySelector('#rail_3')
-  // let width = box.offsetWidth;
-  // let height = box.offsetHeight;
-  // width.value = width
-  // height.value = height
-  // create an off-screen canvas
-  var canvas = document.createElement('canvas')
-  var ctx = canvas.getContext('2d')
-  // var img = document.createElement('img')
-  var img = new Image()
-  // img.src = 'rail_3.jpg'
-  // console.log(img);
-  // img.onload = function() {
-  //   console.log('on;o9da');
-  //   // set its dimension to target size
-  //   canvas.width = getWH.value.clientWidth;
-  //   canvas.height = getWH.value.clientHeight;
-  //   ctx.drawImage(img, 0, 0, getWH.value.clientWidth, getWH.value.clientHeight)
-  //   console.log(canvas.toDataURL('image/jpeg', 0.5));
-  // }
-  // img.src = reader.result
-
-  fetch('rail_3.jpg')
-    .then(raw => raw.blob())
-    .then(blob => {
-      const reader = new FileReader();
-      reader.readAsDataURL(blob)
-      reader.onloadend = () => {
-        img.src = reader.result
-        // console.log(reader.result);
-        signaturePadRail_3.value.fromDataURL(resizeImage(img, getWH.value.clientWidth, getWH.value.clientHeight))
-        // console.log(reader);
-        // signaturePadRail_3.value.fromDataURL(reader.result)
-        // console.log(reader.result);
-      }
-    })
-
-
-  // draw source image into the off-screen canvas:
-
-  // encode image to data-uri with base64 version of compressed image
-  // return canvas.toDataURL()
-  // console.log(canvas.toDataURL());
-  // signaturePadRail_3.value.fromDataURL(canvas.toDataURL())
+const test = (value) => {
+  console.log(value);
 }
-
-const resizeImage = (img, width, height) => {
-  // create an off-screen canvas
-  var canvas = document.createElement('canvas')
-  var ctx = canvas.getContext('2d');
-
-  // set its dimension to target size
-  canvas.width = width;
-  canvas.height = height;
-
-  // draw source image into the off-screen canvas:
-  ctx.drawImage(img, 0, 0, width, height);
-
-  // encode image to data-uri with base64 version of compressed image
-  console.log(canvas.toDataURL());
-  return canvas.toDataURL();
-}
-
-const undo = () => {
-  signaturePad.value.undoSignature()
-  const { isEmpty, data } = signaturePad.value.saveSignature()
-  if (isEmpty) {
-    handleEmit({ name: 'signature', value: null })
-  }
-}
-const clear = () => {
-  signaturePad.value.clearSignature()
-  handleEmit({ name: 'signature', value: null })
-}
-const getAPI = () => {
-  api.get(`/`, null).then((resp) => {
-    resp.json().then((json) => {
-      ta.value = json
-    })
-  })
-}
-
 const handleGetLatLong = () => {
   navigator.geolocation.getCurrentPosition((position) => {
     const p = position.coords;
@@ -202,7 +108,6 @@ const handleSelectZone = (value) => {
     stationAfter: !stations[index + 1] ? value : stations[index + 1]
   }
 }
-
 const scrollToError = () => {
   window.scrollTo(0, general.value.offsetTop)
 }
@@ -210,18 +115,6 @@ defineExpose({
   scrollToError,
   test:() => 'test'
 })
-const onBegin = () => {
-  // console.log('=== Begin ===');
-}
-const onEnd = () => {
-  // console.log('=== End ===');
-  const { isEmpty, data } = signaturePad.value.saveSignature()
-  // console.log(isEmpty)
-  if (!isEmpty) {
-    // console.log(data);
-    handleEmit({ name: 'signature', value: `${data}` })
-  }
-}
 const handleFilterLocation = (value) => {
   if (value === 'situation') {
     if (railSurvey.railDamageSurvey.location.length > 0 ) {
@@ -253,9 +146,16 @@ const handleEmit = (target) => {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value }) }))
   } else if (['station'].includes(arr[1])) {
     emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: target.value, nearby: handleSelectZone(target.value) }) }))
-  } else if (['kilometers'].includes(arr[1])) {
-    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: parseFloat(target.value) }) }))
+  } else if (['kilometer'].includes(arr[1])) {
+    emit('update:modelValue', Object.assign(railSurvey, { [arr[0]]: Object.assign(railSurvey[arr[0]], { [arr[1]]: isNaN(parseFloat(target.value)) ? null : parseFloat(target.value) }) }))
   }
+}
+const testToast = () => {
+  toast.info("I'm an info info!")
+  toast.error("I'm an info error!")
+  toast.warning("I'm an info warning!")
+  toast.success("I'm an info success!")
+  toast("I'm an info default!")
 }
 
 // COMPUTED //
@@ -427,38 +327,35 @@ const compStationItems = computed(() => {
             <div class="grid sm:grid-cols-2 gap-y-4 gap-x-2">
               <div>
                 <label class="_label-sm">เกรดของราง</label>
-                <!-- <select :disabled="isPreview" name="generalSurvey.railType.type" :value="railSurvey.generalSurvey.railType.type" @change="handleEmit($event.target)" id="railType" :class="v$.generalSurvey.railType.type.$error ? '_input_error' : '_input'">
-                  <option disabled value="">กรุณาเลือกประเภทของเกรด</option>
-                  <option v-for="(g ,index) in variable.guageType" :key="index" :value="g.value">{{ g.key }}</option>
-                </select> -->
                 <Dropdown :is-preview="isPreview" :items="variable.guageType" :error="v$.generalSurvey.railType.type.$error" placeholder="กรุณาเลือกประเภทของเกรด" v-model="railSurvey.generalSurvey.railType.type"></Dropdown>
                 <p v-if="v$.generalSurvey.railType.type.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.type.$errors[0].$message }}</p>
               </div>
               <div>
                 <label class="_label-sm">ขนาดของราง (ปอนด์/หลา)</label>
-                <!-- <input :disabled="isPreview" :value="railSurvey.generalSurvey.railType.weight" type="text" name="generalSurvey.railType.weight" @input="handleEmit($event.target)" :class="v$.generalSurvey.railType.weight.$error ? '_input_error' : '_input' " placeholder="ปอนด์" required> -->
                 <Dropdown :is-preview="isPreview" :items="variable.weight" type="number" :error="v$.generalSurvey.railType.weight.$error" placeholder="ปอนด์" v-model="railSurvey.generalSurvey.railType.weight"></Dropdown>
                 <p v-if="v$.generalSurvey.railType.weight.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.weight.$errors[0].$message }}</p>
               </div>
             </div>
-            <div class="grid sm:grid-cols-1 gap-y-4 gap-x-2">
-              <div class="flex items-stretch">
-                <div class="w-full">
-                  <label class="_label-sm">เสาโทรเลข</label>
-                  <input :disabled="isPreview" :value="railSurvey.generalSurvey.telegram.telegramBefore" name="generalSurvey.telegram.telegramBefore" @input="handleEmit($event.target)" type="text" id="telegramBefore" :class="v$.generalSurvey.telegram.telegramBefore.$error ? '_input_error' : '_input' " placeholder="00/00" required>
-                  <p v-if="v$.generalSurvey.telegram.telegramBefore.$error" class="text-sm text-red-600">{{ v$.generalSurvey.telegram.telegramBefore.$errors[0].$message }}</p>
-                </div>
-                <label class="_label-sm mt-9 mx-2">ระหว่าง</label>
-                <div class="w-full">
-                  <label class="_label-sm">&nbsp;</label>
-                  <input :disabled="isPreview" :value="railSurvey.generalSurvey.telegram.telegramAfter" name="generalSurvey.telegram.telegramAfter" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.generalSurvey.telegram.telegramAfter.$error ? '_input_error' : '_input' " placeholder="00/00" required>
-                  <p v-if="v$.generalSurvey.telegram.telegramAfter.$error" class="text-sm text-red-600">{{ v$.generalSurvey.telegram.telegramAfter.$errors[0].$message }}</p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-2">
+              <div>
+                <label class="_label-sm">หลักกิโลเมตร</label>
+                <input :disabled="isPreview" :value="railSurvey.generalSurvey.kilometer" name="generalSurvey.kilometer" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" class="_input">
+              </div>
+              <div class="grid sm:grid-cols-1 lg:col-span-2 gap-y-4 gap-x-2">
+                <div class="flex items-stretch">
+                  <div class="w-full">
+                    <label class="_label-sm">เสาโทรเลข</label>
+                    <input :disabled="isPreview" :value="railSurvey.generalSurvey.telegram.telegramBefore" name="generalSurvey.telegram.telegramBefore" @input="handleEmit($event.target)" type="text" id="telegramBefore" :class="v$.generalSurvey.telegram.telegramBefore.$error ? '_input_error' : '_input' " placeholder="00/00" required>
+                    <p v-if="v$.generalSurvey.telegram.telegramBefore.$error" class="text-sm text-red-600">{{ v$.generalSurvey.telegram.telegramBefore.$errors[0].$message }}</p>
+                  </div>
+                  <label class="_label-sm mt-9 mx-2">ระหว่าง</label>
+                  <div class="w-full">
+                    <label class="_label-sm">&nbsp;</label>
+                    <input :disabled="isPreview" :value="railSurvey.generalSurvey.telegram.telegramAfter" name="generalSurvey.telegram.telegramAfter" @input="handleEmit($event.target)" type="text" id="kmTelegraphPoles" :class="v$.generalSurvey.telegram.telegramAfter.$error ? '_input_error' : '_input' " placeholder="00/00" required>
+                    <p v-if="v$.generalSurvey.telegram.telegramAfter.$error" class="text-sm text-red-600">{{ v$.generalSurvey.telegram.telegramAfter.$errors[0].$message }}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="grid sm:grid-cols-2 gap-y-4 gap-x-2">
-            <div>
             </div>
           </div>
           <div>
@@ -494,14 +391,14 @@ const compStationItems = computed(() => {
           <div>
             <div class="flex flex-row justify-center xl:justify-start flex-wrap gap-1">
               <div class="flex flex-col gap-1">
-                <Signature ref="rail_1" width="700px" height="350px" pen-color="#E74C3C"
+                <Signature :is-preview="isPreview" id="rail_1" width="700px" height="330px" pen-color="#E74C3C"
                   :style="{backgroundImage: `url(${require('@/assets/rail/rail_1.jpg')})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'contain',
                     backgroundPosition: 'center top'
                   }">
                 </Signature>
-                <Signature ref="rail_2" width="700px" height="350px" pen-color="#1ABC9C"
+                <Signature :is-preview="isPreview" id="rail_2" width="700px" height="330px" pen-color="#1ABC9C"
                   :style="{backgroundImage: `url(${require('@/assets/rail/rail_2.jpg')})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'contain',
@@ -510,7 +407,7 @@ const compStationItems = computed(() => {
                 </Signature>
               </div>
               <div class="flex">
-                <Signature ref="rail_3" width="450px" height="600px" pen-color="#3498DB"
+                <Signature :is-preview="isPreview" id="rail_3" width="450px" height="600px" pen-color="#3498DB"
                   :style="{backgroundImage: `url(${require('@/assets/rail/rail_3.jpg')})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'contain',
@@ -701,13 +598,25 @@ const compStationItems = computed(() => {
         </div>
       </template>
     </Accordion>
-    <div class="flex flex-none justify-center pt-2" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
-      <Signature v-model="railSurvey.signature" ref="rail_3" width="400px" height="120px">
-        <template #default>
-          <label class="pb-1 text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
-        </template>
-      </Signature>
+    <div class="flex justify-center items-center mt-4">
+      <div>
+        <Signature :is-preview="isPreview" :error="v$.signature.$error" v-model="railSurvey.signature" id="signaturePad" @on-event="disableButtonSubmit = $event" width="400px" height="120px">
+          <template #default>
+            <label class="pb-1 text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
+          </template>
+        </Signature>
+      </div>
+      <!-- <div class="flex justify-end">
+        <button class="_button">ส่งแบบฟอร์ม</button>
+      </div> -->
+      <!-- <div></div>
+      <div></div> -->
     </div>
+    <div v-if="!isPreview" class="flex justify-end">
+      <button :class="disableButtonSubmit ? '_button-disable' : '_button'" :disabled="disableButtonSubmit" @click="emit('onSubmit')">ส่งแบบฟอร์ม</button>
+    </div>
+    <!-- <div class="flex" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
+    </div> -->
     <!-- <div class="mt-4 flex justify-center">
       <div class="border border-solid p-0" :class="v$.signature.$error ? 'border-red-600' : 'border-gray-200' ">
         <div v-if="!isPreview" class="flex justify-center">
@@ -723,7 +632,7 @@ const compStationItems = computed(() => {
       {{ v$.general }}
       {{ v$.trackDamageSurvey.$error }}
       {{ v$.railDamageSurvey.$error }}
-      {{ v$.maintenanceRate.$errors }}
+      {{ v$.maintenanceRate.$error }}
     </pre> -->
   </div>
 
