@@ -79,38 +79,6 @@ const handleRemoveImage = (index) => {
   // document.getElementById(props.id).value = ''
   if (images.length === 0) showUploadBtn.value = false
 }
-// const uploadImages = (event) => {
-//   let images = [...props.modelValue]
-//   uploadStatus.value = 'pending'
-//   let formData = new FormData()
-//   const files = eval(props.id).files
-//   Array.from(files).forEach((file, index) => {
-//     // console.log(file);
-//     formData.append('file', file)
-//   })
-//   api.uploadFils('/api/uploads', formData, null).then((resp) => {
-//     console.log('201');
-//     if (resp.status === 201) {
-//       resp.json().then((json) => {
-//         console.log(json)
-//         // json.forEach((image, index) => {
-//         //   if (images[index].originalname === image.originalname) {
-//         //     images[index].isUploaded = true
-//         //   }
-//         // })
-//       })
-//       uploadStatus.value = 'success'
-//       emit('update:modelValue', images)
-//     }
-//   }).catch((err) => {
-//     console.log(err);
-//     if (navigator.onLine) {
-//       uploadStatus.value = 'error'
-//     } else {
-//       uploadStatus.value = 'offline'
-//     }
-//   })
-// }
 // COMPUTED
 const compCSSUploadBtn = computed(() => {
   // console.log(props.error.filter(err => Object.keys(err).filter(obj => err[obj].length > 0)).length > 0)
@@ -128,13 +96,13 @@ const compCSSUploadBtn = computed(() => {
     }
   }
 })
-const compUploadStatus = computed(() => {
-  return uploadStatus.value === 'pending' ? 'Uploading'
-  : uploadStatus.value === 'success' ? 'Done'
-  : uploadStatus.value === 'error' ? 'Upload Fail'
-  : uploadStatus.value === 'offline' ? 'Upload Queue'
-  : 'Upload'
-})
+// const compUploadStatus = computed(() => {
+//   return uploadStatus.value === 'pending' ? 'Uploading'
+//   : uploadStatus.value === 'success' ? 'Done'
+//   : uploadStatus.value === 'error' ? 'Upload Fail'
+//   : uploadStatus.value === 'offline' ? 'Upload Queue'
+//   : 'Upload'
+// })
 </script>
 <template>
   <div class="flex flex-col gap-2">

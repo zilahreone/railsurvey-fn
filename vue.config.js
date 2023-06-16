@@ -98,6 +98,19 @@ module.exports = defineConfig({
           options: {
             cacheName: 'rail-cache'
           }
+        },
+        {
+          urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}`),
+          handler: 'NetworkFirst',
+          method: 'GET',
+          options: {
+            cacheName: 'rail-cache',
+            expiration: {
+              maxAgeSeconds: 60 * 60 * 24 * 7,
+              // maxAgeSeconds: 60 * 60 * 24 * 14, // 2 Week
+              maxEntries: 100
+            }
+          }
         }
       ]
     }

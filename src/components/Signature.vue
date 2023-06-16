@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, computed, watch, onUnmounted } from 'vue'
 const props = defineProps({
   isPreview: {
     type: Boolean,
@@ -50,13 +50,18 @@ const activeButton = ref(true)
 
 defineExpose({ activeButton })
 onMounted(() => {
+  loadSignature()
+})
+const loadSignature = () => {
   if (props.isPreview) {
     signaturePad.value.lockSignaturePad()
     if (props.modelValue) signaturePad.value?.fromDataURL(props.modelValue)
   } else {
     if (props.modelValue) signaturePad.value?.fromDataURL(props.modelValue)
   }
-})
+  // console.log();
+  onEnd()
+}
 const undo = () => {
   signaturePad.value.undoSignature()
   const { isEmpty, data } = signaturePad.value.saveSignature()
@@ -87,8 +92,8 @@ const compCustomStyle = computed(() => {
       <button @click="clear" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r text-sm px-5 py-1">เคลียร์</button>
       <!-- <button @click="emit('onSubmit')" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r rounded-br-md text-sm px-5 py-1">Submit</button> -->
     </div>
-    <div class="p-2">
-      <VueSignaturePad :width="width" :height="height" :customStyle="style" :options="{ onBegin, onEnd, penColor: penColor, maxWidth: 1.5 }" ref="signaturePad" />
+    <div class="p-2" :class="`w-[${width}] h-[${height}]`">
+      <VueSignaturePad :customStyle="style" :options="{ onBegin, onEnd, penColor: penColor, maxWidth: 1.5 }" ref="signaturePad" />
     </div>
     <slot></slot>
     <!-- <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label> -->

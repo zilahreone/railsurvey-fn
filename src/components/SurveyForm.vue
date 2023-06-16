@@ -59,7 +59,7 @@ const isActiveMA = ref(true)
 const general = ref(null)
 const disableButtonSubmit = ref(false)
 onMounted(() => {
-  // window.addEventListener("resize", onResize)
+  window.addEventListener("resize", onResize)
   // onResize()
   // resizeImage()
   // fetch('rail_3.jpg')
@@ -82,10 +82,13 @@ onMounted(() => {
   // }
 })
 onUnmounted(() => {
-    // window.removeEventListener('resize', onResize)
+    window.removeEventListener('resize', onResize)
 })
 
 // METHOD
+const onResize = () => {
+  // emit('update:modelValue', Object.assign(railSurvey, { signature: railSurvey.signature }))
+}
 const test = (value) => {
   console.log(value);
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, computed, watch, onUnmounted } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, helpers, requiredIf, minValue, maxValue, requiredUnless, minLength, decimal, maxLength, integer } from '@vuelidate/validators'
 import { useRouter, useRoute } from 'vue-router'
@@ -27,10 +27,21 @@ const modalActive = ref(false)
 let railSurvey = reactive(clone)
 const v$ = useVuelidate(validate(form, railSurvey), railSurvey, { $autoDirty: true })
 
+// const width = ref(document.documentElement.clientWidth)
+// const height = ref(document.documentElement.clientHeight)
+
 onMounted(() => {
+  // window.addEventListener('resize', getDimensions)
   getSurveyID(route.params.id)
   // console.log('start');
 })
+// onUnmounted(() => {
+//   window.addEventListener('resize', getDimensions)
+// })
+// const getDimensions = () => {
+//   width.value = document.documentElement.clientWidth
+//   height.value = document.documentElement.clientHeight
+// }
 const getSurveyID = (id) => {
   api.get(`/api/rail-survey/${id}`, store.state.token).then((resp) => {
     if (resp.status === 200) {
@@ -101,11 +112,9 @@ const handleSubmit = async () => {
 }
 const submitForm = () => {
   let formData = new FormData()
-  const uploadImages = [...railSurvey.railDamageSurvey.uploadImages, ...railSurvey.trackDamageSurvey.uploadImages]
+  const uploadImages = [...railSurvey.railDamageSurvey.uploadImages, ...railSurvey.trackDamageSurvey.uploadImages].filter(image => image.file)
   uploadImages.forEach(images => {
-    if (images.file) {
-      formData.append('file', images.file)
-    }
+    formData.append('file', images.file)
     // console.log(images.file);
     // const file_ = new File([images.file], images.filename, { type: images.type })
     // list.items.add(file_)
@@ -152,13 +161,13 @@ const compSubmitForm = computed(() => {
         }
       }
     } else if (['uploadImages'].includes(key)) {
-      rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.filename)
+      rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].map(image => image.file ? image.filename : image.originalname)
     }
   })
-  rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename)
+  rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.file ? image.filename : image.originalname)
   rtnRail.createdBy = rtnRail.createdBy.id
-  rtnRail.modifiedBy = '64eea302-a74b-498a-8bd6-5e040e90166b'
-  delete rtnRail.modifiedAt
+  // rtnRail.modifiedBy = '64eea302-a74b-498a-8bd6-5e040e90166b'
+  // delete rtnRail.modifiedAt
   // rtnRail.createdAt = moment().utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z'
   return rtnRail
 })

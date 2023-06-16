@@ -47,7 +47,7 @@ const handleSubmit = async () => {
 }
 const submitForm = () => {
   let formData = new FormData()
-  const uploadImages = [...railSurvey.railDamageSurvey.uploadImages, ...railSurvey.trackDamageSurvey.uploadImages]
+  const uploadImages = [...railSurvey.railDamageSurvey.uploadImages, ...railSurvey.trackDamageSurvey.uploadImages].filter(image => image.file)
   uploadImages.forEach(images => {
     // console.log(images.file);
     // const file_ = new File([images.file], images.filename, { type: images.type })
@@ -104,7 +104,7 @@ const compSubmitForm = computed(() => {
     }
   })
   rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename)
-  rtnRail.createdAt = time
+  // rtnRail.createdAt = time
   // rtnRail.createdBy = Cookies.get('isAuthenticated')
   rtnRail.createdBy = '64eea302-a74b-498a-8bd6-5e040e90166b'
   return rtnRail

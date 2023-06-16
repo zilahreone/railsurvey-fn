@@ -23,12 +23,11 @@ onMounted (() => {
   getCount()
   getSurveyList2()
   getOfflineForm()
-  // formData()
-//   if(navigator.onLine){
-//   console.log('online');
-//  } else {
-//   console.log('offline');
-//  }
+  if (navigator.onLine) {
+    // handleDeleteOldCache()
+  } else {
+    // console.log('offline');
+  }
 })
 const getSurveyList2 = (p) => {
   if (p) page.value = p
@@ -58,6 +57,19 @@ const generateId = (length) => {
   }
   return result
 }
+const handleDeleteOldCache = () => {
+  caches.keys().then((cacheNames) => {
+    cacheNames.forEach(cacheName => {
+      // console.log(`cache name: ${cacheName}`);
+      if (cacheName === 'rail-cache') {
+        caches.open(cacheName).then((cache) => {
+          // cache.delete(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${id}`).then((response) => {
+          // })
+        })
+      }
+    })
+  })
+}
 const getOfflineForm = () => {
   const dbName = 'workbox-background-sync'
   const dbVersion = 3
@@ -77,15 +89,28 @@ const getOfflineForm = () => {
             getAll.onsuccess = () => {
               const result = getAll.result;
               result?.forEach((request, index) => {
-                const regex = /{.*}/gm
+                const regex = /^\{.*\}$/gm
                 const body = request.requestData?.body
                 if (body) {
                   if (('TextDecoder' in window)) {
                     const enc = new TextDecoder('utf-8')
+                    // console.log(enc.decode(body));
                     let parse = JSON.parse(enc.decode(body).match(regex)[0])
-                    parse = Object.assign({}, parse, { createdBy: { id: parse.createdBy }})
+                    let clone = JSON.parse(JSON.stringify(parse))
                     console.log(parse);
-                    items.push(parse)
+                    Object.keys(parse).forEach(key => {
+                      // if (['railDamageSurvey', 'trackDamageSurvey'].includes(key)) {
+                      //   if (parse[key].uploadImages.length > 0) {
+                      //     clone[key].uploadImages = parse[key].uploadImages.map(uploadImg => {
+                      //       return { originalname: uploadImg, originalPath: `${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${uploadImg}` }
+                      //     })
+                      //   }
+                      // } else 
+                      if (key === 'createdBy') {
+                        clone[key] = { id: parse.createdBy }
+                      }
+                    })
+                    items.push(clone)
                   }
                 }
               })
@@ -99,9 +124,15 @@ const getOfflineForm = () => {
                         if (item.id) {
                           cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${item.id}`, new Response(JSON.stringify(item), responseOptions))
                         } else {
-                          const id = generateId(6)
-                          cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${id}`, new Response(JSON.stringify({id: id, ...item}), responseOptions))
-                          // cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${generateId(6)}`, new Response(JSON.stringify(item), responseOptions))
+                          const id = generateId(8)
+                          fetch(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/?offset=0`).then(response => {
+                            response.json().then(json => {
+                              // console.log(json)
+                              cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${id}`, new Response(JSON.stringify({id: id, ...item}), responseOptions))
+                              cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/?offset=0`, new Response(JSON.stringify([item, ...json]), responseOptions))
+                              cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/count`, new Response(json.length + 1, responseOptions))
+                            })
+                          })
                         }
                       })
                     })
@@ -160,15 +191,17 @@ const compSurveyList = computed(() => {
   return surveyList.value.map(sl => {
     return {
       id: sl.id,
-      date: sl.generalSurvey.date,
-      // date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
-      zone: variable.zone.filter((z) => z.value === sl.generalSurvey.zone)[0]?.key,
+      // date: sl.generalSurvey.date,
+      area: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.key,
+      zone: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.zones.filter(zone => zone.value === sl.generalSurvey.zone)[0]?.key,
+      station: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.zones.filter(zone => zone.value === sl.generalSurvey.zone)[0]?.stations.filter(station => station.value === sl.generalSurvey.station)[0]?.key,
+      date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
       zoneBe: variable.zone.filter((z) => z.value === sl.generalSurvey.nearby.stationBefore)[0]?.key,
       zoneAf: variable.zone.filter((z) => z.value === sl.generalSurvey.nearby.stationAfter)[0]?.key,
       kilometers: sl.generalSurvey.kilometers ? sl.generalSurvey.kilometers : '-',
       createdBy: sl.createdBy,
-      // createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss')
-      createdAt: sl.createdAt
+      createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss')
+      // createdAt: sl.createdAt
     }
   })
 })
@@ -185,11 +218,13 @@ const compSurveyList = computed(() => {
         <!-- <th class="py-3 px-6">วันที่สร้างฟอร์ม</th> -->
         <!-- <th class="py-3 px-6">รหัสฟอร์ม</th> -->
         <th class="py-3 px-6">เขตการเดินรถ</th>
+        <th class="py-3 px-6">แขวง</th>
+        <th class="py-3 px-6">สถานี</th>
         <!-- <th class="py-3 px-6">สถานีก่อนหน้า</th>
         <th class="py-3 px-6">สถานีถัดไป</th> -->
-        <th class="py-3 px-6">หลักกิโลเมตร</th>
+        <!-- <th class="py-3 px-6">หลักกิโลเมตร</th> -->
         <th class="py-3 px-6">สร้างโดย</th>
-        <th class="py-3 px-6">แก้ไขเมื่อ</th>
+        <th class="py-3 px-6">สร้างเมื่อ</th>
       </template>
       <template #tbody="{ item, index }">
         <td class="py-2 px-4">
@@ -198,7 +233,13 @@ const compSurveyList = computed(() => {
         <!-- <td class="py-2 px-4">
         </td> -->
         <td class="py-2 px-4">
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.area }}</router-link>
+        </td>
+        <td class="py-2 px-4">
           <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.zone }}</router-link>
+        </td>
+        <td class="py-2 px-4">
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.station }}</router-link>
         </td>
         <!-- <td class="py-2 px-4">
           {{ item.zoneBe }}
@@ -206,11 +247,11 @@ const compSurveyList = computed(() => {
         <td class="py-2 px-4">
           {{ item.zoneAf }}
         </td> -->
-        <td class="py-2 px-4">
+        <!-- <td class="py-2 px-4">
           <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.kilometers }}</router-link>
-        </td>
+        </td> -->
         <td class="py-2 px-4">
-          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.createdBy }}</router-link>
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.createdBy.username }}</router-link>
         </td>
         <td class="py-2 px-4">
           <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.createdAt }}</router-link>
