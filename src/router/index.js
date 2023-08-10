@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, isNavigationFailure, NavigationFailureT
 import HomeView from '../views/HomeView.vue'
 import Login from '../views/Login.vue'
 import SurveyFormView from '../views/SurveyFormView.vue'
-import SurveyFormDetail from '../views/SurveyFormDetail_.vue'
+import SurveyFormDetail from '../views/SurveyFormDetail.vue'
 import Cookies from 'js-cookie';
 
 const router = createRouter({

@@ -1,17 +1,30 @@
 <!DOCTYPE html>
 <html lang="">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title>Rail Survey</title>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <!-- <meta http-equiv="Content-Security-Policy" content="worker-src 'self' 'unsafe-inline';"> -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="worker-src 'self' blob:;"> -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="img-src 'self' data:; default-src 'self' https://app.rail-survey.app.meca.in.th/"> -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://app-dev.rail-survey.app.meca.in.th; img-src https://* https://app-dev.rail-survey.app.meca.in.th;"> -->
+  <!-- <meta http-equiv="Content-Security-Policy"
+    content="img-src 'self' blob: data:; default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content:"> -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src *;
+    img-src * 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *;
+    style-src  'self' 'unsafe-inline' *"> -->
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <title>Rail Survey</title>
+</head>
+
+<body>
+  <noscript>
+    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
+        Please enable it to continue.</strong>
+  </noscript>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+
 </html>

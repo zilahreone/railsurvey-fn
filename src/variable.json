@@ -373,7 +373,7 @@
       "value": "slope"
     },
     {
-      "key": "พื้นที่รัสมีโค้ง (Curve)",
+      "key": "พื้นที่รัศมีโค้ง (Curve)",
       "value": "curve"
     },
     {
@@ -437,23 +437,23 @@
   ],
   "location": [
     {
-      "key": "หัวราง (Rail head)",
+      "key": "หัวราง (Rail Head)",
       "value": "railHead"
     },
     {
-      "key": "เอวราง (Rail web)",
+      "key": "เอวราง (Rail Web)",
       "value": "railWeb"
     },
     {
-      "key": "ฐานราง (Rail foot)",
+      "key": "ฐานราง (Rail Foot)",
       "value": "railFoot"
     },
     {
-      "key": "เต็มหน้าตัด (Full section)",
+      "key": "เต็มหน้าตัด (Full Section)",
       "value": "fullSection"
     },
     {
-      "key": "สันราง (Gauge side)",
+      "key": "สันราง (Gauge Side)",
       "value": "gaugeSide"
     },
     {
@@ -467,8 +467,8 @@
       "value": "fracture"
     },
     {
-      "key": "แตกร้าว (Rupture)",
-      "value": "rupture"
+      "key": "แตกร้าว (Crack)",
+      "value": "crack"
     },
     {
       "key": "สึกหรอ (Wear)",

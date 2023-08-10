@@ -52,6 +52,10 @@ const emit = defineEmits(['update:modelValue', 'onSubmit'])
 const v$ = props.validate
 
 const signaturePad = ref(null)
+const planPad = ref(null)
+const elevationPad = ref(null)
+const sectionPad = ref(null)
+
 const isActiveGeneral = ref(true)
 const isActiveRail = ref(true)
 const isActiveTrack = ref(true)
@@ -87,7 +91,10 @@ onUnmounted(() => {
 
 // METHOD
 const onResize = () => {
-  // emit('update:modelValue', Object.assign(railSurvey, { signature: railSurvey.signature }))
+  signaturePad.value.fn()
+  planPad.value.plan()
+  elevationPad.value.elevation()
+  sectionPad.value.section()
 }
 const test = (value) => {
   console.log(value);
@@ -315,15 +322,17 @@ const compStationItems = computed(() => {
             </div>
             <div>
               <label class="_label-sm">พิกัด ละติจูด</label>
-              <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.latitude" @on-click="handleGetLatLong()" :error="v$.generalSurvey.coordinates.latitude.$error"></InputIcon>
+              <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.latitude" @on-click="handleGetLatLong()"></InputIcon>
+              <!-- <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.latitude" @on-click="handleGetLatLong()" :error="v$.generalSurvey.coordinates.latitude.$error"></InputIcon> -->
               <!-- <input :disabled="isPreview" :value="railSurvey.generalSurvey.coordinates.latitude" type="text" name="generalSurvey.coordinates.latitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.latitude.$error ? '_input_error' : '_input' " required> -->
-              <p v-if="v$.generalSurvey.coordinates.latitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.latitude.$errors[0].$message }}</p>
+              <!-- <p v-if="v$.generalSurvey.coordinates.latitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.latitude.$errors[0].$message }}</p> -->
             </div>
             <div>
               <label class="_label-sm">พิกัด ลองติจูด</label>
-              <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.longitude" @on-click="handleGetLatLong()" :error="v$.generalSurvey.coordinates.longitude.$error"></InputIcon>
+              <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.longitude" @on-click="handleGetLatLong()"></InputIcon>
+              <!-- <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.longitude" @on-click="handleGetLatLong()" :error="v$.generalSurvey.coordinates.longitude.$error"></InputIcon> -->
               <!-- <input :disabled="isPreview" :value="railSurvey.generalSurvey.coordinates.longitude" type="text" name="generalSurvey.coordinates.longitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.longitude.$error ? '_input_error' : '_input' " required> -->
-              <p v-if="v$.generalSurvey.coordinates.longitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.longitude.$errors[0].$message }}</p>
+              <!-- <p v-if="v$.generalSurvey.coordinates.longitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.longitude.$errors[0].$message }}</p> -->
             </div>
           </div>
           <div class="grid sm:grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-2">
@@ -335,7 +344,7 @@ const compStationItems = computed(() => {
               </div>
               <div>
                 <label class="_label-sm">ขนาดของราง (ปอนด์/หลา)</label>
-                <Dropdown :is-preview="isPreview" :items="variable.weight" type="number" :error="v$.generalSurvey.railType.weight.$error" placeholder="ปอนด์" v-model="railSurvey.generalSurvey.railType.weight"></Dropdown>
+                <Dropdown :is-preview="isPreview" :items="variable.weight" type="number" :error="v$.generalSurvey.railType.weight.$error" placeholder="ปอนด์/หลา" v-model="railSurvey.generalSurvey.railType.weight"></Dropdown>
                 <p v-if="v$.generalSurvey.railType.weight.$error" class="text-sm text-red-600">{{ v$.generalSurvey.railType.weight.$errors[0].$message }}</p>
               </div>
             </div>
@@ -392,16 +401,16 @@ const compStationItems = computed(() => {
             <p v-if="v$.railDamageSurvey.situation.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.situation.$errors[0].$message }}</p>
           </div>
           <div>
-            <div class="flex flex-row justify-center xl:justify-start flex-wrap gap-1">
-              <div class="flex flex-col gap-1">
-                <Signature :is-preview="isPreview" id="rail_1" width="700px" height="330px" pen-color="#E74C3C"
+            <div class="flex flex-row justify-center xl:justify-start flex-wrap gap-2">
+              <div class="flex flex-col gap-2">
+                <Signature v-model="railSurvey.railDamageSurvey.plan" ref="planPad" :is-preview="isPreview" id="rail_1" width="700px" height="330px" pen-color="#E74C3C"
                   :style="{backgroundImage: `url(${require('@/assets/rail/rail_1.jpg')})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'contain',
                     backgroundPosition: 'center top'
                   }">
                 </Signature>
-                <Signature :is-preview="isPreview" id="rail_2" width="700px" height="330px" pen-color="#1ABC9C"
+                <Signature v-model="railSurvey.railDamageSurvey.elevation" ref="elevationPad" :is-preview="isPreview" id="rail_2" width="700px" height="330px" pen-color="#1ABC9C"
                   :style="{backgroundImage: `url(${require('@/assets/rail/rail_2.jpg')})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'contain',
@@ -410,7 +419,7 @@ const compStationItems = computed(() => {
                 </Signature>
               </div>
               <div class="flex">
-                <Signature :is-preview="isPreview" id="rail_3" width="450px" height="600px" pen-color="#3498DB"
+                <Signature v-model="railSurvey.railDamageSurvey.section" ref="sectionPad" :is-preview="isPreview" id="rail_3" width="450px" height="600px" pen-color="#3498DB"
                   :style="{backgroundImage: `url(${require('@/assets/rail/rail_3.jpg')})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'contain',
@@ -462,7 +471,8 @@ const compStationItems = computed(() => {
             <label class="_label-lg">รูปแบบ Surface Defect</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               <!-- <SelectBtn :is-preview="isPreview" type="checkbox" is-specify :error="v$.generalSurvey.areaCondition.$error" v-model="railSurvey.generalSurvey.areaCondition" name="areaCondition" :items="variable.damageAreaPrperties" :disables="compDisableAreaCondition"></SelectBtn> -->
-              <SelectBtn :is-preview="isPreview" type="checkbox" is-specify :error="v$.railDamageSurvey.surfaceDefectPattern.$error" v-model="railSurvey.railDamageSurvey.surfaceDefectPattern" name="surfaceDefect" :items="variable.surfaceDefect"></SelectBtn>
+              <SelectBtn :is-preview="isPreview" type="checkbox" is-specify :error="v$.railDamageSurvey.surfaceDefectPattern.$error" image-key="img" v-model="railSurvey.railDamageSurvey.surfaceDefectPattern" name="surfaceDefect" :items="variable.surfaceDefect"></SelectBtn>
+              <!-- <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.trackGeometryCondition.condition.$error" image-key="img" v-model="railSurvey.trackDamageSurvey.trackGeometryCondition.condition" name="trackGeometryConditionFail" :items="variable.trackGeometry" :disables="compDisabletrackGeometryCondition"></SelectBtn> -->
             </div>
           </div>
         </div>
@@ -603,7 +613,7 @@ const compStationItems = computed(() => {
     </Accordion>
     <div class="flex justify-center items-center mt-4">
       <div>
-        <Signature :is-preview="isPreview" :error="v$.signature.$error" v-model="railSurvey.signature" id="signaturePad" @on-event="disableButtonSubmit = $event" width="400px" height="120px">
+        <Signature ref="signaturePad" :is-preview="isPreview" :error="v$.signature.$error" v-model="railSurvey.signature" id="signaturePad" @on-event="disableButtonSubmit = $event" width="400px" height="120px">
           <template #default>
             <label class="pb-1 text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label>
           </template>

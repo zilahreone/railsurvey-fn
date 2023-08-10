@@ -9,7 +9,7 @@ export default function (railForm, railSurvey) {
     mimetype: { required },
     // destination: { required },
     // filename: { required },
-    size: { maxValue: helpers.withMessage(`Maximum value allowed is 5MB`, maxValue(5 * 1024 * 1024)) }
+    size: { maxValue: helpers.withMessage(`Maximum value allowed is 10MB`, maxValue(10 * 1024 * 1024)) }
   }
   Object.keys(railForm).forEach((key1) => {
     if (['generalSurvey', 'railDamageSurvey', 'trackDamageSurvey', 'maintenanceRate'].includes(key1)) {
@@ -17,8 +17,9 @@ export default function (railForm, railSurvey) {
       if (key1 === 'generalSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
           rule[key1][key2] = {}
-          if (key2 !== 'kilometer') {
-            if (['coordinates', 'nearby', 'railType', 'telegram'].includes(key2)) { 
+          if (!['kilometer', 'coordinates'].includes(key2)) {
+          // if (key2 !== 'kilometer') {
+            if (['nearby', 'railType', 'telegram'].includes(key2)) { 
               if (key2 === 'coordinates') {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {
                   rule[key1][key2][key3] = { decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0) }
@@ -49,26 +50,27 @@ export default function (railForm, railSurvey) {
         })
       } else if (key1 === 'railDamageSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
-          // CHECK LENGTH OF UPLOADIMAGES
-          if (key2 === 'uploadImages') {
-            rule[key1][key2] = {
-              // requiredif: requiredIf(() => {
-              //   return railSurvey[key1][key2].filter(upload => upload.isUploaded).length > 0
+          if (!['plan', 'elevation', 'section'].includes(key2)) {
+            // CHECK LENGTH OF UPLOADIMAGES
+            if (key2 === 'uploadImages') {
+              rule[key1][key2] = {
+                // requiredif: requiredIf(() => {
+                //   return railSurvey[key1][key2].filter(upload => upload.isUploaded).length > 0
+                // })
+                $each: helpers.forEach(uploadImage),
+                maxLength: maxLength(3)
+              }
+              // railSurvey[key1][key2].forEach(element => {
+              //   if (!element.isUploaded) {
+              //   }
               // })
-              $each: helpers.forEach(uploadImage),
-              maxLength: maxLength(3)
+              // if (railSurvey[key1][key2].length > 0) {
+              // }
+            } else if (key2 === 'surfaceDefectPattern') {
+              rule[key1][key2] = { surfaceDefectPattern: requiredIf(() => railSurvey[key1]['defectPattern'].includes('surfaceDefect')) }
+            } else {
+              rule[key1][key2] = { required, minLength: minLength(1) }
             }
-            // railSurvey[key1][key2].forEach(element => {
-            //   if (!element.isUploaded) {
-
-            //   }
-            // })
-            // if (railSurvey[key1][key2].length > 0) {
-            // }
-          } else if (key2 === 'surfaceDefectPattern') {
-            rule[key1][key2] = { surfaceDefectPattern: requiredIf(() => railSurvey[key1]['defectPattern'].includes('surfaceDefect')) }
-          } else {
-            rule[key1][key2] = { required, minLength: minLength(1) }
           }
         })
       } else if (key1 === 'trackDamageSurvey') {

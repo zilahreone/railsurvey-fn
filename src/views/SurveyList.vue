@@ -9,20 +9,21 @@ import moment from 'moment'
 import tz from 'moment-timezone'
 import TailTable from '@/components/TailTable.vue'
 import { useToast } from 'vue-toastification'
+import pdfMake from 'pdfmake'
 
 const toast = useToast()
 const store = useStore()
 
 const surveyList = ref([])
-const indexedDBList = ref([])
+// const indexedDBList = ref([])
 const count = ref(0)
 const perPage = ref(20)
 const page = ref(1)
 
 onMounted (() => {
   getCount()
-  getSurveyList2()
   getOfflineForm()
+  getSurveyList2()
   if (navigator.onLine) {
     // handleDeleteOldCache()
   } else {
@@ -46,30 +47,30 @@ const getSurveyList2 = (p) => {
   })
   // store.state.token
 }
-const generateId = (length) => {
-  let result = ''
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  const charactersLength = characters.length
-  let counter = 0
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength))
-    counter += 1
-  }
-  return result
-}
-const handleDeleteOldCache = () => {
-  caches.keys().then((cacheNames) => {
-    cacheNames.forEach(cacheName => {
-      // console.log(`cache name: ${cacheName}`);
-      if (cacheName === 'rail-cache') {
-        caches.open(cacheName).then((cache) => {
-          // cache.delete(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${id}`).then((response) => {
-          // })
-        })
-      }
-    })
-  })
-}
+// const generateId = (length = 8) => {
+//   let result = ''
+//   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+//   const charactersLength = characters.length
+//   let counter = 0
+//   while (counter < length) {
+//     result += characters.charAt(Math.floor(Math.random() * charactersLength))
+//     counter += 1
+//   }
+//   return result
+// }
+// const handleDeleteOldCache = () => {
+//   caches.keys().then((cacheNames) => {
+//     cacheNames.forEach(cacheName => {
+//       // console.log(`cache name: ${cacheName}`);
+//       if (cacheName === 'rail-cache') {
+//         caches.open(cacheName).then((cache) => {
+//           // cache.delete(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${id}`).then((response) => {
+//           // })
+//         })
+//       }
+//     })
+//   })
+// }
 const getOfflineForm = () => {
   const dbName = 'workbox-background-sync'
   const dbVersion = 3
@@ -89,6 +90,8 @@ const getOfflineForm = () => {
             getAll.onsuccess = () => {
               const result = getAll.result;
               result?.forEach((request, index) => {
+                // let fomdata = new FormData(request.requestData?.body)
+                // console.log(fomdata);
                 const regex = /^\{.*\}$/gm
                 const body = request.requestData?.body
                 if (body) {
@@ -97,17 +100,10 @@ const getOfflineForm = () => {
                     // console.log(enc.decode(body));
                     let parse = JSON.parse(enc.decode(body).match(regex)[0])
                     let clone = JSON.parse(JSON.stringify(parse))
-                    console.log(parse);
+                    // console.log(parse);
                     Object.keys(parse).forEach(key => {
-                      // if (['railDamageSurvey', 'trackDamageSurvey'].includes(key)) {
-                      //   if (parse[key].uploadImages.length > 0) {
-                      //     clone[key].uploadImages = parse[key].uploadImages.map(uploadImg => {
-                      //       return { originalname: uploadImg, originalPath: `${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${uploadImg}` }
-                      //     })
-                      //   }
-                      // } else 
                       if (key === 'createdBy') {
-                        clone[key] = { id: parse.createdBy }
+                        clone[key] = { id: parse.createdBy, username: `offline-cache` }
                       }
                     })
                     items.push(clone)
@@ -116,21 +112,24 @@ const getOfflineForm = () => {
               })
               caches.keys().then((cacheNames) => {
                 cacheNames.forEach(cacheName => {
-                  console.log(`cache name: ${cacheName}`);
+                  // console.log(`cache name: ${cacheName}`);
                   if (cacheName === 'rail-cache') {
                     caches.open(cacheName).then((cache) => {
-                      console.log(`items: ${items}`);
-                      items.forEach((item) => {
+                      // console.log(`items: ${items}`);
+                      items.forEach((item, index) => {
                         if (item.id) {
                           cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${item.id}`, new Response(JSON.stringify(item), responseOptions))
                         } else {
-                          const id = generateId(8)
+                          const genId = `offline-${index + 1}`
                           fetch(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/?offset=0`).then(response => {
                             response.json().then(json => {
+                              const form = {id: genId, ...item}
+                              let fetchCache = json.filter(item => !item.id.includes('offline'))
                               // console.log(json)
-                              cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${id}`, new Response(JSON.stringify({id: id, ...item}), responseOptions))
-                              cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/?offset=0`, new Response(JSON.stringify([item, ...json]), responseOptions))
-                              cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/count`, new Response(json.length + 1, responseOptions))
+                              cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/${genId}`, new Response(JSON.stringify(form), responseOptions))
+                              cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/?offset=0`, new Response(JSON.stringify([form, ...fetchCache]), responseOptions))
+                              cache.put(`${process.env.VUE_APP_BACK_END_URL}/api/rail-survey/count`, new Response(fetchCache.length + 1, responseOptions))
+                              getSurveyList2()
                             })
                           })
                         }
@@ -186,6 +185,53 @@ const hadleDelete = (id) => {
   }).catch((err) => {
   })
 }
+const handleDownloadPDF = () => {
+  pdfMake.fonts = {
+    // download default Roboto font from cdnjs.com
+    Roboto: {
+      normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
+      bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
+      italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
+      bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf'
+    },
+    Kanit: {
+      normal: 'https://fonts.cdnfonts.com/s/15799/Kanit-Regular.woff',
+      bold: 'https://fonts.cdnfonts.com/s/15799/Kanit-Medium.woff',
+      italics: 'https://fonts.cdnfonts.com/s/15799/Kanit-ThinItalic.woff',
+      bolditalics: 'https://fonts.cdnfonts.com/s/15799/Kanit-LightItalic.woff'
+    }
+  }
+  const docDefinition = {
+    watermark: { text: 'test watermark', color: 'blue', opacity: 0.3, bold: false, italics: false, fontSize: 10, angle: 70 },
+    info: {
+      title: 'awesome Document',
+      author: 'john doe',
+      subject: 'subject of document',
+      keywords: 'keywords for document',
+    },
+    content: [
+    { text: 'This is a header', style: 'header' },
+    'No styling here, this is a standard paragraph',
+    { text: 'Another text', style: 'anotherStyle' },
+    { text: 'Multiple styles applied', style: [ 'header', 'anotherStyle' ] }
+  ],
+
+  styles: {
+    header: {
+      fontSize: 22,
+      bold: true
+    },
+    anotherStyle: {
+      italics: true,
+      alignment: 'right'
+    }
+  },
+    defaultStyle: {
+      font: 'Kanit'
+    }
+  }
+  pdfMake.createPdf(docDefinition).open();
+}
 const compSurveyList = computed(() => {
   // console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
   return surveyList.value.map(sl => {
@@ -195,12 +241,14 @@ const compSurveyList = computed(() => {
       area: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.key,
       zone: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.zones.filter(zone => zone.value === sl.generalSurvey.zone)[0]?.key,
       station: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.zones.filter(zone => zone.value === sl.generalSurvey.zone)[0]?.stations.filter(station => station.value === sl.generalSurvey.station)[0]?.key,
-      date: moment(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
+      date: moment.utc(sl.generalSurvey.date).local().format('DD-MM-YYYY HH:mm:ss'),
       zoneBe: variable.zone.filter((z) => z.value === sl.generalSurvey.nearby.stationBefore)[0]?.key,
       zoneAf: variable.zone.filter((z) => z.value === sl.generalSurvey.nearby.stationAfter)[0]?.key,
       kilometers: sl.generalSurvey.kilometers ? sl.generalSurvey.kilometers : '-',
-      createdBy: sl.createdBy,
-      createdAt: moment(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss')
+      createAt: moment.utc(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss'),
+      createdBy: sl.createdBy || { username: '-' },
+      modifiedBy: sl.modifiedBy || { username: '-' },
+      modifiedAt: sl.modifiedAt ? moment.utc(sl.modifiedAt).local().format('DD-MM-YYYY HH:mm:ss') : '-'
       // createdAt: sl.createdAt
     }
   })
@@ -208,7 +256,7 @@ const compSurveyList = computed(() => {
 
 </script>
 <template>
-  {{ indexedDBList }}
+  <!-- {{ indexedDBList }} -->
   <!-- {{ surveyList.map(l => l.createdAt) }} -->
   <div class="container h-full">
     <!-- <pre>{{ surveyList }}</pre> -->
@@ -224,7 +272,9 @@ const compSurveyList = computed(() => {
         <th class="py-3 px-6">สถานีถัดไป</th> -->
         <!-- <th class="py-3 px-6">หลักกิโลเมตร</th> -->
         <th class="py-3 px-6">สร้างโดย</th>
-        <th class="py-3 px-6">สร้างเมื่อ</th>
+        <th class="py-3 px-6">แก้ไขโดย</th>
+        <th class="py-3 px-6">แก้ไขเมื่อ</th>
+        <th class="py-3 px-6">ดาวน์โหลด</th>
       </template>
       <template #tbody="{ item, index }">
         <td class="py-2 px-4">
@@ -254,16 +304,33 @@ const compSurveyList = computed(() => {
           <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.createdBy.username }}</router-link>
         </td>
         <td class="py-2 px-4">
-          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.createdAt }}</router-link>
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.modifiedBy.username }}</router-link>
         </td>
+        <!-- <td class="py-2 px-4">
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.createAt }}</router-link>
+        </td> -->
         <td class="py-2 px-4">
+          <router-link :to="{ path: `form/${item.id}`}" class="capitalize hover:text-blue-500">{{ item.modifiedAt }}</router-link>
+        </td>
+        <!-- <td class="py-2 px-4">
           <button type="button" @click="handleClickDelete(index, item.id)">
             <svg class="w-6 h-6 text-red-500 hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
           </button>
+        </td> -->
+        <td class="py-2 px-4">
+          <button @click="handleDownloadPDF()" type="button" class="text-blue-500 hover:text-blue-800 font-medium text-sm p-2.5 text-center inline-flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
+            </svg>
+            <span class="sr-only">Download</span>
+          </button>
+
+
+
         </td>
       </template>
     </Table>
     <TailTable :count="count" :page="page" :per-page="perPage" @page="getSurveyList2($event)"></TailTable>
-    <button @click="formData()">FORMDATA</button>
+    <!-- <button @click="formData()">FORMDATA</button> -->
   </div>
 </template>

@@ -61,7 +61,7 @@ module.exports = defineConfig({
     workboxOptions: {
       navigateFallback: 'index.html',
       skipWaiting: true,
-      clientsClaim: true,
+      // clientsClaim: true,
       runtimeCaching: [
         {
           urlPattern: new RegExp(`${process.env.VUE_APP_BACK_END_URL}/api`),

@@ -28,7 +28,10 @@
     "situation": [],
     "location": [],
     "defectPattern": [],
-    "surfaceDefectPattern": []
+    "surfaceDefectPattern": [],
+    "plan": null,
+    "elevation": null,
+    "section": null
   },
   "trackDamageSurvey": {
     "uploadImages": [],

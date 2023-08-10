@@ -1,4 +1,5 @@
 <script setup>
+import SignaturePad from 'signature_pad'
 import { ref, reactive, onMounted, computed, watch, onUnmounted } from 'vue'
 const props = defineProps({
   isPreview: {
@@ -46,9 +47,17 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue', 'onEvent'])
 const signaturePad = ref(props.id)
-const activeButton = ref(true)
+const isDraw = ref(false)
+const fn = (() => {
+  return loadSignature()
+})
 
-defineExpose({ activeButton })
+defineExpose({
+  fn,
+  plan: () => loadSignature(),
+  elevation: () => loadSignature(),
+  section: () => loadSignature()
+})
 onMounted(() => {
   loadSignature()
 })
@@ -57,10 +66,9 @@ const loadSignature = () => {
     signaturePad.value.lockSignaturePad()
     if (props.modelValue) signaturePad.value?.fromDataURL(props.modelValue)
   } else {
+    signaturePad.value.lockSignaturePad()
     if (props.modelValue) signaturePad.value?.fromDataURL(props.modelValue)
   }
-  // console.log();
-  onEnd()
 }
 const undo = () => {
   signaturePad.value.undoSignature()
@@ -70,6 +78,14 @@ const undo = () => {
 const clear = () => {
   signaturePad.value.clearSignature()
   emit('update:modelValue', null)
+}
+const handleDraw = () => {
+  isDraw.value = !isDraw.value
+  if (isDraw.value) {
+    !signaturePad.value.openSignaturePad()
+  } else {
+    signaturePad.value.lockSignaturePad()
+  }
 }
 const onBegin = () => { emit('onEvent', true) }
 const onEnd = () => {
@@ -87,13 +103,14 @@ const compCustomStyle = computed(() => {
 </script>
 <template>
   <div :class="`w-fit flex flex-col items-center border p-0 ${error ? 'border-red-600' : 'border-gray-200'} gap-2`">
-    <div class="flex">
+    <div v-if="!props.isPreview" class="flex">
       <button @click="undo" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-x rounded-bl-md text-sm px-5 py-1">ย้อนกลับ</button>
+      <button @click="handleDraw()" type="button" :class="`${ isDraw ? 'text-white bg-blue-700 hover:bg-blue-700' : 'text-gray-900 hover:bg-gray-100' } font-medium border-b border-r text-sm px-5 py-1`">วาด</button>
       <button @click="clear" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r text-sm px-5 py-1">เคลียร์</button>
       <!-- <button @click="emit('onSubmit')" type="button" class="text-gray-900 hover:bg-gray-100 font-medium border-b border-r rounded-br-md text-sm px-5 py-1">Submit</button> -->
     </div>
-    <div class="p-2" :class="`w-[${width}] h-[${height}]`">
-      <VueSignaturePad :customStyle="style" :options="{ onBegin, onEnd, penColor: penColor, maxWidth: 1.5 }" ref="signaturePad" />
+    <div class="p-2">
+      <VueSignaturePad :width="width" :height="height" :customStyle="style" :options="{ onBegin, onEnd, penColor: penColor, maxWidth: 1.5 }" ref="signaturePad" />
     </div>
     <slot></slot>
     <!-- <label class="pb-1 flex flex-col items-center text-sm font-medium text-gray-900 dark:text-white">ผู้สำรวจและบันทึกความเสียหาย</label> -->

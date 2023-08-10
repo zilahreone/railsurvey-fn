@@ -50,16 +50,16 @@ const install = async () => {
       <div class="flex items-center text-center lg:text-left px-8 md:px-12 lg:w-1/2">
         <div>
           <h2 class="text-3xl font-semibold text-gray-800 md:text-4xl">บันทึกความเสียหายของ <span
-              class="text-indigo-600">รางรถไฟ</span></h2>
-          <p class="mt-2 text-sm text-gray-500 md:text-base">
-            เว็บไซต์นี้จัดทำขึ้นเพื่อ ใช้ในการตรวจสอบความสมบูรณ์ หรือความผิดปกติของรางรถไฟ
-            เพื่อวิเคราห์ความรุนแรงของความเสียหาย และพิจารณาในการซ่อมแซมต่อไป
-          </p>
-          <div class="flex justify-center lg:justify-start mt-6">
-            <router-link to="/form"
+            class="text-indigo-600">รางรถไฟ</span></h2>
+            <p class="mt-2 text-sm text-gray-500 md:text-base">
+              เว็บไซต์นี้จัดทำขึ้นเพื่อ ใช้ในการตรวจสอบความสมบูรณ์ หรือความผิดปกติของรางรถไฟ
+              เพื่อวิเคราห์ความรุนแรงของความเสียหาย และพิจารณาในการซ่อมแซมต่อไป
+            </p>
+            <div class="flex justify-center lg:justify-start mt-6">
+              <router-link to="/form"
               class="px-4 py-3 bg-gray-900 text-gray-200 text-xs font-semibold rounded hover:bg-gray-800">เริ่ม
               สำรวจความเสียหาย</router-link>
-            <router-link to="/survey-list"
+              <router-link to="/survey-list"
               class="ml-4 px-4 py-3 bg-gray-500 text-gray-200 text-xs font-semibold rounded hover:bg-gray-800">
               รายการสำรวจความเสียหาย</router-link>
             <!-- <a class="mx-4 px-4 py-3 bg-gray-300 text-gray-900 text-xs font-semibold rounded hover:bg-gray-400"

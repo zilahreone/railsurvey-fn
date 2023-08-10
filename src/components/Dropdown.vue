@@ -38,6 +38,7 @@ const handleSelect = (value) => {
   emit('update:modelValue', value)
 }
 const handleEmit = (value) => {
+  isActive.value = false
   let emitValue = value
   if (props.type === 'number') {
     emitValue = parseInt(value)
@@ -53,11 +54,15 @@ const compWeight = computed(() => {
   }
   return props.items
 })
+const compValue = computed(() => {
+  return props.items.filter(item => item.value === props.modelValue)[0]?.key || props.modelValue
+})
 </script>
 <template>
+  <!-- {{ compValue }} -->
   <div>
     <div class="relative">
-      <input :disabled="isPreview" @input="handleEmit($event.target.value)" :value="modelValue" :type="type" :class="error ? '_input_error': '_input'" :placeholder="placeholder">
+      <input :disabled="isPreview" @input="handleEmit($event.target.value)" :value="compValue" :type="type" :class="[error ? '_input_error': '_input']" :placeholder="placeholder">
       <button :disabled="isPreview" @click="isActive = !isActive" :class="`absolute ${type === 'number' ? 'right-8' : 'right-3'} bottom-2.5 text-sm text-gray-500`">
         <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor"
           viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
