@@ -106,6 +106,7 @@ const handleGetLatLong = () => {
     handleEmit({ name: 'generalSurvey.coordinates.longitude', value: p.longitude })
   }, (err) => {
     console.error(err);
+    toast.error('ไม่สามารถระบุพิกัดได้')
   }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 })
 }
 
@@ -322,17 +323,17 @@ const compStationItems = computed(() => {
             </div>
             <div>
               <label class="_label-sm">พิกัด ละติจูด</label>
-              <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.latitude" @on-click="handleGetLatLong()"></InputIcon>
+              <InputIcon :is-preview="isPreview" type="number" v-model="railSurvey.generalSurvey.coordinates.latitude" :error="v$.generalSurvey.coordinates.latitude.$error" @on-click="handleGetLatLong()"></InputIcon>
               <!-- <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.latitude" @on-click="handleGetLatLong()" :error="v$.generalSurvey.coordinates.latitude.$error"></InputIcon> -->
               <!-- <input :disabled="isPreview" :value="railSurvey.generalSurvey.coordinates.latitude" type="text" name="generalSurvey.coordinates.latitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.latitude.$error ? '_input_error' : '_input' " required> -->
-              <!-- <p v-if="v$.generalSurvey.coordinates.latitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.latitude.$errors[0].$message }}</p> -->
+              <p v-if="v$.generalSurvey.coordinates.latitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.latitude.$errors[0].$message }}</p>
             </div>
             <div>
               <label class="_label-sm">พิกัด ลองติจูด</label>
-              <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.longitude" @on-click="handleGetLatLong()"></InputIcon>
+              <InputIcon :is-preview="isPreview" type="number" v-model="railSurvey.generalSurvey.coordinates.longitude" :error="v$.generalSurvey.coordinates.longitude.$error" @on-click="handleGetLatLong()"></InputIcon>
               <!-- <InputIcon :is-preview="isPreview" v-model="railSurvey.generalSurvey.coordinates.longitude" @on-click="handleGetLatLong()" :error="v$.generalSurvey.coordinates.longitude.$error"></InputIcon> -->
               <!-- <input :disabled="isPreview" :value="railSurvey.generalSurvey.coordinates.longitude" type="text" name="generalSurvey.coordinates.longitude" @input="handleEmit($event.target)" :class="v$.generalSurvey.coordinates.longitude.$error ? '_input_error' : '_input' " required> -->
-              <!-- <p v-if="v$.generalSurvey.coordinates.longitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.longitude.$errors[0].$message }}</p> -->
+              <p v-if="v$.generalSurvey.coordinates.longitude.$error" class="text-sm text-red-600">{{ v$.generalSurvey.coordinates.longitude.$errors[0].$message }}</p>
             </div>
           </div>
           <div class="grid sm:grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-2">
@@ -462,7 +463,7 @@ const compStationItems = computed(() => {
             <p v-if="v$.railDamageSurvey.location.$error" class="text-sm text-red-600">{{ v$.railDamageSurvey.location.$errors[0].$message }}</p>
           </div>
           <div>
-            <label class="_label-lg">ลักณะความเสียหายที่เกิดขึ้น (Pattern, nature)</label>
+            <label class="_label-lg">ลักษณะความเสียหายที่เกิดขึ้น (Pattern, nature)</label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.railDamageSurvey.defectPattern.$error" v-model="railSurvey.railDamageSurvey.defectPattern" name="defectPattern" :items="variable.defectPattern" :disables="compDisablesDefectPattern"></SelectBtn>
             </div>

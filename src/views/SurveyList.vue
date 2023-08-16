@@ -258,7 +258,7 @@ const compSurveyList = computed(() => {
 <template>
   <!-- {{ indexedDBList }} -->
   <!-- {{ surveyList.map(l => l.createdAt) }} -->
-  <div class="container h-full">
+  <div class="container">
     <!-- <pre>{{ surveyList }}</pre> -->
     <Table :tbody="compSurveyList">
       <template #thead>
@@ -274,7 +274,7 @@ const compSurveyList = computed(() => {
         <th class="py-3 px-6">สร้างโดย</th>
         <th class="py-3 px-6">แก้ไขโดย</th>
         <th class="py-3 px-6">แก้ไขเมื่อ</th>
-        <th class="py-3 px-6">ดาวน์โหลด</th>
+        <!-- <th class="py-3 px-6">ดาวน์โหลด</th> -->
       </template>
       <template #tbody="{ item, index }">
         <td class="py-2 px-4">
@@ -317,17 +317,14 @@ const compSurveyList = computed(() => {
             <svg class="w-6 h-6 text-red-500 hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
           </button>
         </td> -->
-        <td class="py-2 px-4">
+        <!-- <td class="py-2 px-4">
           <button @click="handleDownloadPDF()" type="button" class="text-blue-500 hover:text-blue-800 font-medium text-sm p-2.5 text-center inline-flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
             </svg>
             <span class="sr-only">Download</span>
           </button>
-
-
-
-        </td>
+        </td> -->
       </template>
     </Table>
     <TailTable :count="count" :page="page" :per-page="perPage" @page="getSurveyList2($event)"></TailTable>

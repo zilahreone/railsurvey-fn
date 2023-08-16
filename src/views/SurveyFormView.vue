@@ -32,6 +32,7 @@ onMounted(() => {
     railSurvey.generalSurvey.coordinates.longitude = p.longitude
   }, (err) => {
     console.error(err);
+    toast.error('ไม่สามารถระบุพิกัดได้')
   }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 })
   // console.log(moment(new Date()).format('YYYY-MM-DDTHH:mm'));
   // console.log(new Date('2018-06-14T20:00'));
@@ -61,7 +62,7 @@ const submitForm = () => {
   api.uploadFiles('/api/rail-survey', formData, null).then((resp) => {
     if (resp.status === 201) {
       toast.success('ส่งแบบฟอร์มสำเร็จ')
-      // router.push('/survey-list')
+      router.push('/survey-list')
     } else {
       resp.json().then((json) => {
         toast.error(JSON.stringify(json))
@@ -72,8 +73,8 @@ const submitForm = () => {
       toast.error('เกิดความผิดพลาดในการส่งแบบฟอร์ม')
     } else {
       toast('ส่งแบบฟอร์มออฟไลน์สำเร็จ')
+      router.push('/survey-list')
     }
-    // router.push('/survey-list')
     // navigator.serviceWorker.ready.then(registration => {
     //   console.log('registration')
     //   registration.sync.register('some-unique-tag')

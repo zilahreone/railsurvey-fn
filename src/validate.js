@@ -17,12 +17,12 @@ export default function (railForm, railSurvey) {
       if (key1 === 'generalSurvey') {
         Object.keys(railForm[key1]).forEach((key2) => {
           rule[key1][key2] = {}
-          if (!['kilometer', 'coordinates'].includes(key2)) {
-          // if (key2 !== 'kilometer') {
-            if (['nearby', 'railType', 'telegram'].includes(key2)) { 
+          // if (!['kilometer', 'coordinates'].includes(key2)) {
+          if (key2 !== 'kilometer') {
+            if (['coordinates', 'nearby', 'railType', 'telegram'].includes(key2)) { 
               if (key2 === 'coordinates') {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {
-                  rule[key1][key2][key3] = { decimal, custom: helpers.withMessage('Value must be positive decimal', (value) => value && value > 0) }
+                  rule[key1][key2][key3] = { custom: helpers.withMessage('Value must be latitude, longitude format', (value) => !value || /^((\-?|\+?)?\d+(\.\d+)?)$/g.test(value)) }
                 })
               } else if (key2 === 'railType') {
                 Object.keys(railForm[key1][key2]).forEach((key3) => {

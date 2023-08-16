@@ -14,15 +14,21 @@ const navigation = [
   { name: 'หน้าหลัก', href: '/' },
   { name: 'หน้าสำรวจ', href: '/form' },
   { name: 'รายการสำรวจ', href: '/survey-list' },
-  { name: 'เพิ่มเติม', href: '/other' },
+  { name: 'เพิ่มเติม', href: '/other' }
 ]
 const store = useStore()
 const route = useRoute()
 const router = useRouter()
 const isActiveProfile = ref(false)
 const handleLogout = () => {
+  caches.keys().then((keyList) => {
+    keyList.map((key) => {
+      return caches.delete(key)
+    })
+  })
   Cookies.remove('isAuthenticated')
-  router.go(0)
+  location.reload(true)
+  // router.go(0)
 }
 const showHambergerMenu = ref(false)
 
@@ -38,10 +44,18 @@ const showHambergerMenu = ref(false)
       <div class="hidden w-full md:flex md:w-auto justify-end -mr-10 bg-gradient-to-l from-gray-200">
         <router-link v-for="(nav, index) in navigation" :key="index" v-slot="{ href, route, navigate, isActive, isExactActive }" :to="{ path: nav.href }">
           <div :class="['h-full flex items-center justify-center hover:bg-[#952124] hover:text-white font-semibold w-36 -mb-0.5 -ml-5', isActive ? 'text-white bg-[#952124]' : 'text-gray-800']"
-            :style="{'clip-path': `polygon(${index === 0 ? '15%' : '15%'} 0, 100% 0%, ${navigation.length === index + 1 ? '100%' : '85%'} 100%, 0% 100%)`}">
+            :style="{'clip-path': `polygon(${index === 0 ? '15%' : '15%'} 0, 100% 0%, ${navigation.length === index + 1 ? '85%' : '85%'} 100%, 0% 100%)`}">
             {{ nav.name }}
           </div>
         </router-link>
+        <div @click="handleLogout()" class="h-full flex items-center justify-center hover:bg-[#952124] hover:text-white font-semibold w-36 -mb-0.5 -ml-5 text-gray-800 cursor-pointer"
+          style="clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);">
+          ออกจากระบบ
+        </div>
+        <!-- <div
+          class="['h-full flex items-center justify-center hover:bg-[#952124] hover:text-white font-semibold w-36 -mb-0.5 -ml-5']"
+          style="{'clip-path': `polygon(15% 0, 100% 0%, 85% 100%, 0% 100%)`}"
+        >sdfsdff</div> -->
       </div>
       <div class="inline-flex items-center md:hidden">
         <button @click="showHambergerMenu = true" type="button"
@@ -75,6 +89,7 @@ const showHambergerMenu = ref(false)
                 <a :class="`block p-4 text-sm font-semibold ${isActive ? 'text-blue-500 font-medium'  : 'text-gray-dark font-normal'} hover:bg-blue-50 hover:text-blue-600 rounded`" href="#">{{ nav.name }}</a>
               </router-link>
             </li>
+            <div @click="handleLogout()" :class="`block p-4 text-sm text-gray-dark hover:bg-blue-50 hover:text-blue-600 rounded cursor-pointer`">ออกจากระบบ</div>
           </ul>
         </div>
         <div class="mt-auto">

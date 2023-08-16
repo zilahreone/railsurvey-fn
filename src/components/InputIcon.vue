@@ -9,6 +9,13 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  type: {
+    type: String,
+    default: null,
+    validator(value) {
+      return ['text', 'number'].includes(value)
+    }
+  },
   placeholder: {
     type: String,
     default: null
@@ -36,7 +43,7 @@ const weight = ref(null)
 <template>
   <div>
     <div class="relative">
-      <input :disabled="isPreview" :value="modelValue" @input="emit('update:modelValue', ($event.target.value))" type="text" :class="error ? '_input_error' : '_input'" :placeholder="placeholder">
+      <input :disabled="isPreview" :value="modelValue" @input="emit('update:modelValue', type === 'number' ? parseFloat($event.target.value) || null : $event.target.value)" type="text" :class="error ? '_input_error' : '_input'" :placeholder="placeholder">
       <button :disabled="isPreview" @click="emit('onClick')" class="absolute right-3 bottom-2.5 text-sm text-gray-500">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
           class="w-4 h-4">
