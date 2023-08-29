@@ -14,10 +14,12 @@ const route = useRoute()
   <div v-if="route.name === 'login'">
     <Login></Login>
   </div>
-  <div v-else class="flex flex-col h-screen justify-between">
-    <Header></Header>
-    <router-view></router-view>
-    <Footer></Footer>
+  <div v-else class="">
+    <div class="flex flex-col justify-between min-h-screen">
+      <Header></Header>
+      <router-view></router-view>
+      <Footer></Footer>
+    </div>
   </div>
   <!-- <div class="flex flex-col min-h-screen">
     <div class="grow-0">

@@ -114,6 +114,18 @@ const compCSSUploadBtn = computed(() => {
         class="block w-full text-xs text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
       >
     </div>
+    <!-- <div>
+      <div class="flex flex-col bg-gray-50 border border-gray-300 rounded-lg">
+        <div class="flex items-center text-white">
+          <label class="bg-gray-dark" :for="id">เลือกรูปภาพ</label>
+          <input style="visibility:hidden;" :disabled="isPreview" @change="handleUploadImages($event)" title="เลือกรูปภาพ" :name="id" accept="image/x-png,image/gif,image/jpeg" :id="id" type="file" multiple="">
+        </div>
+      </div>
+    </div>
+    <div class="inline-flex justify-items-center border border-gray-300 rounded-lg cursor-pointer bg-gray-50">
+      <label :for="id" class="justify-items-center justify-center bg-gray-dark rounded-lg text-white">เลือกรูปภาพ</label>
+      <input style="visibility:hidden;" :disabled="isPreview" @change="handleUploadImages($event)" title="เลือกรูปภาพ" :name="id" accept="image/x-png,image/gif,image/jpeg" :id="id" type="file" multiple="">
+    </div> -->
     <slot name="default">
       <div class="flex flex-col gap-1">
         <div class="flex flex-wrap gap-1">

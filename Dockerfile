@@ -6,8 +6,8 @@ COPY --chown=node:node package*.json ./
 COPY --chown=node:node . .
 
 RUN npm install
-ENV VUE_APP_BACK_END_URL=https://api-dev.rail-survey.app.meca.in.th
-# ENV VUE_APP_BACK_END_URL=https://api.rail-survey.app.meca.in.th
+# ENV VUE_APP_BACK_END_URL=https://api-dev.rail-survey.app.meca.in.th
+ENV VUE_APP_BACK_END_URL=https://api.rail-survey.app.meca.in.th
 # ENV VUE_APP_BACK_END_URL=https://api.rail-survey.web.meca.in.th
 ENV VUE_APP_IMAGE_DIR=uploads_file
 #PRODUCTION

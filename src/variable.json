@@ -636,13 +636,13 @@
       "value": "round"
     },
     {
-      "key": "หินฟอกขาว (Bleached rocks)",
+      "key": "หินฟอกขาว (Bleached Rocks)",
       "value": "bleachedRocks"
     }
   ],
   "ballastCompaction": [
     {
-      "key": "นานๆครั้ง",
+      "key": "นาน ๆ ครั้ง",
       "value": "infrequent"
     },
     {
