@@ -177,6 +177,7 @@ const compSubmitForm = computed(() => {
   })
   rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.file ? image.filename : image.originalname)
   rtnRail.modifiedBy = rtnRail.createdBy.id
+  rtnRail.modifiedByName = Cookies.get('isAuthenticated')
   rtnRail.createdBy = rtnRail.createdBy.id
   rtnRail.modifiedAt = moment().utc().format('YYYY-MM-DDTHH:mm:ss') + 'Z'
   return rtnRail

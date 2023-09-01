@@ -231,6 +231,7 @@ const toDataURL = async (url) => {
 const calSurveyForm = (sl) => {
   return new Promise((resolve, reject) => {
     let serveyForm = {
+      id: sl.id,
       generalSurvey: {
         coordinates: {
           latitude: sl.generalSurvey.coordinates.latitude,
@@ -266,7 +267,7 @@ const calSurveyForm = (sl) => {
       trackDamageSurvey: {
         uploadImages: sl.trackDamageSurvey.uploadImages.map(img => `${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${img}`),
         trackGeometryCondition: sl.trackDamageSurvey.trackGeometryCondition.map(track => [...variable.integrity, ...variable.trackGeometry].find(v => v.value === track)?.key),
-        ballastCondition: sl.trackDamageSurvey.ballastCondition.map(bal => [...variable.ballast, ...variable.ballastCondition].find(v => v.value === bal)?.key.split(/\s/)[0]),
+        ballastCondition: sl.trackDamageSurvey.ballastCondition.map(bal => [...variable.ballast, ...variable.ballastCondition].find(v => v.value === bal)?.key.split(/\(/)[0].trim()),
         ballastCompaction: variable.ballastCompaction.find(v => v.value === sl.trackDamageSurvey.ballastCompaction)?.key,
         sleeperCondition: sl.trackDamageSurvey.sleeperCondition.map(sc => [...variable.sleeper, ...variable.sleeperCondition].find(v => v.value === sc)?.key.split(/\s/)[0]),
         sleeperType: variable.sleeperType.find(st => st.value === sl.trackDamageSurvey.sleeperType)?.key,
@@ -275,14 +276,15 @@ const calSurveyForm = (sl) => {
       maintenanceRate: {
         severity: variable.damagesLevel.filter(damage => damage.value === sl.maintenanceRate.severity)[0].key,
         isAnalyzeDamage: variable.analyse.filter(an => an.value === sl.maintenanceRate.isAnalyzeDamage)[0].key,
-        comment: sl.maintenanceRate.comment,
+        comment: sl.maintenanceRate.comment || ' ',
         maintenanceRecord: {
           hasMaintenanceRecord: variable.maintenanceRecord.filter(mr => mr.value === sl.maintenanceRate.maintenanceRecord.hasMaintenanceRecord)[0].key,
           lastMaintenanceTimes: sl.maintenanceRate.maintenanceRecord.lastMaintenanceTimes ? variable.lastMaintenance.filter(lm => lm.value === sl.maintenanceRate.maintenanceRecord.lastMaintenanceTimes)[0].key : '-',
           yearlyMaintenanceTimes: sl.maintenanceRate.maintenanceRecord.yearlyMaintenanceTimes ? variable.maintenanceTime.filter(mt => mt.value === sl.maintenanceRate.maintenanceRecord.yearlyMaintenanceTimes)[0].key : '-'
         }
       },
-      signature: sl.signature
+      signature: sl.signature,
+      createdByName: sl.createdByName
     };
     Promise.resolve()
       .then(() => sl.railDamageSurvey.uploadImages.map((img) => toDataURL(`${process.env.VUE_APP_BACK_END_URL}/${process.env.VUE_APP_IMAGE_DIR}/${img}`)))
@@ -458,28 +460,6 @@ const handleDownloadPDF = async (sl) => {
         ]
       },
       ...railPES(),
-      // {
-      //   absolutePosition: { x: 352, y: tableAreaCondition().length > 1 ? 269 : 249 },
-      //   image: surveyForm.railDamageSurvey.plan,
-      //   width: 120
-      // },
-      // {
-      //   absolutePosition: { x: 353, y: tableAreaCondition().length > 1 ? 331.5 : 311.5 },
-      //   image: surveyForm.railDamageSurvey.elevation,
-      //   width: 120
-      // },
-      // {
-      //   absolutePosition: { x: 483, y: tableAreaCondition().length > 1 ? 267 : 247 },
-      //   image: surveyForm.railDamageSurvey.section,
-      //   width: 80
-      // },
-      // {
-      //   table: {
-      //     body: [
-      //       surveyForm.railDamageSurvey.uploadImages.map((image) => Object.assign({ image: image, width: 100 }))
-      //     ]
-      //   }
-      // },
       {
         layout: 'noBorders',
         table: {
@@ -565,28 +545,28 @@ const handleDownloadPDF = async (sl) => {
             // width: '40%',
             columns: [
               [
-                { text: 'การซ่อมบำรุง', decoration: 'underline', margin: [0, 5, 0, 5] },
+                { text: 'การซ่อมบำรุง', style: 'fieldValue', margin: [0, 5, 0, 5] },
                 {
                   ul: [
                     {
                       text: [
                         { text: 'ประวัติการซ่อมบำรุง' },
-                        { text: `${surveyForm.maintenanceRate.maintenanceRecord.hasMaintenanceRecord}\n`, decoration: 'underline' },
+                        { text: `${surveyForm.maintenanceRate.maintenanceRecord.hasMaintenanceRecord}\n`, style: 'fieldValue' },
                         { text: 'การซ่อมบำรุงครั้งล่าสุด' },
-                        { text: `${surveyForm.maintenanceRate.maintenanceRecord.lastMaintenanceTimes}\n`, decoration: 'underline' },
+                        { text: `${surveyForm.maintenanceRate.maintenanceRecord.lastMaintenanceTimes}\n`, style: 'fieldValue' },
                         { text: 'ความถี่ในการซ่อมบำรุงในรอบปี' },
-                        { text: `${surveyForm.maintenanceRate.maintenanceRecord.yearlyMaintenanceTimes}`, decoration: 'underline' }
+                        { text: `${surveyForm.maintenanceRate.maintenanceRecord.yearlyMaintenanceTimes}`, style: 'fieldValue' }
                       ],
                     }
                   ]
                 },
-                { text: 'การประเมินความเสียหาย', decoration: 'underline', margin: [0, 5, 0, 5] },
+                { text: 'การประเมินความเสียหาย', style: 'fieldValue', margin: [0, 5, 0, 5] },
                 {
                   ul: [
                     {
                       text: [
                         { text: 'ความรุนแรงของความเสียหาย' },
-                        { text: `${surveyForm.maintenanceRate.severity}`, decoration: 'underline' },
+                        { text: `${surveyForm.maintenanceRate.severity}`, style: 'fieldValue' },
                       ],
                     }
                   ]
@@ -609,7 +589,7 @@ const handleDownloadPDF = async (sl) => {
                     {
                       text: [
                         { text: 'ควรส่งห้องปฏิบัติการเพื่อทำการวิเคราะห์สาเหตุ\nของความเสียหาย' },
-                        { text: `${surveyForm.maintenanceRate.isAnalyzeDamage}`, decoration: 'underline' },
+                        { text: `${surveyForm.maintenanceRate.isAnalyzeDamage}`, style: 'fieldValue' },
                       ],
                     }
                   ]
@@ -650,8 +630,8 @@ const handleDownloadPDF = async (sl) => {
                     },
                   ]
                 },
-                // { text: , margin: [0, 5, 0, 5] }
-                { text: '(ผู้สำรวจและบันทึกความเสียหาย)', margin: [40, 5, 0, 0] }
+                { text: surveyForm.createdByName, margin: [0, 5, 0, 0], alignment: 'center' },
+                { text: '(ผู้สำรวจและบันทึกความเสียหาย)', margin: [0, -2, 0, 0], alignment: 'center' }
               ]
             ]
           }
@@ -662,7 +642,7 @@ const handleDownloadPDF = async (sl) => {
         canvas: [
           {
             type: 'line',
-            x1: 305, y1: -300,
+            x1: 305, y1: -310,
             x2: 305, y2: 0,
             dash: { length: 2, space: 2 }, lineWidth: 2
           },
@@ -814,7 +794,7 @@ const handleDownloadPDF = async (sl) => {
       fontSize: 10
     }
   }
-  pdfMake.createPdf(docDefinition).open();
+  pdfMake.createPdf(docDefinition).download(`${surveyForm.id}.pdf`);
 }
 const compSurveyList = computed(() => {
   // console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
@@ -832,8 +812,8 @@ const compSurveyList = computed(() => {
       // areaCondition: sl.generalSurvey.areaCondition.map((ac) => variable.damageAreaPrperties.filter((area) => area.value === ac)[0]).map((all) => all.key.split(/\s/)[0]), // check specific
       areaCondition: sl.generalSurvey.areaCondition.map((ac, index) => variable.damageAreaPrperties.find(dap => dap.value === ac)?.key.split(/\s/)[0] || ac),
       createAt: moment.utc(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss'),
-      createdBy: sl.createdBy || { username: '-' },
-      modifiedBy: sl.modifiedBy || { username: '-' },
+      createdBy: sl.createdByName ? { username: sl.createdByName} : { username: '-' },
+      modifiedBy: sl.modifiedByName ? { username: sl.modifiedByName } : { username: '-' },
       modifiedAt: sl.modifiedAt ? moment.utc(sl.modifiedAt).local().format('DD-MM-YYYY HH:mm:ss') : '-',
       survey: sl
       // createdAt: sl.createdAt

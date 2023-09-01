@@ -107,6 +107,7 @@ const compSubmitForm = computed(() => {
   rtnRail.railDamageSurvey.uploadImages = rtnRail.railDamageSurvey.uploadImages.map(image => image.filename)
   rtnRail.createdAt = time
   // rtnRail.createdBy = Cookies.get('isAuthenticated')
+  rtnRail.createdByName = Cookies.get('isAuthenticated')
   rtnRail.createdBy = `${process.env.VUE_APP_USER_ID}`
   return rtnRail
 })
