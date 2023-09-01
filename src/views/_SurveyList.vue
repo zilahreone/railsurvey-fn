@@ -29,6 +29,7 @@ const page = ref(1)
 
 const isReady = ref(false)
 const modalActive = ref(false)
+const isWaitPdf = ref(false)
 
 const pdfForm = ref()
 
@@ -218,18 +219,24 @@ const calSurveyForm = (sl) => {
   const dateTimeFormat = (datetime) => {
     const date = datetime.split(/\s/)[0].split('-')
     const mounth = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
-    return `${date[0]} ${mounth[parseInt(date[1]) - 1]} ${parseInt(date[2]) + 543} ${datetime.split(/\s/)[1]} น.`
+    let dt = `${date[0]} ${mounth[parseInt(date[1]) - 1]} ${parseInt(date[2]) + 543}`
+    console.log(datetime.split(/\s/)[1]);
+    if (datetime.split(/\s/)[1]) {
+      dt = `${dt} ${datetime.split(/\s/)[1]} น.`
+    }
+    return dt
   }
   return new Promise((resolve, reject) => {
     let serForm = {
       id: sl.id,
-      datetime: dateTimeFormat(moment.utc(new Date()).local().format('DD-MM-YYYY HH:mm:ss')),
+      datetime: dateTimeFormat(moment.utc(new Date()).local().format('DD-MM-YYYY')),
       railImgs: ['rail/rail_1.png', 'rail/rail_2.jpg', 'rail/rail_3.jpg'],
       generalSurvey: {
         coordinates: {
           latitude: sl.generalSurvey.coordinates.latitude,
           longitude: sl.generalSurvey.coordinates.longitude,
         },
+        coordinates: sl.generalSurvey.coordinates.latitude && sl.generalSurvey.coordinates.longitude ? `${sl.generalSurvey.coordinates.latitude}, ${sl.generalSurvey.coordinates.longitude}` : '-',
         telegram: {
           telegramBefore: sl.generalSurvey.telegram.telegramBefore,
           telegramAfter: sl.generalSurvey.telegram.telegramAfter,
@@ -262,10 +269,10 @@ const calSurveyForm = (sl) => {
         // trackGeometryCondition: sl.trackDamageSurvey.trackGeometryCondition.map(track => [...variable.integrity, ...variable.trackGeometry].find(v => v.value === track)?.key),
         trackGeometryCondition: sl.trackDamageSurvey.trackGeometryCondition.includes('perfect') ? { isPerfect: 'สมบูรณ์', condition: [].join(', ') } : { isPerfect: 'ไม่สมบูรณ์', condition: sl.trackDamageSurvey.trackGeometryCondition.map(track => variable.trackGeometry.find(v => v.value === track)?.key).join(', ')},
         // ballastCondition: sl.trackDamageSurvey.ballastCondition.map(bal => [...variable.ballast, ...variable.ballastCondition].find(v => v.value === bal)?.key.split(/\(/)[0].trim()),
-        ballastCondition: sl.trackDamageSurvey.ballastCondition.includes('perfect') ? { isPerfect: 'สมบูรณ์หรือเต็มมาตรฐาน', condition: [].join(', ') } : { isPerfect: 'ไม่สมบูรณ์', condition: sl.trackDamageSurvey.ballastCondition.map(bc => variable.ballastCondition.find(v => v.value === bc)?.key.split(/\(/)[0].trim()).join(', ')},
+        ballastCondition: sl.trackDamageSurvey.ballastCondition.includes('perfect') ? { isPerfect: 'สมบูรณ์', condition: [].join(', ') } : { isPerfect: 'ไม่สมบูรณ์', condition: sl.trackDamageSurvey.ballastCondition.map(bc => variable.ballastCondition.find(v => v.value === bc)?.key.split(/\(/)[0].trim()).join(', ')},
         ballastCompaction: variable.ballastCompaction.find(v => v.value === sl.trackDamageSurvey.ballastCompaction)?.key,
         // sleeperCondition: sl.trackDamageSurvey.sleeperCondition.map(sc => [...variable.sleeper, ...variable.sleeperCondition].find(v => v.value === sc)?.key.split(/\s/)[0]),
-        sleeperCondition: sl.trackDamageSurvey.sleeperCondition.includes('defective') ? { isPerfect: 'ชำรุด', condition: sl.trackDamageSurvey.sleeperCondition.map(sc => variable.sleeperCondition.find(v => v.value === sc)?.key).join(', ')} : { isPerfect: variable.sleeperCondition.find(v => v.value === sl.trackDamageSurvey.sleeperCondition[0])?.key.split(/\s/)[0], condition: [].join(', ') },
+        sleeperCondition: sl.trackDamageSurvey.sleeperCondition.includes('defective') ? { isPerfect: 'ชำรุด', condition: sl.trackDamageSurvey.sleeperCondition.map(sc => variable.sleeperCondition.find(v => v.value === sc)?.key).join(', ')} : { isPerfect: variable.sleeper.find(v => v.value === sl.trackDamageSurvey.sleeperCondition[0])?.key, condition: [].join(', ') },
         sleeperType: variable.sleeperType.find(st => st.value === sl.trackDamageSurvey.sleeperType)?.key,
         trackFoundationCondition: variable.integrity.find(v => v.value === sl.trackDamageSurvey.trackFoundationCondition)?.key || sl.trackDamageSurvey.trackFoundationCondition
       },
@@ -300,16 +307,37 @@ const calSurveyForm = (sl) => {
 const downloadPDF = () => {
   const doc = new jsPDF({
     orientation: 'portrait',
-    unit: 'px',
+    unit: 'mm',
     format: 'a4',
     putOnlyUsedFonts: true
   })
+  const detailBoost = 2;
+  const report = document.getElementById('testtest')
+  report.style.width = "1000px";
+  report.style.maxWidth = "1000px";
+  report.style.minWidth = "1000px";
+  report.style.display="block";
+  // document.getElementById("header").style.backgroundColor = 'red';
+  // const body = document.body
+  // body.css({ "width": "1000px", "max-width": "1000px", "min-width": "1000px" });
+  // report.css({ "width": "1000px", "max-width": "1000px", "min-width": "1000px", "display": "block" });
+  // EQCSS.apply()
+  
+  
+  // body.css({ "width": "100%", "max-width": "100%", "min-width": "100%" });
+  // report.css({ "display": "none" });
+  // EQCSS.apply();
   // doc.addFileToVFS('Sarabun-Thin.ttf', font);
   // doc.addFont('Sarabun-Thin.ttf', 'Sarabun', 'normal')
   // doc.setFont('Sarabun')
   // doc.text("Hello, World!", 100, 100);
   // doc.save("customFonts.pdf");
+  // console.log('11111');
+  isWaitPdf.value = true
   html2canvas(document.getElementById('testtest')).then(function(canvas) {
+    report.style.width = "100%";
+    report.style.maxWidth = "100%";
+    report.style.minWidth = "100%";
     // console.log(canvas);
     const imgData = canvas.toDataURL('image/png')
     const ratio = doc.internal.pageSize.getWidth() / canvas.width
@@ -317,53 +345,11 @@ const downloadPDF = () => {
     const height = canvas.height * ratio
     doc.addImage(imgData, 'PNG', 0, 0, width, height)
     doc.save(`${pdfForm.value.id}.pdf`)
-    // emit('update:modelValue', false)
+    isWaitPdf.value = false
+    modalActive.value = false
   })
+  // console.log('22222');
 }
-// const handleDownloadPDF = async (index) => {
-//   // console.log(base64Images.rmt.replace(/^./, '').replace(/.$/, ''));
-//   const surveyForm = await calSurveyForm(index)
-//   const doc = new jsPDF({
-//     orientation: 'portrait',
-//     unit: 'px',
-//     format: 'a4',
-//     putOnlyUsedFonts: true
-//   })
-//   doc.addFileToVFS('Sarabun-Thin.ttf', font);
-//   doc.addFont('Sarabun-Thin.ttf', 'Sarabun', 'normal')
-//   doc.setFont('Sarabun')
-//   // doc.text("Hello, World!", 100, 100);
-//   // doc.save("customFonts.pdf");
-//   html2canvas(document.getElementById('testtest')).then(function(canvas) {
-//     // console.log(canvas);
-//     const imgData = canvas.toDataURL('image/png')
-//     const ratio = doc.internal.pageSize.getWidth() / canvas.width
-//     const width = canvas.width * ratio
-//     const height = canvas.height * ratio
-//     doc.addImage(imgData, 'PNG', 0, 0, width, height)
-//     doc.save('sample-document.pdf')
-//   })
-//   // doc.html(document.getElementById('testtest'), {
-//   //   callback: function(doc) {
-//   //     doc.addFileToVFS('Sarabun-Thin.ttf', font);
-//   //     doc.addFont('Sarabun-Thin.ttf', 'Sarabun', 'normal')
-//   //     doc.setFont('Sarabun')
-//   //     // console.log(doc.internal.pageSize.getWidth())
-//   //     // console.log(doc.internal.pageSize.width)
-//   //     // Save the PDF
-//   //     doc.save('sample-document.pdf');
-//   //     // doc.output('dataurlnewwindow')
-//   //   },
-//   //   // margin: [0, 10, 0, 10],
-//   //   width: doc.internal.pageSize.getWidth(), //target width in the PDF document
-//   //   windowWidth: 1000 //window width in CSS pixels
-//   //   // autoPaging: 'text'
-//   // })
-//   // doc.addImage
-//   // doc.text(JSON.stringify(surveyForm), 10, 10, { maxWidth: 100 })
-//   // doc.addImage(, 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight())
-//   // doc.output('dataurlnewwindow')
-// }
 const handleDownloadPDF = async (form) => {
   const formPreview = await calSurveyForm(form)
   // console.log(formPreview);
@@ -383,6 +369,8 @@ const compSurveyList = computed(() => {
       station: variable.areas.filter(area => area.value === sl.generalSurvey.area)[0]?.zones.filter(zone => zone.value === sl.generalSurvey.zone)[0]?.stations.filter(station => station.value === sl.generalSurvey.station)[0]?.key,
       // areaCondition: sl.generalSurvey.areaCondition.map((ac) => variable.damageAreaPrperties.filter((area) => area.value === ac)[0]).map((all) => all.key.split(/\s/)[0]), // check specific
       createAt: moment.utc(sl.createdAt).local().format('DD-MM-YYYY HH:mm:ss'),
+      // createdBy: sl.createdBy ? sl.createdBy : { username: '-' },
+      // modifiedBy: sl.modifiedBy ? sl.modifiedBy : { username: '-' },
       createdBy: sl.createdByName ? { username: sl.createdByName} : { username: '-' },
       modifiedBy: sl.modifiedByName ? { username: sl.modifiedByName } : { username: '-' },
       modifiedAt: sl.modifiedAt ? moment.utc(sl.modifiedAt).local().format('DD-MM-YYYY HH:mm:ss') : '-',
@@ -479,8 +467,13 @@ const compSurveyList = computed(() => {
       <template #footer>
         <button @click="modalActive = false" data-modal-hide="extralarge-modal" type="button"
           class="_button-error">ยกเลิก</button>
-        <button @click="downloadPDF()" data-modal-hide="extralarge-modal" type="button"
-          class="_button">ดาวน์โหลด</button>
+        <button :disabled="isWaitPdf" @click="downloadPDF()" data-modal-hide="extralarge-modal" type="button" :class="isWaitPdf ? '_button-disable' : '_button'">
+          <svg v-if="isWaitPdf" aria-hidden="true" role="status" class="inline w-4 h-4 mr-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+          </svg>
+          ดาวน์โหลด
+        </button>
       </template>
     </Modal>
   </div>
