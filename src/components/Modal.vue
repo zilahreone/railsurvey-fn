@@ -90,8 +90,8 @@ const modal = computed(() => {
         </div>
       </div>
       <div v-if="content" id="extralarge-modal" tabindex="-1" class="fixed inset-0 z-10 overflow-y-auto">
-        <div class="flex justify-center min-h-full sm:p-8">
-          <div class="relative w-full h-full max-w-7xl">
+        <div class="flex justify-center min-h-fit sm:p-8">
+          <div class="relative w-fit h-full max-w-7xl">
             <!-- Modal content -->
             <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
               <!-- Modal header -->
@@ -112,7 +112,7 @@ const modal = computed(() => {
                 </button>
               </div>
               <!-- Modal body -->
-              <div class="p-2">
+              <div class="p-2 w-">
                 <slot name="content"></slot>
               </div>
             <!-- Modal footer -->
