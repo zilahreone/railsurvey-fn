@@ -14,7 +14,7 @@ const navigation = [
   { name: 'หน้าหลัก', href: '/' },
   { name: 'หน้าสำรวจ', href: '/form' },
   { name: 'รายการสำรวจ', href: '/survey-list' },
-  { name: 'เพิ่มเติม', href: '/other' }
+  { name: 'เพิ่มเติม', href: '/additional' }
 ]
 const store = useStore()
 const route = useRoute()

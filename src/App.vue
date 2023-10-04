@@ -15,11 +15,21 @@ const route = useRoute()
     <Login></Login>
   </div>
   <div v-else class="">
-    <div class="flex flex-col justify-between min-h-screen">
-      <Header></Header>
-      <router-view></router-view>
-      <Footer></Footer>
-    </div>
+    <!-- <div class="flex flex-col min-h-screen">
+      <div class="absolute inset-x-0 bottom-0">
+      </div>
+    </div> -->
+    <div class="flex flex-col h-screen">
+      <div class="">
+        <Header></Header>
+      </div>
+      <div class="flex-grow">
+        <router-view></router-view>
+      </div>
+      <div class="">
+        <Footer></Footer>
+      </div>
+  </div>
   </div>
   <!-- <div class="flex flex-col min-h-screen">
     <div class="grow-0">
