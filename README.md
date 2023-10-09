@@ -47,21 +47,11 @@ docker images
 docker image rm <docker_id>
 ```
 
-current directory rail-survey
-```
-sudo docker build -t inobox.azurecr.io/rail-survey:dev .
-```
-
-current directory garden
-```
-sudo docker build -t inobox.azurecr.io/rail-survey-backend:dev .
-```
-
 next step
 ```
 docker login inobox.azurecr.io
 user: inobox
 password: ve+4Txs07CLovaOTrIcTFv=z+9jla44p
-sudo docker push inobox.azurecr.io/rail-survey:dev
-sudo docker push inobox.azurecr.io/rail-survey-backend:dev
+sudo docker build -t inobox.azurecr.io/rail-survey:2.4 .
+sudo docker push inobox.azurecr.io/rail-survey:2.4
 ```

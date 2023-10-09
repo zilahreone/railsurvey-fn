@@ -59,6 +59,7 @@ module.exports = defineConfig({
     // }
     workboxPluginMode: 'GenerateSW',
     workboxOptions: {
+      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       navigateFallback: 'index.html',
       skipWaiting: true,
       // clientsClaim: true,
