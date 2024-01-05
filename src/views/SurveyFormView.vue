@@ -113,7 +113,7 @@ const compSubmitForm = computed(() => {
 })
 </script>
 <template>
-  <SurveyForm :is-preview="modalActive" :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey"
+  <SurveyForm v-if="!modalActive" :is-preview="modalActive" :id="modalActive ? 'parent' : ''" ref="surveyForm" v-model="railSurvey"
     :validate="v$" @on-submit="handleSubmit()"></SurveyForm>
   <Modal content v-model="modalActive">
     <template #content>
