@@ -29,11 +29,11 @@ onMounted(async() => {
 <template>
   <div id="testtest" class="px-10 py-0 w-[1000px] min-w-[1000px] max-w-[1000px]">
     <div class="border-b-4 border-blue-900 flex flex-row justify-between items-end">
-      <div class="flex items-center gap-4 mb-1">
-        <img class="object-contain h-10" :src="(require('@/assets/rmt-logo.png'))" alt="rmt-logo">
-        <img class="object-contain h-20" :src="(require('@/assets/srt-title.jpg'))" alt="srt-title">
+      <div class="flex items-center gap-4 mb-0">
+        <img class="object-contain h-7" :src="(require('@/assets/rmt-logo.png'))" alt="rmt-logo">
+        <img class="object-contain h-16" :src="(require('@/assets/srt-title.jpg'))" alt="srt-title">
       </div>
-      <p class="pb-2">วันที่รายงาน: {{ surveyForm.datetime }}</p>
+      <p class="py-2">วันที่รายงาน: {{ surveyForm.datetime }}</p>
     </div>
     <div class="pb-4 text-center text-lg font-semibold">
       บันทึกความเสียหายของ รางรถไฟ
@@ -88,10 +88,11 @@ onMounted(async() => {
             <div class="pt-8">
               <p class="pb-4">รูปภาพความเสียหายของราง</p>
               <div class="flex gap-1">
-                <template v-for="index in 3">
+                <img v-for="(image, index) in surveyForm.railDamageSurvey.uploadImages" class="object-contain h-52 w-64 border border-black" :src="image" :alt="index">
+                <!-- <template v-for="index in 3">
                   <img v-if="surveyForm.railDamageSurvey.uploadImages[index - 1]" class="object-contain h-28 border border-black" :src="(surveyForm.railDamageSurvey.uploadImages[index - 1])" :alt="index">
                   <div v-else class="border-2 border-black h-32 w-44 text-center pt-10">ภาพที่ {{ index }}</div>
-                </template>
+                </template> -->
               </div>
             </div>
           </div>
@@ -182,10 +183,11 @@ onMounted(async() => {
           </table>
           <p class="pb-4">รูปภาพความเสียหายของทาง</p>
           <div class="flex gap-1 pr-2">
-            <template v-for="index in 3">
+            <img v-for="(image, index) in surveyForm.trackDamageSurvey.uploadImages" class="object-contain h-52 w-64 border border-black" :src="image" :alt="index">
+            <!-- <template v-for="index in 3">
               <img v-if="surveyForm.trackDamageSurvey.uploadImages[index - 1]" class="object-contain h-28 border border-black" :src="(surveyForm.trackDamageSurvey.uploadImages[index - 1])" :alt="index">
               <div v-else class="border-2 border-black h-32 w-44 text-center pt-10">ภาพที่ {{ index }}</div>
-            </template>
+            </template> -->
           </div>
         </div>
         <div class="w-[40%]">
@@ -240,7 +242,7 @@ onMounted(async() => {
             </div>
             <div class="my-4 mb-2">ข้อคิดเห็น/คำแนะนำ/หมายเหตุ</div>
             <!-- <textarea disabled class="w-full h-20" name="" :value="surveyForm.maintenanceRate.comment" id="comment-m"></textarea> -->
-            <div class="p-1 mb-1 h-16 border border-black">
+            <div class="p-1 mb-1 h-20 border border-black">
             <p class="break-all">{{ surveyForm.maintenanceRate.comment }}</p>
             </div>
             <div class="flex flex-col items-center pb-2">
