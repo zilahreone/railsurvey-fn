@@ -12,7 +12,7 @@ import Modal from '@/components/Modal.vue'
 import Cookies from 'js-cookie';
 import validate from '@/validate'
 import form from '@/template_form.json'
-// import variable from '@/variable.json'
+import variable from '@/variable.json'
 import { useToast } from 'vue-toastification'
 
 const toast = useToast()
@@ -61,17 +61,33 @@ const transform = (response) => {
           }
         }
       } else {
+        let trackDamageSurveyObj = {}
         if (railSurvey.trackDamageSurvey[key].length === 1 && railSurvey.trackDamageSurvey[key][0] === 'perfect') {
-          railSurvey.trackDamageSurvey[key] = {
+          trackDamageSurveyObj = {
             isPerfect: 'perfect',
             condition: []
           }
         } else {
-          railSurvey.trackDamageSurvey[key] = {
-            isPerfect: 'imperfect',
-            condition: railSurvey.trackDamageSurvey[key]
+          if (key === 'ballastCondition') {
+            if (variable.ballastCondition.map(ballCon => ballCon.value).some(varBallastCon => railSurvey.trackDamageSurvey[key].includes(varBallastCon))) {
+              trackDamageSurveyObj = {
+                isPerfect: 'defective',
+                condition: railSurvey.trackDamageSurvey[key]
+              }
+            } else {
+              trackDamageSurveyObj = {
+                isPerfect: railSurvey.trackDamageSurvey[key][0],
+                condition: []
+              }
+            }
+          } else {
+            trackDamageSurveyObj = {
+              isPerfect: 'imperfect',
+              condition: railSurvey.trackDamageSurvey[key]
+            }
           }
         }
+        railSurvey.trackDamageSurvey[key] = trackDamageSurveyObj
       }
     } else if (key === 'uploadImages') {
       let images = []
@@ -168,7 +184,11 @@ const compSubmitForm = computed(() => {
         if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
           rtnRail.trackDamageSurvey[key] = ['perfect']
         } else {
-          rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+          if (rtnRail.trackDamageSurvey[key].condition.length > 0) {
+            rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+          } else {
+            rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+          }
         }
       }
     } else if (['uploadImages'].includes(key)) {

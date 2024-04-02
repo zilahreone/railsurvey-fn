@@ -93,6 +93,16 @@ const compSubmitForm = computed(() => {
         } else {
           rtnRail.trackDamageSurvey[key] = [rtnRail.trackDamageSurvey[key].isPerfect]
         }
+      } else if (key === 'ballastCondition') {
+        if (!['perfect', 'defective'].includes(rtnRail.trackDamageSurvey[key].isPerfect)) {
+          rtnRail.trackDamageSurvey[key] = [rtnRail.trackDamageSurvey[key].isPerfect]
+        } else {
+          if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
+            rtnRail.trackDamageSurvey[key] = ['perfect']
+          } else {
+            rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+          }
+        }
       } else {
         if (rtnRail.trackDamageSurvey[key].isPerfect === 'perfect') {
           rtnRail.trackDamageSurvey[key] = ['perfect']

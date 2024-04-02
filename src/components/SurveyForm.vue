@@ -496,6 +496,7 @@ const compStationItems = computed(() => {
             </div>
             <p v-if="v$.trackDamageSurvey.trackGeometryCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.trackGeometryCondition.isPerfect.$errors[0].$message }}</p>
           </div>
+          <!-- perfect || imperfect -->
           <div v-if="railSurvey.trackDamageSurvey.trackGeometryCondition.isPerfect && railSurvey.trackDamageSurvey.trackGeometryCondition.isPerfect !== 'perfect'">
             <label class="_label-lg">รูปแบบมิติทางเรขาคณิตที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
@@ -509,7 +510,8 @@ const compStationItems = computed(() => {
             </div>
             <p v-if="v$.trackDamageSurvey.ballastCondition.isPerfect.$error" class="text-sm text-red-600">{{ v$.trackDamageSurvey.ballastCondition.isPerfect.$errors[0].$message }}</p>
           </div>
-          <div v-if="railSurvey.trackDamageSurvey.ballastCondition.isPerfect && railSurvey.trackDamageSurvey.ballastCondition.isPerfect !== 'perfect'">
+          <!-- perfect || defective -->
+          <div v-if="railSurvey.trackDamageSurvey.ballastCondition.isPerfect && railSurvey.trackDamageSurvey.ballastCondition.isPerfect === 'defective'">
             <label class="_label-lg">รูปแบบหินโรยทางที่ผิดปกติ</label>
             <div class="grid sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               <SelectBtn :is-preview="isPreview" type="checkbox" :error="v$.trackDamageSurvey.ballastCondition.condition.$error" v-model="railSurvey.trackDamageSurvey.ballastCondition.condition" name="ballastConditionFail" :items="variable.ballastCondition" :disables="compDisableBallast"></SelectBtn>
