@@ -25,6 +25,16 @@ onMounted(async() => {
   // isReady.value = true
   // sf.value = calSur
 })
+const areaCondition = computed(() => {
+  if (surveyForm.generalSurvey.areaCondition.split(',').length > 4) {
+    return [
+      surveyForm.generalSurvey.areaCondition.split(',').slice(0, 5).join(', '),
+      surveyForm.generalSurvey.areaCondition.split(',').slice(5).join(', ')
+    ]
+  } else {
+    return [surveyForm.generalSurvey.areaCondition]
+  }
+})
 </script>
 <template>
   <div id="testtest" class="px-10 py-0 w-[1000px] min-w-[1000px] max-w-[1000px]">
@@ -76,8 +86,15 @@ onMounted(async() => {
             <td>สถานีรถไฟถัดไป:</td>
             <th class="border-b pl-4">{{ surveyForm.generalSurvey.zoneAf }}</th>
             <td class="pl-8">ลักษณะพื้นที่ที่เกิดความเสียหาย:</td>
-            <th class="pl-4"><p class="decoration-gray-300 decoration-1 underline underline-offset-2">{{ surveyForm.generalSurvey.areaCondition }}</p></th>
-            <!-- <th class="border-b pl-4">{{ surveyForm.generalSurvey.areaCondition }}</th> -->
+            <!-- <th class="pl-0"><p class="decoration-gray-300 decoration-1 underline underline-offset-2">{{ surveyForm.generalSurvey.areaCondition }}</p></th> -->
+            <th class="border-b pl-4">{{ areaCondition[0] }}</th>
+          </tr>
+          <tr v-if="areaCondition.length > 1" class="h-8">
+            <td></td>
+            <th class="pl-4"></th>
+            <td class="pl-8"></td>
+            <!-- <th class="pl-0"><p class="decoration-gray-300 decoration-1 underline underline-offset-2">{{ surveyForm.generalSurvey.areaCondition }}</p></th> -->
+            <th class="border-b pl-4">{{ areaCondition[1] }}</th>
           </tr>
         </tbody>
       </table>

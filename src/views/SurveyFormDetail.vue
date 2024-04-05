@@ -187,7 +187,7 @@ const compSubmitForm = computed(() => {
           if (rtnRail.trackDamageSurvey[key].condition.length > 0) {
             rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
           } else {
-            rtnRail.trackDamageSurvey[key] = rtnRail.trackDamageSurvey[key].condition
+            rtnRail.trackDamageSurvey[key] = [rtnRail.trackDamageSurvey[key].isPerfect]
           }
         }
       }

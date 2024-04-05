@@ -301,6 +301,7 @@ const calSurveyForm = (sl) => {
   })
 }
 const handleDownloadPDF = async (sl) => {
+  console.log(sl);
   const surveyForm = await calSurveyForm(sl)
   const dateTimeFormat = (datetime) => {
     const date = datetime.split(/\s/)[0].split('-')
