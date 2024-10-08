@@ -167,6 +167,22 @@
     {
       "key": "สายแม่กลอง",
       "value": "maeklong"
+    },
+    {
+      "key": "อื่นๆ",
+      "value": "other",
+      "zones": [
+        {
+          "key": "อื่นๆ",
+          "value": "other",
+          "stations": [
+            {
+              "key": "อื่นๆ",
+              "value": "other"
+            }
+          ]
+        }
+      ]
     }
   ],
   "station": [
