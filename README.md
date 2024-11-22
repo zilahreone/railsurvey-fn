@@ -50,8 +50,6 @@ docker image rm <docker_id>
 next step
 ```
 docker login inobox.azurecr.io
-user: inobox
-password: ve+4Txs07CLovaOTrIcTFv=z+9jla44p
 sudo docker build -t inobox.azurecr.io/rail-survey:2.4 .
 sudo docker push inobox.azurecr.io/rail-survey:2.4
 ```
